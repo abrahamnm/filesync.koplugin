@@ -74,8 +74,8 @@ msgstr "Iniciar de todos modos"
 msgid "Server is not running."
 msgstr "El servidor no está en ejecución."
 
-msgid "Scan the QR code or enter the URL in your browser. Both devices must be on the same WiFi network."
-msgstr "Escanea el código QR o ingresa la URL en tu navegador. Ambos dispositivos deben estar en la misma red WiFi."
+msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
+msgstr "Escanea el código QR o ingresa la URL\nen tu navegador.\n\nAmbos dispositivos deben estar en la misma red WiFi."
 
 msgid "Stop Server"
 msgstr "Detener servidor"
@@ -85,3 +85,6 @@ msgstr "Deteniendo servidor..."
 
 msgid "Server running in the background. Stop the server to save battery."
 msgstr "Servidor ejecutándose en segundo plano. Detén el servidor para ahorrar batería."
+
+msgid "Image preview"
+msgstr "Vista previa de imagen"

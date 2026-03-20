@@ -275,7 +275,8 @@ function HttpServer:_route(client, method, path, query, headers, body)
                     return
                 end
             end
-            local ok, err_msg = FileOps:downloadFile(client, file_path, self)
+            local inline = query.preview == "1"
+            local ok, err_msg = FileOps:downloadFile(client, file_path, self, inline)
             if not ok then
                 self:_sendJSON(client, 400, {error = err_msg or "Cannot download file"})
             end

@@ -13,6 +13,7 @@ local SAFE_MODE_EXTENSIONS = {
     fb2 = true, ["fb2.zip"] = true, djvu = true, cbz = true, cbr = true, kfx = true,
     txt = true, doc = true, docx = true, rtf = true,
     html = true, htm = true, md = true, chm = true, pdb = true, prc = true, lit = true,
+    jpg = true, jpeg = true, png = true, gif = true, webp = true,
 }
 
 --- Read a big-endian uint16 from a binary string at 1-based offset
@@ -151,6 +152,7 @@ function FileOps:_getMimeType(filename)
         jpg = "image/jpeg",
         jpeg = "image/jpeg",
         gif = "image/gif",
+        webp = "image/webp",
         svg = "image/svg+xml",
         -- Archives
         zip = "application/zip",
@@ -169,7 +171,7 @@ function FileOps:_getFileType(filename)
 
     local ebook_exts = {epub=true, pdf=true, mobi=true, azw=true, azw3=true, fb2=true, djvu=true, cbz=true, cbr=true, kfx=true}
     local doc_exts = {txt=true, doc=true, docx=true, rtf=true, html=true, htm=true, md=true}
-    local image_exts = {png=true, jpg=true, jpeg=true, gif=true, svg=true, bmp=true}
+    local image_exts = {png=true, jpg=true, jpeg=true, gif=true, svg=true, bmp=true, webp=true}
 
     if ebook_exts[ext] then return "ebook"
     elseif doc_exts[ext] then return "document"
@@ -321,7 +323,8 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
 end
 
 --- Download a file, sending it directly to the client socket
-function FileOps:downloadFile(client, rel_path, server)
+--- When inline is true, serve with Content-Disposition: inline (for image previews)
+function FileOps:downloadFile(client, rel_path, server, inline)
     local full_path, err = self:_resolvePath(rel_path)
     if not full_path then
         return false, err
@@ -342,10 +345,13 @@ function FileOps:downloadFile(client, rel_path, server)
     local file_size = attr.size
 
     -- Send headers
+    local disposition = inline
+        and ('inline; filename="' .. filename .. '"')
+        or ('attachment; filename="' .. filename .. '"')
     server:sendResponseHeaders(client, 200, {
         ["Content-Type"] = mime_type,
         ["Content-Length"] = tostring(file_size),
-        ["Content-Disposition"] = 'attachment; filename="' .. filename .. '"',
+        ["Content-Disposition"] = disposition,
         ["Connection"] = "close",
     })
 

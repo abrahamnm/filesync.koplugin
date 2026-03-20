@@ -75,11 +75,14 @@ msgstr ""
 msgid "Server is not running."
 msgstr ""
 
-msgid "Scan the QR code or enter the URL in your browser. Both devices must be on the same WiFi network."
+msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
 msgstr ""
 
 msgid "Stop Server"
 msgstr ""
 
 msgid "Server running in the background. Stop the server to save battery."
+msgstr ""
+
+msgid "Image preview"
 msgstr ""

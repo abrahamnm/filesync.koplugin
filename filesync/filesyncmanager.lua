@@ -18,6 +18,9 @@ local UIManager = require("ui/uimanager")
 local VerticalGroup = require("ui/widget/verticalgroup")
 local VerticalSpan = require("ui/widget/verticalspan")
 local Font = require("ui/font")
+local HorizontalGroup = require("ui/widget/horizontalgroup")
+local HorizontalSpan = require("ui/widget/horizontalspan")
+local ImageWidget = require("ui/widget/imagewidget")
 local logger = require("logger")
 local Screen = Device.screen
 local ok_i18n, plugin_gettext = pcall(require, "filesync/filesync_i18n")
@@ -335,34 +338,48 @@ function FileSyncManager:showQRCode()
     local screen_height = Screen:getHeight()
 
     -- Build the QR code widget
-    local qr_size = Screen:scaleBySize(200)
+    local qr_size = Screen:scaleBySize(260)
     local qr_widget = QRWidget:new{
         text = url,
         width = qr_size,
         height = qr_size,
     }
 
-    -- Title
-    local title_widget = TextWidget:new{
+    -- Icon + Title row
+    local icon_dir = debug.getinfo(1, "S").source:match("@(.+)"):match("(.*/)")
+    local icon_size = Screen:scaleBySize(36)
+    local icon_widget = ImageWidget:new{
+        file = icon_dir .. "icon.png",
+        width = icon_size,
+        height = icon_size,
+        alpha = true,
+    }
+    local title_text = TextWidget:new{
         text = _("FileSync"),
-        face = Font:getFace("infofont", 36),
+        face = Font:getFace("infofont", 48),
+        bold = true,
         fgcolor = Blitbuffer.COLOR_BLACK,
-        max_width = screen_width - Screen:scaleBySize(40),
+    }
+    local title_widget = HorizontalGroup:new{
+        align = "center",
+        icon_widget,
+        HorizontalSpan:new{ width = Screen:scaleBySize(10) },
+        title_text,
     }
 
     -- URL text
     local url_widget = TextWidget:new{
         text = url,
-        face = Font:getFace("infofont", 20),
+        face = Font:getFace("infofont", 22),
         fgcolor = Blitbuffer.COLOR_BLACK,
         max_width = screen_width - Screen:scaleBySize(40),
     }
 
     -- Instructions text
     local instructions_widget = TextBoxWidget:new{
-        text = _("Scan the QR code or enter the URL in your browser. Both devices must be on the same WiFi network."),
-        face = Font:getFace("smallinfofont", 16),
-        width = screen_width - Screen:scaleBySize(80),
+        text = _("Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."),
+        face = Font:getFace("smallinfofont", 20),
+        width = screen_width * 0.65,
         alignment = "center",
         fgcolor = Blitbuffer.COLOR_BLACK,
     }

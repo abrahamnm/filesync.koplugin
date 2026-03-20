@@ -803,6 +803,36 @@ html, body {
     animation: spin 0.7s linear infinite;
 }
 
+.detail-image-preview {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+}
+
+.detail-image-preview img {
+    width: 100%;
+    max-height: 50vh;
+    object-fit: contain;
+    display: block;
+}
+
+.detail-image-preview .cover-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 40px 0;
+}
+
 .detail-title {
     font-size: 20px;
     font-weight: 700;
@@ -1019,6 +1049,7 @@ html, body {
         </div>
     </div>
     <div class="detail-content">
+        <div class="detail-image-preview" id="detailImagePreview" style="display:none;"></div>
         <div class="detail-cover" id="detailCover"></div>
         <div class="detail-title" id="detailTitle"></div>
         <div class="detail-author" id="detailAuthor"></div>
@@ -1091,7 +1122,8 @@ html, body {
             days_ago: "d ago",
             upload_files_title: "Upload files",
             new_folder_title: "New folder",
-            also_delete_sdr: "Also delete reading metadata (.sdr)"
+            also_delete_sdr: "Also delete reading metadata (.sdr)",
+            image_preview: "Image preview"
         },
         es: {
             filesync: "FileSync",
@@ -1148,7 +1180,8 @@ html, body {
             days_ago: "d",
             upload_files_title: "Subir archivos",
             new_folder_title: "Nueva carpeta",
-            also_delete_sdr: "Tambi\u00e9n eliminar metadatos de lectura (.sdr)"
+            also_delete_sdr: "Tambi\u00e9n eliminar metadatos de lectura (.sdr)",
+            image_preview: "Vista previa de imagen"
         }
     };
     var currentLang = "en";
@@ -1413,8 +1446,36 @@ html, body {
         document.body.style.right = '0';
         document.body.style.overflow = 'hidden';
 
-        // Show loading spinner in cover area
-        coverEl.innerHTML = '<div class="cover-spinner"></div>';
+        // Determine if this is an image file
+        var imageExts = {jpg:1, jpeg:1, png:1, gif:1, webp:1};
+        var fileExt = (entry.name.split('.').pop() || '').toLowerCase();
+        var isImage = imageExts[fileExt] === 1;
+
+        var imagePreviewEl = document.getElementById('detailImagePreview');
+
+        if (isImage) {
+            // Show image preview, hide book cover
+            coverEl.style.display = 'none';
+            imagePreviewEl.style.display = 'flex';
+            imagePreviewEl.innerHTML = '<div class="cover-spinner"></div>';
+            var previewImg = document.createElement('img');
+            previewImg.src = '/api/download?path=' + encodeURIComponent(path) + '&preview=1';
+            previewImg.alt = t('image_preview');
+            previewImg.onload = function() {
+                imagePreviewEl.innerHTML = '';
+                imagePreviewEl.appendChild(previewImg);
+            };
+            previewImg.onerror = function() {
+                imagePreviewEl.innerHTML = buildCoverPlaceholder('image');
+            };
+        } else {
+            // Hide image preview, show book cover
+            imagePreviewEl.style.display = 'none';
+            imagePreviewEl.innerHTML = '';
+            coverEl.style.display = '';
+            // Show loading spinner in cover area
+            coverEl.innerHTML = '<div class="cover-spinner"></div>';
+        }
 
         // Set title from filename (without extension)
         var nameWithoutExt = entry.name.replace(/\.[^.]+$/, '') || entry.name;
@@ -1443,41 +1504,47 @@ html, body {
         actHtml += '<button class="btn btn-danger" onclick="detailDelete()">' + icons.trash + '<span>' + escapeHtml(t('delete_label')) + '</span></button>';
         actionsEl.innerHTML = actHtml;
 
-        // Fetch metadata asynchronously
-        fetch('/api/metadata?path=' + encodeURIComponent(path))
-            .then(function(res) { return res.json(); })
-            .then(function(meta) {
-                if (!currentDetailEntry || currentDetailEntry.path !== path) return;
+        // For image files, skip metadata fetch (no book metadata to show)
+        if (isImage) {
+            coverEl.innerHTML = '';
+            coverEl.style.display = 'none';
+        } else {
+            // Fetch metadata asynchronously for non-image files
+            fetch('/api/metadata?path=' + encodeURIComponent(path))
+                .then(function(res) { return res.json(); })
+                .then(function(meta) {
+                    if (!currentDetailEntry || currentDetailEntry.path !== path) return;
 
-                // Update title if metadata has one
-                if (meta.title) {
-                    titleEl.textContent = meta.title;
-                }
+                    // Update title if metadata has one
+                    if (meta.title) {
+                        titleEl.textContent = meta.title;
+                    }
 
-                // Show author if available
-                if (meta.author) {
-                    authorEl.textContent = meta.author;
-                    authorEl.style.display = 'block';
-                }
+                    // Show author if available
+                    if (meta.author) {
+                        authorEl.textContent = meta.author;
+                        authorEl.style.display = 'block';
+                    }
 
-                // Handle cover image
-                if (meta.has_cover) {
-                    var img = document.createElement('img');
-                    img.src = '/api/cover?path=' + encodeURIComponent(path);
-                    img.alt = 'Book cover';
-                    img.onerror = function() {
+                    // Handle cover image
+                    if (meta.has_cover) {
+                        var img = document.createElement('img');
+                        img.src = '/api/cover?path=' + encodeURIComponent(path);
+                        img.alt = 'Book cover';
+                        img.onerror = function() {
+                            coverEl.innerHTML = buildCoverPlaceholder(typeClass);
+                        };
+                        coverEl.innerHTML = '';
+                        coverEl.appendChild(img);
+                    } else {
                         coverEl.innerHTML = buildCoverPlaceholder(typeClass);
-                    };
-                    coverEl.innerHTML = '';
-                    coverEl.appendChild(img);
-                } else {
+                    }
+                })
+                .catch(function() {
+                    if (!currentDetailEntry || currentDetailEntry.path !== path) return;
                     coverEl.innerHTML = buildCoverPlaceholder(typeClass);
-                }
-            })
-            .catch(function() {
-                if (!currentDetailEntry || currentDetailEntry.path !== path) return;
-                coverEl.innerHTML = buildCoverPlaceholder(typeClass);
-            });
+                });
+        }
     }
 
     // Public showFileDetail: shows detail and pushes a history entry
