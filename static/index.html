@@ -1225,11 +1225,12 @@ html, body {
     // Public navigate: updates state and pushes a history entry
     window.navigate = function(path) {
         path = path || '/';
-        var hashTarget = '#' + path;
         _navigateInternal(path);
-        // Only push if the hash actually changed
-        if (window.location.hash !== hashTarget) {
-            history.pushState({path: path}, '', hashTarget);
+        // Only push if the hash actually changed (decode to handle %20 etc.)
+        var currentHash;
+        try { currentHash = decodeURIComponent(window.location.hash); } catch(e) { currentHash = window.location.hash; }
+        if (currentHash !== '#' + path) {
+            history.pushState({path: path}, '', '#' + encodeURI(path));
         }
     };
 
@@ -1471,9 +1472,11 @@ html, body {
     // Public showFileDetail: shows detail and pushes a history entry
     window.showFileDetail = function(path) {
         _showDetailInternal(path);
+        var currentHash;
+        try { currentHash = decodeURIComponent(window.location.hash); } catch(e) { currentHash = window.location.hash; }
         var hashTarget = '#' + path + '!detail';
-        if (window.location.hash !== hashTarget) {
-            history.pushState({path: path, detail: true}, '', hashTarget);
+        if (currentHash !== hashTarget) {
+            history.pushState({path: path, detail: true}, '', '#' + encodeURI(path) + '!detail');
         }
     };
 
@@ -1569,7 +1572,7 @@ html, body {
                 showToast(t('renamed_successfully'), 'success');
                 restoreModalInput();
                 _hideDetailInternal();
-                history.replaceState({path: currentPath}, '', '#' + currentPath);
+                history.replaceState({path: currentPath}, '', '#' + encodeURI(currentPath));
                 loadFiles();
             } catch (err) {
                 showToast(t('rename_failed') + ' ' + err.message, 'error');
@@ -1605,7 +1608,7 @@ html, body {
                     await api('POST', '/api/delete', body);
                     showToast(t('deleted_successfully'), 'success');
                     _hideDetailInternal();
-                    history.replaceState({path: currentPath}, '', '#' + currentPath);
+                    history.replaceState({path: currentPath}, '', '#' + encodeURI(currentPath));
                     loadFiles();
                 } catch (err) {
                     showToast(t('delete_failed') + ' ' + err.message, 'error');
@@ -1870,8 +1873,9 @@ html, body {
         if (!hash || hash === '#' || hash === '#/') {
             return {path: '/', detail: false};
         }
-        // Strip leading '#'
-        var raw = hash.substring(1);
+        // Strip leading '#' and decode URL-encoded characters (spaces, parens, etc.)
+        var raw;
+        try { raw = decodeURIComponent(hash.substring(1)); } catch(e) { raw = hash.substring(1); }
         if (raw.endsWith('!detail')) {
             return {path: raw.substring(0, raw.length - 7), detail: true};
         }
