@@ -990,6 +990,9 @@ html, body {
         <div class="modal-handle"></div>
         <div class="modal-title" id="confirmTitle"></div>
         <p id="confirmMessage" style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;"></p>
+        <label id="confirmSdrOption" style="display:none;font-size:14px;color:var(--text-secondary);margin-bottom:16px;cursor:pointer;align-items:center;gap:8px;">
+            <input type="checkbox" id="confirmSdrCheckbox" checked> <span id="confirmSdrLabel"></span>
+        </label>
         <div class="modal-actions">
             <button class="btn btn-secondary" id="confirmCancelBtn" onclick="hideConfirm()">Cancel</button>
             <button class="btn btn-danger" id="confirmBtn" onclick="doConfirm()">Delete</button>
@@ -1080,7 +1083,8 @@ html, body {
             hours_ago: "h ago",
             days_ago: "d ago",
             upload_files_title: "Upload files",
-            new_folder_title: "New folder"
+            new_folder_title: "New folder",
+            also_delete_sdr: "Also delete reading metadata (.sdr)"
         },
         es: {
             filesync: "FileSync",
@@ -1134,7 +1138,8 @@ html, body {
             hours_ago: "h",
             days_ago: "d",
             upload_files_title: "Subir archivos",
-            new_folder_title: "Nueva carpeta"
+            new_folder_title: "Nueva carpeta",
+            also_delete_sdr: "Tambi\u00e9n eliminar metadatos de lectura (.sdr)"
         }
     };
     var currentLang = "en";
@@ -1329,22 +1334,28 @@ html, body {
         });
     };
 
-    window.deleteItem = function(path, name, isDir) {
+    window.deleteItem = function(path, name, isDir, hasSdr) {
         var titleStr = isDir ? t('delete_folder') : t('delete_file');
         var msgStr = t('confirm_delete') + ' "' + escapeHtml(name) + '"?' + (isDir ? ' ' + t('confirm_delete_contents') : '');
+        var showSdrCheckbox = !isDir && hasSdr;
         showConfirm(
             titleStr,
             msgStr,
             t('delete_label'),
             async function() {
                 try {
-                    await api('POST', '/api/delete', { path: path });
+                    var body = { path: path };
+                    if (showSdrCheckbox) {
+                        body.delete_sdr = document.getElementById('confirmSdrCheckbox').checked;
+                    }
+                    await api('POST', '/api/delete', body);
                     showToast(t('deleted_successfully'), 'success');
                     loadFiles();
                 } catch (err) {
                     showToast(t('delete_failed') + ' ' + err.message, 'error');
                 }
-            }
+            },
+            showSdrCheckbox
         );
     };
 
@@ -1550,20 +1561,26 @@ html, body {
     window.detailDelete = function() {
         if (!currentDetailEntry) return;
         var entry = currentDetailEntry;
+        var showSdrCheckbox = !entry.is_dir && entry.has_sdr;
         showConfirm(
             t('delete_file'),
             t('confirm_delete') + ' "' + escapeHtml(entry.name) + '"?',
             t('delete_label'),
             async function() {
                 try {
-                    await api('POST', '/api/delete', { path: entry.path });
+                    var body = { path: entry.path };
+                    if (showSdrCheckbox) {
+                        body.delete_sdr = document.getElementById('confirmSdrCheckbox').checked;
+                    }
+                    await api('POST', '/api/delete', body);
                     showToast(t('deleted_successfully'), 'success');
                     hideFileDetail();
                     loadFiles();
                 } catch (err) {
                     showToast(t('delete_failed') + ' ' + err.message, 'error');
                 }
-            }
+            },
+            showSdrCheckbox
         );
     };
 
@@ -1741,12 +1758,22 @@ html, body {
     };
 
     // ===== Confirm Dialog =====
-    function showConfirm(title, message, btnText, callback) {
+    function showConfirm(title, message, btnText, callback, showSdr) {
         confirmCallback = callback;
         document.getElementById('confirmTitle').textContent = title;
         document.getElementById('confirmMessage').textContent = message;
         document.getElementById('confirmBtn').textContent = btnText;
         document.getElementById('confirmCancelBtn').textContent = t('cancel');
+        var sdrOption = document.getElementById('confirmSdrOption');
+        var sdrCheckbox = document.getElementById('confirmSdrCheckbox');
+        if (showSdr) {
+            document.getElementById('confirmSdrLabel').textContent = t('also_delete_sdr');
+            sdrCheckbox.checked = true;
+            sdrOption.style.display = 'flex';
+        } else {
+            sdrOption.style.display = 'none';
+            sdrCheckbox.checked = false;
+        }
         document.getElementById('confirmOverlay').classList.add('open');
     }
 

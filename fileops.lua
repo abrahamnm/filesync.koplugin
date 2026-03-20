@@ -207,6 +207,8 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
                             -- Apply safe mode filter: only dirs and whitelisted extensions
                             if safe_mode and not is_dir and not self:isExtensionSafe(name) then
                                 -- skip non-whitelisted file
+                            elseif safe_mode and is_dir and name:match("%.sdr$") then
+                                -- skip .sdr metadata directories in safe mode
                             else
                                 local entry = {
                                     name = name,
@@ -217,6 +219,13 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
                                     modified = entry_attr.modification or 0,
                                     type = is_dir and "directory" or self:_getFileType(name),
                                 }
+                                -- For non-directory files, check if a corresponding .sdr directory exists
+                                if not is_dir then
+                                    local sdr_attr = lfs.attributes(entry_path .. ".sdr")
+                                    if sdr_attr and sdr_attr.mode == "directory" then
+                                        entry.has_sdr = true
+                                    end
+                                end
                                 table.insert(entries, entry)
                             end
                         end
@@ -484,7 +493,11 @@ function FileOps:rename(old_rel_path, new_rel_path)
 end
 
 --- Delete a file or directory (directory must be empty)
-function FileOps:delete(rel_path)
+--- @param rel_path string: relative path to delete
+--- @param options table|nil: optional settings
+---   - safe_mode (bool): when true, auto-delete associated .sdr directory for book files
+---   - delete_sdr (bool): when true (and not safe_mode), delete associated .sdr directory
+function FileOps:delete(rel_path, options)
     local full_path, err = self:_resolvePath(rel_path)
     if not full_path then
         return false, err
@@ -500,6 +513,8 @@ function FileOps:delete(rel_path)
         return false, "Path does not exist"
     end
 
+    local is_file = attr.mode ~= "directory"
+
     if attr.mode == "directory" then
         -- Recursively delete directory contents
         local ok, del_err = self:_deleteRecursive(full_path)
@@ -514,6 +529,32 @@ function FileOps:delete(rel_path)
     end
 
     logger.info("FileSync: Deleted", full_path)
+
+    -- Handle .sdr metadata directory cleanup for files
+    if is_file and options then
+        local should_delete_sdr = false
+        if options.safe_mode then
+            -- In safe mode, always auto-delete the associated .sdr directory
+            should_delete_sdr = true
+        elseif options.delete_sdr then
+            -- Outside safe mode, delete .sdr only if explicitly requested
+            should_delete_sdr = true
+        end
+
+        if should_delete_sdr then
+            local sdr_path = full_path .. ".sdr"
+            local sdr_attr = lfs.attributes(sdr_path)
+            if sdr_attr and sdr_attr.mode == "directory" then
+                local sdr_ok, sdr_err = self:_deleteRecursive(sdr_path)
+                if sdr_ok then
+                    logger.info("FileSync: Deleted .sdr metadata directory", sdr_path)
+                else
+                    logger.warn("FileSync: Failed to delete .sdr directory", sdr_path, sdr_err)
+                end
+            end
+        end
+    end
+
     return true
 end
 
