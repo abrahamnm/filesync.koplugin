@@ -1,0 +1,85 @@
+# English translations for FileSync KOReader plugin
+# This is the source language — msgstr can be empty or identical to msgid.
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+
+msgid "FileSync"
+msgstr ""
+
+msgid "FileSync - Wireless File Manager"
+msgstr ""
+
+msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
+msgstr ""
+
+msgid "Stop file server"
+msgstr ""
+
+msgid "Start file server"
+msgstr ""
+
+msgid "Server port"
+msgstr ""
+
+msgid "Safe mode"
+msgstr ""
+
+msgid "Show QR code"
+msgstr ""
+
+msgid "About"
+msgstr ""
+
+msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Port set to %1. Restart the server for changes to take effect."
+msgstr ""
+
+msgid "Invalid port. Please enter a number between 1024 and 65535."
+msgstr ""
+
+msgid "FileSync server is already running."
+msgstr ""
+
+msgid "WiFi is not enabled. Please turn on WiFi first."
+msgstr ""
+
+msgid "Could not determine device IP address. Make sure WiFi is connected."
+msgstr ""
+
+msgid "Failed to start server: %1"
+msgstr ""
+
+msgid "FileSync server stopped."
+msgstr ""
+
+msgid "Low Battery"
+msgstr ""
+
+msgid "Battery level is at %1%. Running the server may drain the battery quickly."
+msgstr ""
+
+msgid "Start Anyway"
+msgstr ""
+
+msgid "Server is not running."
+msgstr ""
+
+msgid "Scan the QR code or enter the URL in your browser. Both devices must be on the same WiFi network."
+msgstr ""
+
+msgid "Stop Server"
+msgstr ""
+
+msgid "Server running in the background. Stop the server to save battery."
+msgstr ""

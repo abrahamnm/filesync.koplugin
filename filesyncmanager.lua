@@ -343,7 +343,7 @@ function FileSyncManager:showQRCode()
 
     -- Title
     local title_widget = TextWidget:new{
-        text = "FileSync",
+        text = _("FileSync"),
         face = Font:getFace("infofont", 36),
         fgcolor = Blitbuffer.COLOR_BLACK,
         max_width = screen_width - Screen:scaleBySize(40),

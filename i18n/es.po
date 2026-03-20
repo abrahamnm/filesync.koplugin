@@ -1,0 +1,84 @@
+# Spanish translations for FileSync KOReader plugin
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: es\n"
+
+msgid "FileSync"
+msgstr "FileSync"
+
+msgid "FileSync - Wireless File Manager"
+msgstr "FileSync - Gestor de archivos inalámbrico"
+
+msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
+msgstr "Inicia un servidor web HTTP local y muestra un código QR. Escanéalo con tu teléfono para gestionar libros y archivos en tu dispositivo de forma inalámbrica a través de una interfaz web."
+
+msgid "Stop file server"
+msgstr "Detener servidor de archivos"
+
+msgid "Start file server"
+msgstr "Iniciar servidor de archivos"
+
+msgid "Server port"
+msgstr "Puerto del servidor"
+
+msgid "Safe mode"
+msgstr "Modo seguro"
+
+msgid "Show QR code"
+msgstr "Mostrar código QR"
+
+msgid "About"
+msgstr "Acerca de"
+
+msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
+msgstr "FileSync v1.0.0\n\nGestor de archivos inalámbrico para KOReader.\n\nInicia el servidor, escanea el código QR con tu teléfono y gestiona tus libros desde cualquier navegador en la misma red WiFi."
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Port set to %1. Restart the server for changes to take effect."
+msgstr "Puerto configurado a %1. Reinicia el servidor para que los cambios surtan efecto."
+
+msgid "Invalid port. Please enter a number between 1024 and 65535."
+msgstr "Puerto no válido. Introduce un número entre 1024 y 65535."
+
+msgid "FileSync server is already running."
+msgstr "El servidor FileSync ya está en ejecución."
+
+msgid "WiFi is not enabled. Please turn on WiFi first."
+msgstr "El WiFi no está activado. Activa el WiFi primero."
+
+msgid "Could not determine device IP address. Make sure WiFi is connected."
+msgstr "No se pudo determinar la dirección IP del dispositivo. Asegúrate de que el WiFi esté conectado."
+
+msgid "Failed to start server: %1"
+msgstr "Error al iniciar el servidor: %1"
+
+msgid "FileSync server stopped."
+msgstr "Servidor FileSync detenido."
+
+msgid "Low Battery"
+msgstr "Batería baja"
+
+msgid "Battery level is at %1%. Running the server may drain the battery quickly."
+msgstr "El nivel de batería es del %1%. Ejecutar el servidor puede agotar la batería rápidamente."
+
+msgid "Start Anyway"
+msgstr "Iniciar de todos modos"
+
+msgid "Server is not running."
+msgstr "El servidor no está en ejecución."
+
+msgid "Scan the QR code or enter the URL in your browser. Both devices must be on the same WiFi network."
+msgstr "Escanea el código QR o ingresa la URL en tu navegador. Ambos dispositivos deben estar en la misma red WiFi."
+
+msgid "Stop Server"
+msgstr "Detener servidor"
+
+msgid "Server running in the background. Stop the server to save battery."
+msgstr "Servidor ejecutándose en segundo plano. Detén el servidor para ahorrar batería."

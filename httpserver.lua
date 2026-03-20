@@ -195,6 +195,13 @@ function HttpServer:_route(client, method, path, query, headers, body)
         local FileSyncManager = require("filesyncmanager")
         local safe_mode = FileSyncManager:getSafeMode()
 
+        -- Language endpoint for web UI i18n
+        if method == "GET" and path == "/api/lang" then
+            local lang = G_reader_settings:readSetting("language") or "en"
+            self:_sendJSON(client, 200, {lang = lang})
+            return
+        end
+
         -- Health check endpoint for debugging
         if method == "GET" and path == "/api/health" then
             self:_sendJSON(client, 200, {

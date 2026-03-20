@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>FileSync</title>
+<title data-i18n="filesync">FileSync</title>
 <style>
 *, *::before, *::after {
     box-sizing: border-box;
@@ -897,24 +897,24 @@ html, body {
                 <polyline points="13 2 13 9 20 9"/>
                 <path d="M9 15l2 2 4-4"/>
             </svg>
-            FileSync
+            <span data-i18n="filesync">FileSync</span>
         </a>
         <div class="header-actions">
-            <button class="btn btn-secondary btn-sm" onclick="toggleUploadZone()" title="Upload files">
+            <button class="btn btn-secondary btn-sm" onclick="toggleUploadZone()" id="btnUpload" title="Upload files">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                     <polyline points="17 8 12 3 7 8"/>
                     <line x1="12" y1="3" x2="12" y2="15"/>
                 </svg>
-                <span>Upload</span>
+                <span data-i18n="upload">Upload</span>
             </button>
-            <button class="btn btn-secondary btn-sm" onclick="showNewFolderModal()" title="New folder">
+            <button class="btn btn-secondary btn-sm" onclick="showNewFolderModal()" id="btnFolder" title="New folder">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
                     <line x1="12" y1="11" x2="12" y2="17"/>
                     <line x1="9" y1="14" x2="15" y2="14"/>
                 </svg>
-                <span>Folder</span>
+                <span data-i18n="folder">Folder</span>
             </button>
         </div>
     </div>
@@ -933,13 +933,13 @@ html, body {
         <input type="text" id="searchInput" placeholder="Filter files..." oninput="onFilterChange()">
     </div>
     <select class="sort-select" id="sortSelect" onchange="onSortChange()">
-        <option value="name-asc">Name A-Z</option>
-        <option value="name-desc">Name Z-A</option>
-        <option value="date-desc">Newest first</option>
-        <option value="date-asc">Oldest first</option>
-        <option value="size-desc">Largest first</option>
-        <option value="size-asc">Smallest first</option>
-        <option value="type-asc">Type</option>
+        <option value="name-asc" data-i18n="sort_name_asc">Name A-Z</option>
+        <option value="name-desc" data-i18n="sort_name_desc">Name Z-A</option>
+        <option value="date-desc" data-i18n="sort_newest">Newest first</option>
+        <option value="date-asc" data-i18n="sort_oldest">Oldest first</option>
+        <option value="size-desc" data-i18n="sort_largest">Largest first</option>
+        <option value="size-asc" data-i18n="sort_smallest">Smallest first</option>
+        <option value="type-asc" data-i18n="sort_type">Type</option>
     </select>
 </div>
 
@@ -951,7 +951,7 @@ html, body {
             <polyline points="17 8 12 3 7 8"/>
             <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
-        <div class="dropzone-text">
+        <div class="dropzone-text" id="dropzoneText">
             Drag and drop files here, or <strong onclick="document.getElementById('fileInput').click()">browse</strong>
         </div>
         <input type="file" id="fileInput" multiple style="display:none" onchange="handleFileSelect(this.files)">
@@ -960,7 +960,7 @@ html, body {
                 <line x1="12" y1="5" x2="12" y2="19"/>
                 <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            Choose Files
+            <span data-i18n="choose_files">Choose Files</span>
         </button>
     </div>
 </div>
@@ -978,7 +978,7 @@ html, body {
         <div class="modal-title" id="modalTitle"></div>
         <input type="text" class="modal-input" id="modalInput" onkeydown="if(event.key==='Enter')confirmModal()">
         <div class="modal-actions">
-            <button class="btn btn-secondary" onclick="hideModal()">Cancel</button>
+            <button class="btn btn-secondary" id="modalCancelBtn" onclick="hideModal()">Cancel</button>
             <button class="btn btn-primary" id="modalConfirm" onclick="confirmModal()">Create</button>
         </div>
     </div>
@@ -991,7 +991,7 @@ html, body {
         <div class="modal-title" id="confirmTitle"></div>
         <p id="confirmMessage" style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;"></p>
         <div class="modal-actions">
-            <button class="btn btn-secondary" onclick="hideConfirm()">Cancel</button>
+            <button class="btn btn-secondary" id="confirmCancelBtn" onclick="hideConfirm()">Cancel</button>
             <button class="btn btn-danger" id="confirmBtn" onclick="doConfirm()">Delete</button>
         </div>
     </div>
@@ -1006,7 +1006,7 @@ html, body {
                     <line x1="19" y1="12" x2="5" y2="12"/>
                     <polyline points="12 19 5 12 12 5"/>
                 </svg>
-                <span>Back</span>
+                <span data-i18n="back">Back</span>
             </button>
         </div>
     </div>
@@ -1026,20 +1026,154 @@ html, body {
 (function() {
     'use strict';
 
+    // ===== i18n =====
+    var translations = {
+        en: {
+            filesync: "FileSync",
+            upload: "Upload",
+            folder: "Folder",
+            filter_placeholder: "Filter files...",
+            sort_name_asc: "Name A-Z",
+            sort_name_desc: "Name Z-A",
+            sort_newest: "Newest first",
+            sort_oldest: "Oldest first",
+            sort_largest: "Largest first",
+            sort_smallest: "Smallest first",
+            sort_type: "Type",
+            dropzone_text: "Drag and drop files here, or",
+            dropzone_browse: "browse",
+            choose_files: "Choose Files",
+            loading: "Loading...",
+            failed_to_load: "Failed to load files",
+            empty_folder: "This folder is empty",
+            empty_folder_sub: "Upload files or create a new folder",
+            folder_label: "Folder",
+            file_type: "File type",
+            size: "Size",
+            modified: "Modified",
+            download: "Download",
+            rename: "Rename",
+            delete_label: "Delete",
+            back: "Back",
+            cancel: "Cancel",
+            create: "Create",
+            new_folder: "New Folder",
+            renamed_successfully: "Renamed successfully",
+            deleted_successfully: "Deleted successfully",
+            folder_created: "Folder created",
+            uploaded: "uploaded",
+            rename_failed: "Rename failed:",
+            delete_failed: "Delete failed:",
+            upload_failed: "Upload failed:",
+            failed_create_folder: "Failed to create folder:",
+            home: "Home",
+            done: "Done",
+            failed: "Failed",
+            network_error: "Network error",
+            delete_file: "Delete file",
+            delete_folder: "Delete folder",
+            confirm_delete: "Are you sure you want to delete",
+            confirm_delete_contents: "This will delete all contents inside.",
+            unknown: "Unknown",
+            just_now: "Just now",
+            minutes_ago: "m ago",
+            hours_ago: "h ago",
+            days_ago: "d ago",
+            upload_files_title: "Upload files",
+            new_folder_title: "New folder"
+        },
+        es: {
+            filesync: "FileSync",
+            upload: "Subir",
+            folder: "Carpeta",
+            filter_placeholder: "Filtrar archivos...",
+            sort_name_asc: "Nombre A-Z",
+            sort_name_desc: "Nombre Z-A",
+            sort_newest: "M\u00e1s recientes",
+            sort_oldest: "M\u00e1s antiguos",
+            sort_largest: "M\u00e1s grandes",
+            sort_smallest: "M\u00e1s peque\u00f1os",
+            sort_type: "Tipo",
+            dropzone_text: "Arrastra archivos aqu\u00ed, o",
+            dropzone_browse: "busca",
+            choose_files: "Elegir archivos",
+            loading: "Cargando...",
+            failed_to_load: "Error al cargar archivos",
+            empty_folder: "Esta carpeta est\u00e1 vac\u00eda",
+            empty_folder_sub: "Sube archivos o crea una nueva carpeta",
+            folder_label: "Carpeta",
+            file_type: "Tipo de archivo",
+            size: "Tama\u00f1o",
+            modified: "Modificado",
+            download: "Descargar",
+            rename: "Renombrar",
+            delete_label: "Eliminar",
+            back: "Volver",
+            cancel: "Cancelar",
+            create: "Crear",
+            new_folder: "Nueva carpeta",
+            renamed_successfully: "Renombrado exitosamente",
+            deleted_successfully: "Eliminado exitosamente",
+            folder_created: "Carpeta creada",
+            uploaded: "subido",
+            rename_failed: "Error al renombrar:",
+            delete_failed: "Error al eliminar:",
+            upload_failed: "Error al subir:",
+            failed_create_folder: "Error al crear carpeta:",
+            home: "Inicio",
+            done: "Listo",
+            failed: "Error",
+            network_error: "Error de red",
+            delete_file: "Eliminar archivo",
+            delete_folder: "Eliminar carpeta",
+            confirm_delete: "\u00bfEst\u00e1s seguro de que quieres eliminar",
+            confirm_delete_contents: "Esto eliminar\u00e1 todo el contenido.",
+            unknown: "Desconocido",
+            just_now: "Ahora",
+            minutes_ago: "min",
+            hours_ago: "h",
+            days_ago: "d",
+            upload_files_title: "Subir archivos",
+            new_folder_title: "Nueva carpeta"
+        }
+    };
+    var currentLang = "en";
+
+    function t(key) {
+        return (translations[currentLang] && translations[currentLang][key]) || translations.en[key] || key;
+    }
+
+    function applyStaticTranslations() {
+        document.querySelectorAll('[data-i18n]').forEach(function(el) {
+            el.textContent = t(el.dataset.i18n);
+        });
+        // Placeholder
+        document.getElementById('searchInput').placeholder = t('filter_placeholder');
+        // Button titles
+        document.getElementById('btnUpload').title = t('upload_files_title');
+        document.getElementById('btnFolder').title = t('new_folder_title');
+        // Dropzone text
+        var dzText = document.getElementById('dropzoneText');
+        dzText.innerHTML = t('dropzone_text') + ' <strong onclick="document.getElementById(\'fileInput\').click()">' + t('dropzone_browse') + '</strong>';
+        // Modal default buttons
+        document.getElementById('modalCancelBtn').textContent = t('cancel');
+        document.getElementById('confirmCancelBtn').textContent = t('cancel');
+    }
+
     // ===== State =====
-    let currentPath = '/';
-    let currentSort = 'name';
-    let currentOrder = 'asc';
-    let currentFilter = '';
-    let uploadZoneVisible = false;
-    let modalCallback = null;
-    let confirmCallback = null;
-    let filterTimer = null;
-    let currentEntries = [];
-    let currentDetailEntry = null;
+    var currentPath = '/';
+    var currentSort = 'name';
+    var currentOrder = 'asc';
+    var currentFilter = '';
+    var uploadZoneVisible = false;
+    var modalCallback = null;
+    var confirmCallback = null;
+    var filterTimer = null;
+    var currentEntries = [];
+    var currentDetailEntry = null;
 
     // ===== Icons =====
-    const icons = {
+    var icons = {
         dir: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>',
         ebook: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
         document: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
@@ -1053,14 +1187,14 @@ html, body {
 
     // ===== API =====
     async function api(method, url, body) {
-        const opts = { method };
+        var opts = { method: method };
         if (body instanceof FormData) {
             opts.body = body;
         } else if (body) {
             opts.headers = { 'Content-Type': 'application/json' };
             opts.body = JSON.stringify(body);
         }
-        const res = await fetch(url, opts);
+        var res = await fetch(url, opts);
         var text = await res.text();
         var data;
         try {
@@ -1083,60 +1217,63 @@ html, body {
     };
 
     async function loadFiles() {
-        const list = document.getElementById('fileList');
-        list.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">Loading...</div></div>';
+        var list = document.getElementById('fileList');
+        list.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">' + escapeHtml(t('loading')) + '</div></div>';
 
         try {
-            const params = new URLSearchParams({
+            var params = new URLSearchParams({
                 path: currentPath,
                 sort: currentSort,
                 order: currentOrder,
                 filter: currentFilter
             });
-            const data = await api('GET', '/api/files?' + params);
+            var data = await api('GET', '/api/files?' + params);
             renderBreadcrumbs(data.breadcrumbs);
             renderFiles(data.entries);
         } catch (err) {
             list.innerHTML = '<div class="empty-state">' + icons.empty +
-                '<div class="empty-state-text">Failed to load files</div>' +
+                '<div class="empty-state-text">' + escapeHtml(t('failed_to_load')) + '</div>' +
                 '<div class="empty-state-sub">' + escapeHtml(err.message) + '</div></div>';
             showToast(err.message, 'error');
         }
     }
 
     function renderBreadcrumbs(crumbs) {
-        const el = document.getElementById('breadcrumbs');
+        var el = document.getElementById('breadcrumbs');
         if (!crumbs || !crumbs.length) { el.innerHTML = ''; return; }
-        let html = '';
-        for (let i = 0; i < crumbs.length; i++) {
+        var html = '';
+        for (var i = 0; i < crumbs.length; i++) {
             if (i > 0) html += '<span class="breadcrumb-sep">/</span>';
-            const isLast = i === crumbs.length - 1;
+            var isLast = i === crumbs.length - 1;
+            var displayName = crumbs[i].name;
+            if (displayName === "Home") displayName = t('home');
             html += '<span class="breadcrumb-item' + (isLast ? ' active' : '') + '"' +
                      (isLast ? '' : ' onclick="navigate(\'' + escapeAttr(crumbs[i].path) + '\')"') +
-                     '>' + escapeHtml(crumbs[i].name) + '</span>';
+                     '>' + escapeHtml(displayName) + '</span>';
         }
         el.innerHTML = html;
     }
 
     function renderFiles(entries) {
         currentEntries = entries || [];
-        const list = document.getElementById('fileList');
+        var list = document.getElementById('fileList');
         if (!entries || entries.length === 0) {
             list.innerHTML = '<div class="empty-state">' + icons.empty +
-                '<div class="empty-state-text">This folder is empty</div>' +
-                '<div class="empty-state-sub">Upload files or create a new folder</div></div>';
+                '<div class="empty-state-text">' + escapeHtml(t('empty_folder')) + '</div>' +
+                '<div class="empty-state-sub">' + escapeHtml(t('empty_folder_sub')) + '</div></div>';
             return;
         }
 
-        let html = '';
-        for (const entry of entries) {
-            const typeClass = entry.is_dir ? 'dir' : (entry.type || 'file');
-            const icon = icons[typeClass] || icons.file;
-            const date = entry.modified ? formatDate(entry.modified) : '';
-            const size = entry.is_dir ? '' : (entry.size_formatted || '');
-            const meta = [size, date].filter(Boolean).join(' &middot; ');
-            const ext = entry.name.split('.').pop().toUpperCase();
-            const typeLabel = entry.is_dir ? 'Folder' : ext;
+        var html = '';
+        for (var idx = 0; idx < entries.length; idx++) {
+            var entry = entries[idx];
+            var typeClass = entry.is_dir ? 'dir' : (entry.type || 'file');
+            var icon = icons[typeClass] || icons.file;
+            var date = entry.modified ? formatDate(entry.modified) : '';
+            var size = entry.is_dir ? '' : (entry.size_formatted || '');
+            var meta = [size, date].filter(Boolean).join(' &middot; ');
+            var ext = entry.name.split('.').pop().toUpperCase();
+            var typeLabel = entry.is_dir ? t('folder_label') : ext;
 
             html += '<div class="file-item" onclick="onFileClick(event, ' + (entry.is_dir ? 'true' : 'false') + ', \'' + escapeAttr(entry.path) + '\')">';
             html += '<div class="file-icon ' + typeClass + '">' + icon + '</div>';
@@ -1148,8 +1285,8 @@ html, body {
             html += '</div></div>';
             if (entry.is_dir) {
                 html += '<div class="file-actions">';
-                html += '<button class="btn-icon" onclick="event.stopPropagation(); renameItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\')" title="Rename">' + icons.rename + '</button>';
-                html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\', true)" title="Delete">' + icons.trash + '</button>';
+                html += '<button class="btn-icon" onclick="event.stopPropagation(); renameItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\')" title="' + escapeHtml(t('rename')) + '">' + icons.rename + '</button>';
+                html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\', true)" title="' + escapeHtml(t('delete_label')) + '">' + icons.trash + '</button>';
                 html += '</div>';
             } else {
                 html += '<div class="file-actions"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--text-tertiary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>';
@@ -1169,7 +1306,7 @@ html, body {
 
     // ===== File Operations =====
     window.downloadFile = function(path) {
-        const a = document.createElement('a');
+        var a = document.createElement('a');
         a.href = '/api/download?path=' + encodeURIComponent(path);
         a.download = '';
         document.body.appendChild(a);
@@ -1178,33 +1315,34 @@ html, body {
     };
 
     window.renameItem = function(path, oldName) {
-        showModal('Rename', oldName, 'Rename', async function(newName) {
+        showModal(t('rename'), oldName, t('rename'), async function(newName) {
             if (!newName || newName === oldName) return;
             try {
-                const parentPath = path.substring(0, path.lastIndexOf('/')) || '/';
-                const newPath = parentPath + '/' + newName;
+                var parentPath = path.substring(0, path.lastIndexOf('/')) || '/';
+                var newPath = parentPath + '/' + newName;
                 await api('POST', '/api/rename', { old_path: path, new_path: newPath });
-                showToast('Renamed successfully', 'success');
+                showToast(t('renamed_successfully'), 'success');
                 loadFiles();
             } catch (err) {
-                showToast('Rename failed: ' + err.message, 'error');
+                showToast(t('rename_failed') + ' ' + err.message, 'error');
             }
         });
     };
 
     window.deleteItem = function(path, name, isDir) {
-        const type = isDir ? 'folder' : 'file';
+        var titleStr = isDir ? t('delete_folder') : t('delete_file');
+        var msgStr = t('confirm_delete') + ' "' + escapeHtml(name) + '"?' + (isDir ? ' ' + t('confirm_delete_contents') : '');
         showConfirm(
-            'Delete ' + type,
-            'Are you sure you want to delete "' + escapeHtml(name) + '"?' + (isDir ? ' This will delete all contents inside.' : ''),
-            'Delete',
+            titleStr,
+            msgStr,
+            t('delete_label'),
             async function() {
                 try {
                     await api('POST', '/api/delete', { path: path });
-                    showToast('Deleted successfully', 'success');
+                    showToast(t('deleted_successfully'), 'success');
                     loadFiles();
                 } catch (err) {
-                    showToast('Delete failed: ' + err.message, 'error');
+                    showToast(t('delete_failed') + ' ' + err.message, 'error');
                 }
             }
         );
@@ -1253,20 +1391,20 @@ html, body {
         // File type info
         var typeClass = entry.type || 'file';
         var ext = entry.name.split('.').pop().toUpperCase();
-        var dateStr = entry.modified ? formatDate(entry.modified) : 'Unknown';
+        var dateStr = entry.modified ? formatDate(entry.modified) : t('unknown');
         var sizeStr = entry.size_formatted || '0 B';
 
         var infoHtml = '';
-        infoHtml += '<div class="detail-info-row"><span class="detail-info-label">File type</span><span class="detail-info-value">' + escapeHtml(ext) + '</span></div>';
-        infoHtml += '<div class="detail-info-row"><span class="detail-info-label">Size</span><span class="detail-info-value">' + escapeHtml(sizeStr) + '</span></div>';
-        infoHtml += '<div class="detail-info-row"><span class="detail-info-label">Modified</span><span class="detail-info-value">' + escapeHtml(dateStr) + '</span></div>';
+        infoHtml += '<div class="detail-info-row"><span class="detail-info-label">' + escapeHtml(t('file_type')) + '</span><span class="detail-info-value">' + escapeHtml(ext) + '</span></div>';
+        infoHtml += '<div class="detail-info-row"><span class="detail-info-label">' + escapeHtml(t('size')) + '</span><span class="detail-info-value">' + escapeHtml(sizeStr) + '</span></div>';
+        infoHtml += '<div class="detail-info-row"><span class="detail-info-label">' + escapeHtml(t('modified')) + '</span><span class="detail-info-value">' + escapeHtml(dateStr) + '</span></div>';
         infoEl.innerHTML = infoHtml;
 
         // Build action buttons
         var actHtml = '';
-        actHtml += '<button class="btn btn-primary" onclick="detailDownload()">' + icons.download + '<span>Download</span></button>';
-        actHtml += '<button class="btn btn-secondary" onclick="detailRename()">' + icons.rename + '<span>Rename</span></button>';
-        actHtml += '<button class="btn btn-danger" onclick="detailDelete()">' + icons.trash + '<span>Delete</span></button>';
+        actHtml += '<button class="btn btn-primary" onclick="detailDownload()">' + icons.download + '<span>' + escapeHtml(t('download')) + '</span></button>';
+        actHtml += '<button class="btn btn-secondary" onclick="detailRename()">' + icons.rename + '<span>' + escapeHtml(t('rename')) + '</span></button>';
+        actHtml += '<button class="btn btn-danger" onclick="detailDelete()">' + icons.trash + '<span>' + escapeHtml(t('delete_label')) + '</span></button>';
         actionsEl.innerHTML = actHtml;
 
         // Fetch metadata asynchronously
@@ -1345,8 +1483,8 @@ html, body {
         var inputElem = document.getElementById('modalInput');
         var confirmBtn = document.getElementById('modalConfirm');
 
-        titleElem.textContent = 'Rename';
-        confirmBtn.textContent = 'Rename';
+        titleElem.textContent = t('rename');
+        confirmBtn.textContent = t('rename');
 
         // Wrap input with extension suffix
         var inputParent = inputElem.parentNode;
@@ -1365,10 +1503,10 @@ html, body {
             document.getElementById('modalExtSuffix').textContent = extPart;
         } else if (hasExtWrapper) {
             // Remove the wrapper if no extension
-            var wrapper = inputParent;
-            var grandParent = wrapper.parentNode;
-            grandParent.insertBefore(inputElem, wrapper);
-            wrapper.remove();
+            var wrapper2 = inputParent;
+            var grandParent = wrapper2.parentNode;
+            grandParent.insertBefore(inputElem, wrapper2);
+            wrapper2.remove();
         }
 
         inputElem.value = namePart;
@@ -1388,12 +1526,12 @@ html, body {
                 var parentPath = entry.path.substring(0, entry.path.lastIndexOf('/')) || '/';
                 var newPath = parentPath + '/' + finalName;
                 await api('POST', '/api/rename', { old_path: entry.path, new_path: newPath });
-                showToast('Renamed successfully', 'success');
+                showToast(t('renamed_successfully'), 'success');
                 restoreModalInput();
                 hideFileDetail();
                 loadFiles();
             } catch (err) {
-                showToast('Rename failed: ' + err.message, 'error');
+                showToast(t('rename_failed') + ' ' + err.message, 'error');
                 restoreModalInput();
             }
         };
@@ -1413,32 +1551,32 @@ html, body {
         if (!currentDetailEntry) return;
         var entry = currentDetailEntry;
         showConfirm(
-            'Delete file',
-            'Are you sure you want to delete "' + escapeHtml(entry.name) + '"?',
-            'Delete',
+            t('delete_file'),
+            t('confirm_delete') + ' "' + escapeHtml(entry.name) + '"?',
+            t('delete_label'),
             async function() {
                 try {
                     await api('POST', '/api/delete', { path: entry.path });
-                    showToast('Deleted successfully', 'success');
+                    showToast(t('deleted_successfully'), 'success');
                     hideFileDetail();
                     loadFiles();
                 } catch (err) {
-                    showToast('Delete failed: ' + err.message, 'error');
+                    showToast(t('delete_failed') + ' ' + err.message, 'error');
                 }
             }
         );
     };
 
     window.showNewFolderModal = function() {
-        showModal('New Folder', '', 'Create', async function(name) {
+        showModal(t('new_folder'), '', t('create'), async function(name) {
             if (!name) return;
             try {
-                const newPath = (currentPath === '/' ? '' : currentPath) + '/' + name;
+                var newPath = (currentPath === '/' ? '' : currentPath) + '/' + name;
                 await api('POST', '/api/mkdir', { path: newPath });
-                showToast('Folder created', 'success');
+                showToast(t('folder_created'), 'success');
                 loadFiles();
             } catch (err) {
-                showToast('Failed to create folder: ' + err.message, 'error');
+                showToast(t('failed_create_folder') + ' ' + err.message, 'error');
             }
         });
     };
@@ -1451,17 +1589,17 @@ html, body {
 
     window.handleFileSelect = function(files) {
         if (!files || files.length === 0) return;
-        for (const file of files) {
-            uploadFile(file);
+        for (var fi = 0; fi < files.length; fi++) {
+            uploadFile(files[fi]);
         }
         document.getElementById('fileInput').value = '';
     };
 
     async function uploadFile(file) {
-        const container = document.getElementById('uploadProgress');
-        const id = 'upload-' + Date.now() + '-' + Math.random().toString(36).substring(2, 8);
+        var container = document.getElementById('uploadProgress');
+        var id = 'upload-' + Date.now() + '-' + Math.random().toString(36).substring(2, 8);
 
-        const item = document.createElement('div');
+        var item = document.createElement('div');
         item.className = 'upload-item';
         item.id = id;
         item.innerHTML = '<span class="upload-item-name">' + escapeHtml(file.name) + '</span>' +
@@ -1470,17 +1608,17 @@ html, body {
         container.prepend(item);
 
         try {
-            const formData = new FormData();
+            var formData = new FormData();
             formData.append('file', file);
 
-            const xhr = new XMLHttpRequest();
+            var xhr = new XMLHttpRequest();
             xhr.open('POST', '/api/upload?path=' + encodeURIComponent(currentPath));
 
             xhr.upload.onprogress = function(e) {
                 if (e.lengthComputable) {
-                    const pct = Math.round((e.loaded / e.total) * 100);
-                    const bar = document.getElementById(id + '-bar');
-                    const status = document.getElementById(id + '-status');
+                    var pct = Math.round((e.loaded / e.total) * 100);
+                    var bar = document.getElementById(id + '-bar');
+                    var status = document.getElementById(id + '-status');
                     if (bar) bar.style.width = pct + '%';
                     if (status) status.textContent = pct + '%';
                 }
@@ -1492,41 +1630,41 @@ html, body {
                         resolve();
                     } else {
                         try {
-                            const d = JSON.parse(xhr.responseText);
-                            reject(new Error(d.error || 'Upload failed'));
+                            var d = JSON.parse(xhr.responseText);
+                            reject(new Error(d.error || t('upload_failed')));
                         } catch(e) {
-                            reject(new Error('Upload failed'));
+                            reject(new Error(t('upload_failed')));
                         }
                     }
                 };
-                xhr.onerror = function() { reject(new Error('Network error')); };
+                xhr.onerror = function() { reject(new Error(t('network_error'))); };
                 xhr.send(formData);
             });
 
-            const bar = document.getElementById(id + '-bar');
-            const status = document.getElementById(id + '-status');
+            var bar = document.getElementById(id + '-bar');
+            var status = document.getElementById(id + '-status');
             if (bar) { bar.style.width = '100%'; bar.classList.add('complete'); }
-            if (status) { status.textContent = 'Done'; status.classList.add('success'); }
-            showToast(file.name + ' uploaded', 'success');
+            if (status) { status.textContent = t('done'); status.classList.add('success'); }
+            showToast(file.name + ' ' + t('uploaded'), 'success');
             loadFiles();
 
             setTimeout(function() {
-                const el = document.getElementById(id);
+                var el = document.getElementById(id);
                 if (el) el.remove();
             }, 3000);
 
         } catch (err) {
-            const bar = document.getElementById(id + '-bar');
-            const status = document.getElementById(id + '-status');
-            if (bar) { bar.style.width = '100%'; bar.classList.add('error'); }
-            if (status) { status.textContent = 'Failed'; status.classList.add('error'); }
-            showToast('Upload failed: ' + err.message, 'error');
+            var bar2 = document.getElementById(id + '-bar');
+            var status2 = document.getElementById(id + '-status');
+            if (bar2) { bar2.style.width = '100%'; bar2.classList.add('error'); }
+            if (status2) { status2.textContent = t('failed'); status2.classList.add('error'); }
+            showToast(t('upload_failed') + ' ' + err.message, 'error');
         }
     }
 
     // Drag and drop
-    const dropzone = document.getElementById('dropzone');
-    const dropContainer = document.getElementById('dropzoneContainer');
+    var dropzone = document.getElementById('dropzone');
+    var dropContainer = document.getElementById('dropzoneContainer');
 
     document.addEventListener('dragover', function(e) {
         e.preventDefault();
@@ -1553,8 +1691,8 @@ html, body {
 
     // ===== Sort & Filter =====
     window.onSortChange = function() {
-        const val = document.getElementById('sortSelect').value;
-        const parts = val.split('-');
+        var val = document.getElementById('sortSelect').value;
+        var parts = val.split('-');
         currentSort = parts[0];
         currentOrder = parts[1] || 'asc';
         loadFiles();
@@ -1574,9 +1712,10 @@ html, body {
         document.getElementById('modalTitle').textContent = title;
         document.getElementById('modalInput').value = defaultValue;
         document.getElementById('modalConfirm').textContent = confirmText;
+        document.getElementById('modalCancelBtn').textContent = t('cancel');
         document.getElementById('modalOverlay').classList.add('open');
         setTimeout(function() {
-            const input = document.getElementById('modalInput');
+            var input = document.getElementById('modalInput');
             input.focus();
             input.select();
         }, 100);
@@ -1593,8 +1732,8 @@ html, body {
     };
 
     window.confirmModal = function() {
-        const value = document.getElementById('modalInput').value.trim();
-        const cb = modalCallback;
+        var value = document.getElementById('modalInput').value.trim();
+        var cb = modalCallback;
         hideModal();
         if (cb) {
             cb(value);
@@ -1607,6 +1746,7 @@ html, body {
         document.getElementById('confirmTitle').textContent = title;
         document.getElementById('confirmMessage').textContent = message;
         document.getElementById('confirmBtn').textContent = btnText;
+        document.getElementById('confirmCancelBtn').textContent = t('cancel');
         document.getElementById('confirmOverlay').classList.add('open');
     }
 
@@ -1620,7 +1760,7 @@ html, body {
     };
 
     window.doConfirm = function() {
-        const cb = confirmCallback;
+        var cb = confirmCallback;
         hideConfirm();
         if (cb) {
             cb();
@@ -1630,8 +1770,8 @@ html, body {
     // ===== Toast =====
     function showToast(message, type) {
         type = type || 'info';
-        const container = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
+        var container = document.getElementById('toastContainer');
+        var toast = document.createElement('div');
         toast.className = 'toast ' + type;
         toast.textContent = message;
         container.appendChild(toast);
@@ -1654,19 +1794,33 @@ html, body {
 
     function formatDate(timestamp) {
         if (!timestamp) return '';
-        const d = new Date(timestamp * 1000);
-        const now = new Date();
-        const diff = now - d;
-        if (diff < 60000) return 'Just now';
-        if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
-        if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
-        if (diff < 604800000) return Math.floor(diff / 86400000) + 'd ago';
-        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var d = new Date(timestamp * 1000);
+        var now = new Date();
+        var diff = now - d;
+        if (diff < 60000) return t('just_now');
+        if (diff < 3600000) return Math.floor(diff / 60000) + t('minutes_ago');
+        if (diff < 86400000) return Math.floor(diff / 3600000) + t('hours_ago');
+        if (diff < 604800000) return Math.floor(diff / 86400000) + t('days_ago');
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         return months[d.getMonth()] + ' ' + d.getDate() + (d.getFullYear() !== now.getFullYear() ? ', ' + d.getFullYear() : '');
     }
 
     // ===== Init =====
-    loadFiles();
+    // Fetch language setting from server, then apply translations and load files
+    fetch('/api/lang')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data && data.lang && translations[data.lang]) {
+                currentLang = data.lang;
+            }
+        })
+        .catch(function() {
+            // Keep English as default
+        })
+        .then(function() {
+            applyStaticTranslations();
+            loadFiles();
+        });
 })();
 </script>
 </body>
