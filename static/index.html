@@ -1214,11 +1214,23 @@ html, body {
     }
 
     // ===== Navigation =====
-    window.navigate = function(path) {
+    // Internal navigation: sets state and loads files WITHOUT pushing history
+    function _navigateInternal(path) {
         currentPath = path || '/';
         currentFilter = '';
         document.getElementById('searchInput').value = '';
         loadFiles();
+    }
+
+    // Public navigate: updates state and pushes a history entry
+    window.navigate = function(path) {
+        path = path || '/';
+        var hashTarget = '#' + path;
+        _navigateInternal(path);
+        // Only push if the hash actually changed
+        if (window.location.hash !== hashTarget) {
+            history.pushState({path: path}, '', hashTarget);
+        }
     };
 
     async function loadFiles() {
@@ -1360,7 +1372,8 @@ html, body {
     };
 
     // ===== File Detail View =====
-    window.showFileDetail = function(path) {
+    // Internal detail show: renders the detail view WITHOUT pushing history
+    function _showDetailInternal(path) {
         var entry = null;
         for (var i = 0; i < currentEntries.length; i++) {
             if (currentEntries[i].path === path) {
@@ -1453,6 +1466,15 @@ html, body {
                 if (!currentDetailEntry || currentDetailEntry.path !== path) return;
                 coverEl.innerHTML = buildCoverPlaceholder(typeClass);
             });
+    }
+
+    // Public showFileDetail: shows detail and pushes a history entry
+    window.showFileDetail = function(path) {
+        _showDetailInternal(path);
+        var hashTarget = '#' + path + '!detail';
+        if (window.location.hash !== hashTarget) {
+            history.pushState({path: path, detail: true}, '', hashTarget);
+        }
     };
 
     function buildCoverPlaceholder(typeClass) {
@@ -1460,7 +1482,8 @@ html, body {
         return '<div class="cover-placeholder">' + icon + '</div>';
     }
 
-    window.hideFileDetail = function() {
+    // Internal hide detail: does the DOM work without touching history
+    function _hideDetailInternal() {
         var detail = document.getElementById('fileDetail');
         detail.classList.remove('open');
         detail.style.display = 'none';
@@ -1472,6 +1495,12 @@ html, body {
         document.body.style.overflow = '';
         window.scrollTo(0, scrollY);
         currentDetailEntry = null;
+    }
+
+    // Public hideFileDetail: called by the Back button — uses history.back()
+    // so the popstate handler will call _hideDetailInternal
+    window.hideFileDetail = function() {
+        history.back();
     };
 
     window.detailDownload = function() {
@@ -1539,7 +1568,8 @@ html, body {
                 await api('POST', '/api/rename', { old_path: entry.path, new_path: newPath });
                 showToast(t('renamed_successfully'), 'success');
                 restoreModalInput();
-                hideFileDetail();
+                _hideDetailInternal();
+                history.replaceState({path: currentPath}, '', '#' + currentPath);
                 loadFiles();
             } catch (err) {
                 showToast(t('rename_failed') + ' ' + err.message, 'error');
@@ -1574,7 +1604,8 @@ html, body {
                     }
                     await api('POST', '/api/delete', body);
                     showToast(t('deleted_successfully'), 'success');
-                    hideFileDetail();
+                    _hideDetailInternal();
+                    history.replaceState({path: currentPath}, '', '#' + currentPath);
                     loadFiles();
                 } catch (err) {
                     showToast(t('delete_failed') + ' ' + err.message, 'error');
@@ -1832,8 +1863,78 @@ html, body {
         return months[d.getMonth()] + ' ' + d.getDate() + (d.getFullYear() !== now.getFullYear() ? ', ' + d.getFullYear() : '');
     }
 
+    // ===== History / popstate =====
+    // Parse the current hash and return {path, detail} without modifying state
+    function _parseHash() {
+        var hash = window.location.hash;
+        if (!hash || hash === '#' || hash === '#/') {
+            return {path: '/', detail: false};
+        }
+        // Strip leading '#'
+        var raw = hash.substring(1);
+        if (raw.endsWith('!detail')) {
+            return {path: raw.substring(0, raw.length - 7), detail: true};
+        }
+        return {path: raw || '/', detail: false};
+    }
+
+    window.addEventListener('popstate', function() {
+        var state = _parseHash();
+        if (state.detail) {
+            // If navigating to a detail view and we're already showing it, skip
+            if (currentDetailEntry && currentDetailEntry.path === state.path) return;
+            // We might need to navigate to the parent directory first to load entries
+            var parentPath = state.path.substring(0, state.path.lastIndexOf('/')) || '/';
+            if (currentPath !== parentPath) {
+                // Need to load the directory first, then show detail once loaded
+                currentPath = parentPath;
+                currentFilter = '';
+                document.getElementById('searchInput').value = '';
+                var params = new URLSearchParams({
+                    path: currentPath,
+                    sort: currentSort,
+                    order: currentOrder,
+                    filter: currentFilter
+                });
+                api('GET', '/api/files?' + params).then(function(data) {
+                    renderBreadcrumbs(data.breadcrumbs);
+                    renderFiles(data.entries);
+                    _showDetailInternal(state.path);
+                }).catch(function() {
+                    // If loading fails, just navigate to the directory
+                    _navigateInternal(parentPath);
+                });
+            } else {
+                _showDetailInternal(state.path);
+            }
+        } else {
+            // Navigating to a directory — close detail if open
+            if (currentDetailEntry) {
+                _hideDetailInternal();
+            }
+            _navigateInternal(state.path);
+        }
+    });
+
     // ===== Init =====
+    // Read hash to determine initial state before loading
+    var initState = _parseHash();
+    if (initState.detail) {
+        // For detail view, start at the parent directory
+        var initParent = initState.path.substring(0, initState.path.lastIndexOf('/')) || '/';
+        currentPath = initParent;
+    } else {
+        currentPath = initState.path;
+    }
+    // Set the initial history entry (replaceState so we don't add an extra entry)
+    history.replaceState(
+        initState.detail ? {path: initState.path, detail: true} : {path: currentPath},
+        '',
+        window.location.hash || '#/'
+    );
+
     // Fetch language setting from server, then apply translations and load files
+    var _initDetailPath = initState.detail ? initState.path : null;
     fetch('/api/lang')
         .then(function(res) { return res.json(); })
         .then(function(data) {
@@ -1846,7 +1947,13 @@ html, body {
         })
         .then(function() {
             applyStaticTranslations();
-            loadFiles();
+            return loadFiles();
+        })
+        .then(function() {
+            // After files are loaded, open detail view if hash indicated one
+            if (_initDetailPath) {
+                _showDetailInternal(_initDetailPath);
+            }
         });
 })();
 </script>
