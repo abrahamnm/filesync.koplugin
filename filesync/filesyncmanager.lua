@@ -37,7 +37,11 @@ local FileSyncManager = {
     _qr_widget = nil,
 }
 
-local DEFAULT_PORT = 8080
+local DEFAULT_PORT = 80
+-- NOTE: Port 80 is used by default for convenience (no :port in the URL).
+-- On Kindle, KOReader runs as root, so binding to port 80 works.
+-- On other devices this may fail due to OS permission restrictions;
+-- the start() function handles this case with a clear error message.
 -- The Root PIN is stored in plain plugin settings because this first version
 -- needs to reveal it locally on the device. This is convenient, not secure.
 local ROOT_PIN_SETTING_KEY = "filesync_root_pin"
@@ -246,7 +250,7 @@ function FileSyncManager:configurePort()
         title = _("Server port"),
         input = tostring(self:getPort()),
         input_type = "number",
-        input_hint = "8080",
+        input_hint = "80",
         buttons = {
             {
                 {
@@ -261,7 +265,7 @@ function FileSyncManager:configurePort()
                     is_enter_default = true,
                     callback = function()
                         local new_port = tonumber(port_dialog:getInputText())
-                        if new_port and new_port >= 1024 and new_port <= 65535 then
+                        if new_port and new_port >= 1 and new_port <= 65535 then
                             self:setPort(new_port)
                             UIManager:close(port_dialog)
                             UIManager:show(InfoMessage:new{
@@ -270,7 +274,7 @@ function FileSyncManager:configurePort()
                             })
                         else
                             UIManager:show(InfoMessage:new{
-                                text = _("Invalid port. Please enter a number between 1024 and 65535."),
+                                text = _("Invalid port. Please enter a number between 1 and 65535."),
                                 timeout = 3,
                             })
                         end
@@ -321,6 +325,16 @@ function FileSyncManager:getLocalIP()
     end
 
     return nil
+end
+
+--- Build the full URL for the server, omitting :80 for port 80.
+-- This single function is the source of truth for the URL shown on
+-- the QR screen, encoded in the QR code, and printed in the log.
+function FileSyncManager:buildURL(ip, port)
+    if tonumber(port) == 80 then
+        return "http://" .. ip
+    end
+    return "http://" .. ip .. ":" .. port
 end
 
 function FileSyncManager:getRootDir()
@@ -394,9 +408,15 @@ function FileSyncManager:start(silent)
     if not ok then
         logger.err("FileSync: Failed to start server:", err)
         if not silent then
+            local err_msg
+            if port < 1024 then
+                err_msg = T(_("Failed to start server on port %1.\n\nPorts below 1024 require root/admin privileges. The system may not allow binding to this port.\n\nTry changing the port to 8080 or higher in the Server Port setting."), port)
+            else
+                err_msg = T(_("Failed to start server: %1"), tostring(err))
+            end
             UIManager:show(InfoMessage:new{
-                text = T(_("Failed to start server: %1"), tostring(err)),
-                timeout = 5,
+                text = err_msg,
+                timeout = 8,
             })
         end
         return
@@ -411,20 +431,22 @@ function FileSyncManager:start(silent)
     self._ip = ip
     self._port = port
     self:preventStandby()
-    logger.info("FileSync: Server started on", ip .. ":" .. port)
+    logger.info("FileSync: Server started on", self:buildURL(ip, port))
 
     if not silent then
         self:showQRCode()
     end
 end
 
-function FileSyncManager:stop(silent)
+function FileSyncManager:stop(silent, keep_qr_screen)
     if not self._running then
         return
     end
 
     -- Close QR screen if open
-    self:closeQRScreen()
+    if not keep_qr_screen then
+        self:closeQRScreen()
+    end
 
     if self._server then
         pcall(function()
@@ -447,7 +469,6 @@ function FileSyncManager:stop(silent)
             text = _("FileSync server stopped."),
             timeout = 2,
         })
-        UIManager:restartKOReader()
     end
 end
 
@@ -512,7 +533,7 @@ function FileSyncManager:showQRCode()
     -- Close any existing QR screen first
     self:closeQRScreen()
 
-    local url = "http://" .. self._ip .. ":" .. self._port
+    local url = self:buildURL(self._ip, self._port)
     local screen_width = Screen:getWidth()
     local screen_height = Screen:getHeight()
 
@@ -680,18 +701,9 @@ function FileSyncManager:showQRCode()
         if btn.dimen then
             if x >= btn.dimen.x and x <= btn.dimen.x + btn.dimen.w
                and y >= btn.dimen.y and y <= btn.dimen.y + btn.dimen.h then
-                -- Stop button tapped: show feedback, then stop and restart
-                self._manager:closeQRScreen()
-                UIManager:show(InfoMessage:new{
-                    text = _("Stopping server..."),
-                    timeout = 2,
-                })
-                -- Schedule the actual stop+restart after a brief moment so the
-                -- InfoMessage renders on the e-ink screen before the restart
-                UIManager:scheduleIn(0.5, function()
-                    self._manager:stop(true)
-                    UIManager:restartKOReader()
-                end)
+                -- Stop button tapped: reuse the standard stop flow so the
+                -- "server stopped" confirmation remains visible on screen.
+                self._manager:stop(false, true)
                 return true
             end
         end

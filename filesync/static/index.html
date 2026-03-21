@@ -215,40 +215,72 @@ html, body {
     padding: 12px 16px 4px;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
 }
 
 .breadcrumb-back {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     padding: 0;
     border-radius: 999px;
-    font-size: 16px;
-    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
 }
 
+.breadcrumb-back svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 .breadcrumb-back.hidden {
-    visibility: hidden;
-    pointer-events: none;
+    display: none;
 }
 
 .breadcrumbs {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     flex-wrap: wrap;
-    font-size: 13px;
+    font-size: 14px;
     min-width: 0;
+    flex: 1 1 240px;
 }
 
 .breadcrumb-item {
     color: var(--text-secondary);
     cursor: pointer;
-    padding: 2px 6px;
+    padding: 2px 5px;
     border-radius: var(--radius-xs);
     transition: all var(--transition);
     white-space: nowrap;
+    font-weight: 500;
+}
+
+.breadcrumb-item.breadcrumb-home {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+}
+
+.breadcrumb-item.breadcrumb-home svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .breadcrumb-item:hover {
@@ -258,7 +290,7 @@ html, body {
 
 .breadcrumb-item.active {
     color: var(--text);
-    font-weight: 600;
+    font-weight: 700;
     cursor: default;
 }
 
@@ -269,8 +301,70 @@ html, body {
 
 .breadcrumb-sep {
     color: var(--text-tertiary);
-    font-size: 11px;
+    font-size: 12px;
     user-select: none;
+}
+
+.nav-context {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.nav-context > [hidden] {
+    display: none !important;
+}
+
+.nav-context.hidden {
+    display: none;
+}
+
+.nav-scope-select {
+    min-width: 96px;
+    max-width: 160px;
+    height: 40px;
+    padding: 0 28px 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--text-tertiary) 50%),
+        linear-gradient(135deg, var(--text-tertiary) 50%, transparent 50%);
+    background-position:
+        calc(100% - 14px) 12px,
+        calc(100% - 9px) 12px;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+}
+
+.nav-scope-select:disabled {
+    opacity: 0.6;
+}
+
+.nav-hidden-toggle,
+.nav-view-toggle {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    padding: 0;
+}
+
+.nav-hidden-toggle svg,
+.nav-view-toggle svg {
+    width: 18px;
+    height: 18px;
+    vertical-align: middle;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 /* ===== Toolbar ===== */
@@ -285,13 +379,14 @@ html, body {
 }
 
 .search-box {
-    flex: 1;
-    min-width: 160px;
+    flex: 1 1 240px;
+    min-width: 180px;
     position: relative;
 }
 
 .search-box input {
     width: 100%;
+    height: 40px;
     padding: 8px 12px 8px 36px;
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
@@ -323,6 +418,7 @@ html, body {
 }
 
 .sort-select {
+    height: 40px;
     padding: 8px 12px;
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
@@ -337,6 +433,10 @@ html, body {
     background-repeat: no-repeat;
     background-position: right 8px center;
     padding-right: 28px;
+}
+
+.toolbar .nav-context {
+    margin-left: auto;
 }
 
 /* ===== Buttons ===== */
@@ -447,6 +547,25 @@ html, body {
     padding: 4px 16px 100px;
 }
 
+.file-list.view-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 10px;
+}
+
+.file-list.view-grid-large {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.file-list.view-grid .loading,
+.file-list.view-grid .empty-state,
+.file-list.view-grid-large .loading,
+.file-list.view-grid-large .empty-state {
+    grid-column: 1 / -1;
+}
+
 .file-item {
     display: flex;
     align-items: center;
@@ -458,6 +577,149 @@ html, body {
     margin-bottom: 6px;
     cursor: pointer;
     transition: all var(--transition);
+}
+
+.file-list.view-grid .file-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-areas:
+        "icon info"
+        "actions actions";
+    align-items: start;
+    gap: 10px 12px;
+    min-height: 132px;
+    margin-bottom: 0;
+}
+
+.file-list.view-grid .file-item.selection-mode {
+    padding-left: 12px;
+}
+
+.file-list.view-grid .file-select-marker {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+.file-list.view-grid .file-icon {
+    grid-area: icon;
+    width: 42px;
+    height: 42px;
+}
+
+.file-list.view-grid .file-info {
+    grid-area: info;
+    width: auto;
+    min-width: 0;
+    padding-top: 2px;
+}
+
+.file-list.view-grid .file-name {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.35;
+}
+
+.file-list.view-grid .file-meta {
+    margin-top: 6px;
+    gap: 2px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.file-list.view-grid .file-actions {
+    grid-area: actions;
+    width: 100%;
+    margin-top: 4px;
+    justify-content: flex-end;
+}
+
+.file-list.view-grid .file-actions .file-chevron {
+    margin-left: auto;
+}
+
+.file-list.view-grid-large .file-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    min-height: 176px;
+    padding: 18px 14px 14px;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+.file-list.view-grid-large .file-item.selection-mode {
+    padding-left: 14px;
+}
+
+.file-list.view-grid-large .file-select-marker {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+.file-list.view-grid-large .file-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+}
+
+.file-list.view-grid-large .file-icon svg {
+    width: 32px;
+    height: 32px;
+}
+
+.file-list.view-grid-large .file-info {
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.file-list.view-grid-large .file-name {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-align: center;
+    line-height: 1.35;
+}
+
+.file-list.view-grid-large .file-meta {
+    margin-top: 0;
+    gap: 4px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-list.view-grid-large .file-meta span:first-child {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.file-list.view-grid-large .file-meta span:last-child {
+    display: none;
+}
+
+.file-list.view-grid-large .file-actions {
+    width: 100%;
+    margin-top: auto;
+    justify-content: flex-end;
+}
+
+.file-list.view-grid-large .file-actions .file-chevron {
+    display: none;
 }
 
 .file-item:hover {
@@ -531,6 +793,19 @@ html, body {
 .file-icon.dir {
     background: #fef3c7;
     color: #d97706;
+}
+
+.file-item.is-hidden .file-icon.dir {
+    background: #edf7ee;
+    color: #4b6b46;
+}
+
+.file-item.is-hidden .file-name {
+    color: #3f4f3d;
+}
+
+.file-item.is-hidden .file-meta {
+    color: #7b8a78;
 }
 
 .file-icon.ebook {
@@ -659,13 +934,21 @@ html, body {
     cursor: pointer;
 }
 
+.dropzone-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
 .dropzone-cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    padding: 8px 16px 8px 10px;
-    border: none;
+    min-height: 48px;
+    padding: 8px 18px 8px 12px;
+    border: 1px solid transparent;
     border-radius: 999px;
     background: var(--primary);
     color: #fff;
@@ -688,8 +971,8 @@ html, body {
 }
 
 .dropzone-cta-icon {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.16);
     display: flex;
@@ -699,8 +982,8 @@ html, body {
 }
 
 .dropzone-cta-icon svg {
-    width: 16px;
-    height: 16px;
+    width: 17px;
+    height: 17px;
     stroke: currentColor;
 }
 
@@ -708,6 +991,41 @@ html, body {
     display: block;
     transform: translateY(-0.5px);
     white-space: nowrap;
+}
+
+.dropzone-cta-secondary {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: none;
+}
+
+.dropzone-cta-secondary:hover {
+    background: var(--surface-hover);
+    box-shadow: var(--shadow);
+}
+
+.dropzone-cta-secondary .dropzone-cta-icon {
+    background: var(--border-light);
+    color: var(--text-secondary);
+}
+
+.dropzone-cta-folder .dropzone-cta-icon svg {
+    width: 18px;
+    height: 18px;
+    transform: translateY(-0.5px);
+}
+
+@media (max-width: 520px) {
+    .dropzone-actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .dropzone-cta {
+        width: 100%;
+    }
 }
 
 /* ===== Upload Progress ===== */
@@ -818,6 +1136,20 @@ html, body {
     justify-content: flex-end;
 }
 
+.selection-close-btn {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+.selection-close-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
 @media (max-width: 560px) {
     .selection-bar {
         flex-direction: column;
@@ -826,6 +1158,11 @@ html, body {
 
     .selection-bar-actions .btn {
         flex: 1;
+    }
+
+    .selection-bar-actions .btn.selection-close-btn {
+        flex: 0 0 auto;
+        align-self: flex-end;
     }
 }
 
@@ -1207,6 +1544,25 @@ html, body {
     .file-item { padding: 10px; gap: 10px; }
 }
 
+@media (max-width: 520px) {
+    .toolbar .nav-context {
+        margin-left: 0;
+    }
+
+    .file-list.view-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+
+    .file-list.view-grid-large {
+        grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+    }
+
+    .nav-scope-select {
+        flex: 1 1 auto;
+        max-width: none;
+    }
+}
+
 /* ===== Scrollbar ===== */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -1371,11 +1727,19 @@ html, body {
 }
 
 .detail-actions .btn {
-    flex: 1;
-    min-width: 100px;
+    flex: 1 1 120px;
+    min-width: 0;
     padding: 12px 16px;
     font-size: 14px;
     justify-content: center;
+}
+
+.detail-actions .btn span {
+    min-width: 0;
+}
+
+.detail-actions .btn.detail-action-meta {
+    flex: 1.35 1 170px;
 }
 
 .detail-ext-suffix {
@@ -1401,6 +1765,112 @@ html, body {
     border-radius: var(--radius-sm) 0 0 var(--radius-sm);
     flex: 1;
     min-width: 0;
+}
+
+/* Metadata Edit Modal */
+.metadata-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.metadata-overlay.open {
+    display: flex;
+}
+
+.metadata-modal {
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 540px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 24px 20px 32px;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.25s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.metadata-modal .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+}
+
+.metadata-modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text);
+}
+
+.metadata-modal-subtitle {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-bottom: 20px;
+}
+
+.metadata-field {
+    margin-bottom: 16px;
+}
+
+.metadata-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.metadata-field input,
+.metadata-field textarea {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 15px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+
+.metadata-field input:focus,
+.metadata-field textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+
+.metadata-field textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.metadata-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.metadata-actions .btn {
+    flex: 1;
+    justify-content: center;
+    padding: 12px 16px;
+    font-size: 14px;
 }
 </style>
 </head>
@@ -1476,7 +1946,11 @@ html, body {
 
 <!-- Breadcrumbs -->
 <div class="breadcrumbs-wrap">
-    <button class="btn btn-secondary btn-sm breadcrumb-back hidden" id="btnParentNav" type="button" onclick="navigateUp()" aria-label="Go up" title="Go up">&larr;</button>
+    <button class="btn btn-secondary btn-sm breadcrumb-back hidden" id="btnParentNav" type="button" onclick="navigateUp()" aria-label="Go up" title="Go up">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+    </button>
     <nav class="breadcrumbs" id="breadcrumbs"></nav>
 </div>
 
@@ -1488,6 +1962,11 @@ html, body {
             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
         <input type="text" id="searchInput" placeholder="Filter files..." oninput="onFilterChange()">
+    </div>
+    <div class="nav-context hidden" id="navContextControls">
+        <select class="nav-scope-select" id="scopeSelect" onchange="onScopeChange()" aria-label="Filesystem scope"></select>
+        <button class="btn btn-secondary btn-sm nav-hidden-toggle" id="btnHiddenToggle" type="button" onclick="toggleHiddenFiles()" hidden></button>
+        <button class="btn btn-secondary btn-sm nav-view-toggle" id="btnViewMode" type="button" onclick="toggleViewMode()"></button>
     </div>
     <select class="sort-select" id="sortSelect" onchange="onSortChange()">
         <option value="name-asc" data-i18n="sort_name_asc">Name A-Z</option>
@@ -1509,18 +1988,29 @@ html, body {
             <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
         <div class="dropzone-text" id="dropzoneText">
-            Drag and drop files here, or <strong onclick="document.getElementById('fileInput').click()">browse</strong>
+            Drag and drop files or folders here, or <strong onclick="document.getElementById('fileInput').click()">browse files</strong>
         </div>
         <input type="file" id="fileInput" multiple style="display:none" onchange="handleFileSelect(this.files)">
-        <button class="dropzone-cta" onclick="document.getElementById('fileInput').click()">
-            <span class="dropzone-cta-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-            </span>
-            <span class="dropzone-cta-label" data-i18n="choose_files">Choose Files</span>
-        </button>
+        <input type="file" id="folderInput" multiple webkitdirectory directory style="display:none" onchange="handleFolderSelect(this.files)">
+        <div class="dropzone-actions">
+            <button class="dropzone-cta dropzone-cta-file" onclick="document.getElementById('fileInput').click()">
+                <span class="dropzone-cta-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </span>
+                <span class="dropzone-cta-label" data-i18n="choose_files">Choose Files</span>
+            </button>
+            <button class="dropzone-cta dropzone-cta-secondary dropzone-cta-folder" onclick="document.getElementById('folderInput').click()">
+                <span class="dropzone-cta-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4.2l1.5 1.7H19.5A1.5 1.5 0 0 1 21 9.2v7.3A1.5 1.5 0 0 1 19.5 18h-15A1.5 1.5 0 0 1 3 16.5z"/>
+                    </svg>
+                </span>
+                <span class="dropzone-cta-label" data-i18n="choose_folder">Choose Folder</span>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -1532,6 +2022,14 @@ html, body {
     <div class="selection-bar" id="selectionBar">
         <div class="selection-bar-info" id="selectionCount"></div>
         <div class="selection-bar-actions">
+            <button class="btn btn-secondary btn-sm" id="btnSelectionDownload" onclick="downloadSelectedItems()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span data-i18n="download">Download</span>
+            </button>
             <button class="btn btn-secondary btn-sm" id="btnSelectionCopy" onclick="copySelectedItems()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="9" y="9" width="11" height="11" rx="2" ry="2"/>
@@ -1556,12 +2054,11 @@ html, body {
                 </svg>
                 <span data-i18n="delete_label">Delete</span>
             </button>
-            <button class="btn btn-secondary btn-sm" id="btnSelectionCancel" onclick="cancelSelection()">
+            <button class="btn btn-secondary btn-sm selection-close-btn" id="btnSelectionCancel" onclick="cancelSelection()" aria-label="Cancel selection">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"/>
                     <line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
-                <span data-i18n="cancel">Cancel</span>
             </button>
         </div>
     </div>
@@ -1645,6 +2142,35 @@ html, body {
     </div>
 </div>
 
+<!-- Metadata Edit Modal -->
+<div class="metadata-overlay" id="metadataOverlay" onclick="closeMetadataModal(event)">
+    <div class="metadata-modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div class="metadata-modal-title" id="metadataModalTitle">Edit Metadata</div>
+        <div class="metadata-modal-subtitle" id="metadataModalSubtitle"></div>
+        <div class="metadata-field">
+            <label id="metaLabelTitle">Title</label>
+            <input type="text" id="metaInputTitle" autocomplete="off">
+        </div>
+        <div class="metadata-field">
+            <label id="metaLabelAuthor">Author</label>
+            <input type="text" id="metaInputAuthor" autocomplete="off">
+        </div>
+        <div class="metadata-field">
+            <label id="metaLabelPublisher">Publisher</label>
+            <input type="text" id="metaInputPublisher" autocomplete="off">
+        </div>
+        <div class="metadata-field">
+            <label id="metaLabelDescription">Description</label>
+            <textarea id="metaInputDescription" rows="3"></textarea>
+        </div>
+        <div class="metadata-actions">
+            <button class="btn btn-secondary" id="metaCancelBtn" onclick="hideMetadataModal()">Cancel</button>
+            <button class="btn btn-primary" id="metaSaveBtn" onclick="saveMetadata()">Save</button>
+        </div>
+    </div>
+</div>
+
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
@@ -1676,9 +2202,14 @@ html, body {
             sort_largest: "Largest first",
             sort_smallest: "Smallest first",
             sort_type: "Type",
-            dropzone_text: "Drag and drop files here, or",
-            dropzone_browse: "browse",
+            dropzone_text: "Drag and drop files or folders here, or",
+            dropzone_browse: "browse files",
             choose_files: "Choose Files",
+            choose_folder: "Choose Folder",
+            hidden_files: "Hidden",
+            grid_view: "Grid view",
+            icon_grid_view: "Icon grid view",
+            list_view: "List view",
             loading: "Loading...",
             failed_to_load: "Failed to load files",
             empty_folder: "This folder is empty",
@@ -1731,6 +2262,7 @@ html, body {
             paste_placeholder: "Paste will be implemented next",
             clipboard_copy_ready: "{count} items copied",
             clipboard_cut_ready: "{count} items cut",
+            edit: "Edit",
             root_pin_title: "Unlock Root mode",
             root_pin_message: "Enter the Root PIN configured on the Kindle.",
             unlock: "Unlock",
@@ -1749,7 +2281,18 @@ html, body {
             invalid_server_response: "Invalid server response",
             server_error: "Server error",
             request_failed: "Request failed",
-            book_cover: "Book cover"
+            book_cover: "Book cover",
+            edit_metadata: "Edit Metadata",
+            metadata_title_label: "Title",
+            metadata_author_label: "Author",
+            metadata_publisher_label: "Publisher",
+            metadata_description_label: "Description",
+            metadata_save: "Save",
+            metadata_saved: "Metadata saved successfully",
+            metadata_save_failed: "Failed to save metadata:",
+            metadata_epub_only: "Metadata editing is available for EPUB files only.",
+            metadata_root_required: "Root mode is required to edit metadata.",
+            folder_download_unavailable: "Folder download is not available yet."
         },
         es: {
             filesync: "FileSync",
@@ -1773,9 +2316,14 @@ html, body {
             sort_largest: "M\u00e1s grandes",
             sort_smallest: "M\u00e1s peque\u00f1os",
             sort_type: "Tipo",
-            dropzone_text: "Arrastra archivos aqu\u00ed, o",
-            dropzone_browse: "busca",
+            dropzone_text: "Arrastra archivos o carpetas aqu\u00ed, o",
+            dropzone_browse: "busca archivos",
             choose_files: "Elegir archivos",
+            choose_folder: "Elegir carpeta",
+            hidden_files: "Ocultos",
+            grid_view: "Vista en cuadrícula",
+            icon_grid_view: "Vista de íconos",
+            list_view: "Vista en lista",
             loading: "Cargando...",
             failed_to_load: "Error al cargar archivos",
             empty_folder: "Esta carpeta est\u00e1 vac\u00eda",
@@ -1828,6 +2376,7 @@ html, body {
             paste_placeholder: "Pegar se implementar\u00e1 despu\u00e9s",
             clipboard_copy_ready: "{count} elementos copiados",
             clipboard_cut_ready: "{count} elementos cortados",
+            edit: "Editar",
             root_pin_title: "Desbloquear modo Root",
             root_pin_message: "Introduce el PIN Root configurado en el Kindle.",
             unlock: "Desbloquear",
@@ -1846,7 +2395,18 @@ html, body {
             invalid_server_response: "Respuesta inv\u00e1lida del servidor",
             server_error: "Error del servidor",
             request_failed: "Solicitud fallida",
-            book_cover: "Portada del libro"
+            book_cover: "Portada del libro",
+            edit_metadata: "Editar metadatos",
+            metadata_title_label: "T\u00edtulo",
+            metadata_author_label: "Autor",
+            metadata_publisher_label: "Editorial",
+            metadata_description_label: "Descripci\u00f3n",
+            metadata_save: "Guardar",
+            metadata_saved: "Metadatos guardados exitosamente",
+            metadata_save_failed: "Error al guardar metadatos:",
+            metadata_epub_only: "La edici\u00f3n de metadatos est\u00e1 disponible solo para archivos EPUB.",
+            metadata_root_required: "El modo Root es necesario para editar metadatos.",
+            folder_download_unavailable: "La descarga de carpetas aún no está disponible."
         },
         pt_BR: {
             filesync: "FileSync",
@@ -1870,9 +2430,14 @@ html, body {
             sort_largest: "Maiores primeiro",
             sort_smallest: "Menores primeiro",
             sort_type: "Tipo",
-            dropzone_text: "Arraste e solte arquivos aqui ou",
-            dropzone_browse: "procure",
+            dropzone_text: "Arraste e solte arquivos ou pastas aqui ou",
+            dropzone_browse: "procure arquivos",
             choose_files: "Escolher arquivos",
+            choose_folder: "Escolher pasta",
+            hidden_files: "Ocultos",
+            grid_view: "Visualização em grade",
+            icon_grid_view: "Visualização por ícones",
+            list_view: "Visualização em lista",
             loading: "Carregando...",
             failed_to_load: "Falha ao carregar arquivos",
             empty_folder: "Esta pasta est\u00e1 vazia",
@@ -1925,6 +2490,7 @@ html, body {
             paste_placeholder: "Colar ser\u00e1 implementado em seguida",
             clipboard_copy_ready: "{count} itens copiados",
             clipboard_cut_ready: "{count} itens recortados",
+            edit: "Editar",
             root_pin_title: "Desbloquear modo Root",
             root_pin_message: "Digite o PIN Root configurado no Kindle.",
             unlock: "Desbloquear",
@@ -1943,7 +2509,18 @@ html, body {
             invalid_server_response: "Resposta inv\u00e1lida do servidor",
             server_error: "Erro do servidor",
             request_failed: "Falha na requisi\u00e7\u00e3o",
-            book_cover: "Capa do livro"
+            book_cover: "Capa do livro",
+            edit_metadata: "Editar metadados",
+            metadata_title_label: "T\u00edtulo",
+            metadata_author_label: "Autor",
+            metadata_publisher_label: "Editora",
+            metadata_description_label: "Descri\u00e7\u00e3o",
+            metadata_save: "Salvar",
+            metadata_saved: "Metadados salvos com sucesso",
+            metadata_save_failed: "Erro ao salvar metadados:",
+            metadata_epub_only: "A edi\u00e7\u00e3o de metadados est\u00e1 dispon\u00edvel apenas para arquivos EPUB.",
+            metadata_root_required: "O modo Root \u00e9 necess\u00e1rio para editar metadados.",
+            folder_download_unavailable: "Download de pasta ainda n\u00e3o est\u00e1 dispon\u00edvel."
         }
     };
     var currentLang = "en";
@@ -1983,10 +2560,12 @@ html, body {
         document.getElementById('btnFolder').setAttribute('aria-label', t('new_folder_title'));
         document.getElementById('btnParentNav').title = t('go_up');
         document.getElementById('btnParentNav').setAttribute('aria-label', t('go_up'));
+        document.getElementById('btnSelectionDownload').title = t('download');
         document.getElementById('btnSelectionCopy').title = t('copy');
         document.getElementById('btnSelectionCut').title = t('cut');
         document.getElementById('btnSelectionDelete').title = t('delete_label');
         document.getElementById('btnSelectionCancel').title = t('cancel');
+        document.getElementById('btnSelectionCancel').setAttribute('aria-label', t('cancel'));
         // Dropzone text
         var dzText = document.getElementById('dropzoneText');
         dzText.innerHTML = t('dropzone_text') + ' <strong onclick="document.getElementById(\'fileInput\').click()">' + t('dropzone_browse') + '</strong>';
@@ -2004,6 +2583,7 @@ html, body {
 
     // ===== State =====
     var currentPath = '/';
+    var currentScope = 'storage';
     var currentSort = 'name';
     var currentOrder = 'asc';
     var currentFilter = '';
@@ -2015,12 +2595,20 @@ html, body {
     var currentDetailEntry = null;
     var selectionMode = false;
     var selectedPaths = [];
-    var clipboardState = { mode: null, paths: [] };
+    var clipboardState = { mode: null, paths: [], scope: 'storage' };
     var hasRootPin = false;
     var rootUnlocked = false;
     var authRequestPending = false;
     var rootPinExpectedLength = 4;
     var safeExtensions = {};
+    var availableScopes = [];
+    var defaultScope = 'storage';
+    var safeRootPath = '/mnt/us';
+    var rootStartPath = '/mnt/us';
+    var canShowHidden = false;
+    var showHiddenFiles = false;
+    var VIEW_MODES = ['list', 'grid', 'grid-large'];
+    var viewMode = 'list';
     var longPressState = null;
     var suppressNextSelectionClick = null;
     var LONG_PRESS_DURATION = 500;
@@ -2067,33 +2655,268 @@ html, body {
         return data;
     }
 
+    function setAvailableScopes(scopes) {
+        availableScopes = [];
+        if (!Array.isArray(scopes)) return;
+        for (var i = 0; i < scopes.length; i++) {
+            var scope = scopes[i];
+            if (!scope || !scope.id) continue;
+            availableScopes.push({
+                id: String(scope.id),
+                label: scope.label || scope.root_path || String(scope.id),
+                rootPath: scope.root_path || scope.label || String(scope.id)
+            });
+        }
+    }
+
+    function getScopeById(scopeId) {
+        for (var i = 0; i < availableScopes.length; i++) {
+            if (availableScopes[i].id === scopeId) {
+                return availableScopes[i];
+            }
+        }
+        return null;
+    }
+
+    function normalizeAbsolutePath(path) {
+        var normalized = String(path || '/').replace(/\/+/g, '/');
+        if (!normalized || normalized === '') {
+            normalized = '/';
+        }
+        if (normalized.charAt(0) !== '/') {
+            normalized = '/' + normalized;
+        }
+        if (normalized.length > 1 && normalized.charAt(normalized.length - 1) === '/') {
+            normalized = normalized.slice(0, -1);
+        }
+        return normalized || '/';
+    }
+
+    function toRootScopePath(path) {
+        if (currentScope === 'system') {
+            return normalizeAbsolutePath(path);
+        }
+        var relativePath = String(path || '/');
+        if (relativePath === '/') {
+            return normalizeAbsolutePath(rootStartPath || safeRootPath || '/mnt/us');
+        }
+        return normalizeAbsolutePath((safeRootPath || '/mnt/us') + '/' + relativePath.replace(/^\/+/, ''));
+    }
+
+    function toSafeScopePath(path) {
+        var normalized = normalizeAbsolutePath(path);
+        var safeRoot = normalizeAbsolutePath(safeRootPath || '/mnt/us');
+
+        if (safeRoot === '/') {
+            return normalized;
+        }
+        if (normalized === safeRoot) {
+            return '/';
+        }
+        if (normalized.indexOf(safeRoot + '/') === 0) {
+            return normalized.slice(safeRoot.length) || '/';
+        }
+        return '/';
+    }
+
+    function ensureNavigationState() {
+        if (!defaultScope) {
+            defaultScope = 'storage';
+        }
+        if (!currentScope) {
+            currentScope = defaultScope;
+        }
+        if (!getScopeById(currentScope)) {
+            currentScope = defaultScope;
+        }
+        if (!getScopeById(currentScope) && availableScopes.length > 0) {
+            currentScope = availableScopes[0].id;
+        }
+        if (!canShowHidden) {
+            showHiddenFiles = false;
+        }
+    }
+
+    function updateNavigationContextFromResponse(data) {
+        if (!data) return;
+        if (data.default_scope) {
+            defaultScope = String(data.default_scope);
+        }
+        if (Array.isArray(data.available_scopes)) {
+            setAvailableScopes(data.available_scopes);
+        }
+        if (typeof data.can_show_hidden === 'boolean') {
+            canShowHidden = data.can_show_hidden;
+        }
+        if (data.safe_root_path) {
+            safeRootPath = String(data.safe_root_path);
+        }
+        if (data.root_start_path) {
+            rootStartPath = String(data.root_start_path);
+        }
+        if (data.scope) {
+            currentScope = String(data.scope);
+        }
+        if (typeof data.include_hidden === 'boolean') {
+            showHiddenFiles = !!data.include_hidden;
+        }
+        if (!rootUnlocked) {
+            canShowHidden = false;
+            showHiddenFiles = false;
+        }
+        ensureNavigationState();
+        updateNavigationContextUI();
+    }
+
+    function updateNavigationContextUI() {
+        var wrap = document.getElementById('navContextControls');
+        var scopeSelect = document.getElementById('scopeSelect');
+        var hiddenBtn = document.getElementById('btnHiddenToggle');
+        var viewBtn = document.getElementById('btnViewMode');
+        if (!wrap || !scopeSelect || !hiddenBtn || !viewBtn) return;
+
+        ensureNavigationState();
+
+        var showScopeSelect = availableScopes.length > 1;
+        var showHiddenToggle = canUseRootActions() && canShowHidden;
+        wrap.classList.toggle('hidden', !showScopeSelect && !showHiddenToggle && viewBtn.hidden);
+
+        if (showScopeSelect) {
+            var optionsHtml = '';
+            for (var i = 0; i < availableScopes.length; i++) {
+                var scope = availableScopes[i];
+                optionsHtml += '<option value="' + escapeAttr(scope.id) + '">' + escapeHtml(scope.label) + '</option>';
+            }
+            scopeSelect.innerHTML = optionsHtml;
+            scopeSelect.value = currentScope;
+            scopeSelect.hidden = false;
+            scopeSelect.disabled = !rootUnlocked || authRequestPending;
+            scopeSelect.title = getScopeById(currentScope) ? getScopeById(currentScope).rootPath : currentScope;
+        } else {
+            scopeSelect.hidden = true;
+            scopeSelect.innerHTML = '';
+        }
+
+        hiddenBtn.hidden = !showHiddenToggle;
+        hiddenBtn.classList.toggle('active', showHiddenToggle && showHiddenFiles);
+        hiddenBtn.setAttribute('aria-pressed', showHiddenToggle && showHiddenFiles ? 'true' : 'false');
+        hiddenBtn.title = t('hidden_files');
+        hiddenBtn.setAttribute('aria-label', t('hidden_files'));
+        // Swap eye icon: open eye when showing hidden, slashed eye when hiding
+        if (showHiddenToggle && showHiddenFiles) {
+            hiddenBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+        } else {
+            hiddenBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+        }
+
+        viewBtn.hidden = false;
+        viewBtn.classList.remove('active');
+        viewBtn.title = getViewModeLabel(viewMode);
+        viewBtn.setAttribute('aria-label', getViewModeLabel(viewMode));
+        viewBtn.innerHTML = getViewModeIcon(viewMode);
+    }
+
+    function updateViewModeUI() {
+        var list = document.getElementById('fileList');
+        if (list) {
+            list.classList.toggle('view-grid', viewMode === 'grid');
+            list.classList.toggle('view-grid-large', viewMode === 'grid-large');
+        }
+        updateNavigationContextUI();
+    }
+
+    function getNextViewMode(mode) {
+        var currentIndex = VIEW_MODES.indexOf(mode);
+        if (currentIndex === -1) currentIndex = 0;
+        return VIEW_MODES[(currentIndex + 1) % VIEW_MODES.length];
+    }
+
+    function getViewModeLabel(mode) {
+        if (mode === 'grid-large') return t('icon_grid_view');
+        if (mode === 'grid') return t('grid_view');
+        return t('list_view');
+    }
+
+    function getViewModeIcon(mode) {
+        if (mode === 'grid-large') {
+            return '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1.2"/><rect x="14" y="4" width="6" height="6" rx="1.2"/><rect x="4" y="14" width="6" height="6" rx="1.2"/><rect x="14" y="14" width="6" height="6" rx="1.2"/></svg>';
+        }
+        if (mode === 'grid') {
+            return '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="6" rx="1.4"/><rect x="13" y="4" width="8" height="6" rx="1.4"/><rect x="3" y="13" width="8" height="8" rx="1.4"/><rect x="13" y="13" width="8" height="8" rx="1.4"/></svg>';
+        }
+        return '<svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
+    }
+
+    function buildHistoryHash(path, scope, detail) {
+        var params = new URLSearchParams();
+        params.set('path', path || '/');
+        params.set('scope', scope || currentScope || defaultScope || 'storage');
+        if (detail) {
+            params.set('detail', '1');
+        }
+        return '#' + params.toString();
+    }
+
+    function normalizeNavigationTarget(path, scope, detail) {
+        ensureNavigationState();
+
+        var requestedScope = scope || currentScope || defaultScope || 'storage';
+        var scopeAvailable = !!getScopeById(requestedScope);
+        var normalizedScope = scopeAvailable ? requestedScope : (defaultScope || 'storage');
+        var normalizedPath = path || '/';
+        var normalizedDetail = !!detail;
+
+        if (requestedScope !== normalizedScope) {
+            normalizedPath = '/';
+            normalizedDetail = false;
+            showHiddenFiles = false;
+        }
+
+        return {
+            path: normalizedPath,
+            scope: normalizedScope,
+            detail: normalizedDetail
+        };
+    }
+
+    function replaceCurrentHistoryState(detail) {
+        history.replaceState(
+            { path: currentPath, scope: currentScope, detail: !!detail },
+            '',
+            buildHistoryHash(currentPath, currentScope, detail)
+        );
+    }
+
     // ===== Navigation =====
     // Internal navigation: sets state and loads files WITHOUT pushing history
-    function _navigateInternal(path) {
+    function _navigateInternal(path, scope) {
         path = path || '/';
+        scope = scope || currentScope || defaultScope || 'storage';
         cancelPendingLongPress();
-        if (currentPath !== path) {
+        if (currentPath !== path || currentScope !== scope) {
             selectionMode = false;
             selectedPaths = [];
             updateSelectionUI();
         }
         closeUploadZone();
+        currentScope = scope;
         currentPath = path;
         currentFilter = '';
         document.getElementById('searchInput').value = '';
+        ensureNavigationState();
+        updateNavigationContextUI();
         updateParentNav();
         loadFiles();
     }
 
     // Public navigate: updates state and pushes a history entry
-    window.navigate = function(path) {
+    window.navigate = function(path, scope) {
         path = path || '/';
-        _navigateInternal(path);
-        // Only push if the hash actually changed (decode to handle %20 etc.)
-        var currentHash;
-        try { currentHash = decodeURIComponent(window.location.hash); } catch(e) { currentHash = window.location.hash; }
-        if (currentHash !== '#' + path) {
-            history.pushState({path: path}, '', '#' + encodeURI(path));
+        scope = scope || currentScope || defaultScope || 'storage';
+        _navigateInternal(path, scope);
+        var nextHash = buildHistoryHash(path, scope, false);
+        if (window.location.hash !== nextHash) {
+            history.pushState({ path: path, scope: scope }, '', nextHash);
         }
     };
 
@@ -2104,11 +2927,20 @@ html, body {
         try {
             var params = new URLSearchParams({
                 path: currentPath,
+                scope: currentScope,
                 sort: currentSort,
                 order: currentOrder,
                 filter: currentFilter
             });
+            if (showHiddenFiles && canShowHidden) {
+                params.set('hidden', '1');
+            }
             var data = await api('GET', '/api/files?' + params);
+            if (data && typeof data.path === 'string') {
+                currentPath = data.path;
+            }
+            updateNavigationContextFromResponse(data);
+            updateParentNav();
             renderBreadcrumbs(data.breadcrumbs);
             renderFiles(data.entries);
         } catch (err) {
@@ -2132,6 +2964,30 @@ html, body {
         navigate(getParentPath(currentPath));
     };
 
+    window.onScopeChange = function() {
+        var scopeSelect = document.getElementById('scopeSelect');
+        if (!scopeSelect) return;
+        var nextScope = scopeSelect.value || defaultScope || 'storage';
+        if (nextScope === currentScope) return;
+        if (currentDetailEntry) {
+            _hideDetailInternal();
+        }
+        showHiddenFiles = false;
+        navigate('/', nextScope);
+    };
+
+    window.toggleHiddenFiles = function() {
+        if (!canShowHidden) return;
+        showHiddenFiles = !showHiddenFiles;
+        updateNavigationContextUI();
+        loadFiles();
+    };
+
+    window.toggleViewMode = function() {
+        viewMode = getNextViewMode(viewMode);
+        updateViewModeUI();
+    };
+
     function renderBreadcrumbs(crumbs) {
         var el = document.getElementById('breadcrumbs');
         if (!crumbs || !crumbs.length) { el.innerHTML = ''; return; }
@@ -2140,10 +2996,17 @@ html, body {
             if (i > 0) html += '<span class="breadcrumb-sep">/</span>';
             var isLast = i === crumbs.length - 1;
             var displayName = crumbs[i].name;
-            if (displayName === "Home") displayName = t('home');
-            html += '<span class="breadcrumb-item' + (isLast ? ' active' : '') + '"' +
-                     (isLast ? '' : ' onclick="navigate(\'' + escapeAttr(crumbs[i].path) + '\')"') +
-                     '>' + escapeHtml(displayName) + '</span>';
+            var classes = 'breadcrumb-item' + (isLast ? ' active' : '');
+            var attrs = isLast ? '' : ' onclick="navigate(\'' + escapeAttr(crumbs[i].path) + '\')"';
+            if (displayName === "Home") {
+                classes += ' breadcrumb-home';
+                attrs += ' title="' + escapeHtml(t('home')) + '" aria-label="' + escapeHtml(t('home')) + '"';
+                html += '<span class="' + classes + '"' + attrs + '>' +
+                    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5L12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5"/><path d="M10 20v-6h4v6"/></svg>' +
+                    '</span>';
+                continue;
+            }
+            html += '<span class="' + classes + '"' + attrs + '>' + escapeHtml(displayName) + '</span>';
         }
         el.innerHTML = html;
     }
@@ -2252,6 +3115,7 @@ html, body {
             list.innerHTML = '<div class="empty-state">' + icons.empty +
                 '<div class="empty-state-text">' + escapeHtml(t('empty_folder')) + '</div>' +
                 '<div class="empty-state-sub">' + escapeHtml(t('empty_folder_sub')) + '</div></div>';
+            updateViewModeUI();
             return;
         }
 
@@ -2267,6 +3131,7 @@ html, body {
             var typeLabel = entry.is_dir ? t('folder_label') : ext;
             var isSelected = selectedPaths.indexOf(entry.path) !== -1;
             var itemClass = 'file-item ' + (entry.is_dir ? 'is-dir' : 'is-file');
+            if (entry.name && entry.name.charAt(0) === '.') itemClass += ' is-hidden';
             if (selectionMode) itemClass += ' selection-mode';
             if (isSelected) itemClass += ' selected';
 
@@ -2305,6 +3170,7 @@ html, body {
             html += '</div>';
         }
         list.innerHTML = html;
+        updateViewModeUI();
     }
 
     window.onFileClick = function(event, isDir, path) {
@@ -2327,7 +3193,7 @@ html, body {
     // ===== File Operations =====
     window.downloadFile = function(path) {
         var a = document.createElement('a');
-        a.href = '/api/download?path=' + encodeURIComponent(path);
+        a.href = '/api/download?path=' + encodeURIComponent(path) + '&scope=' + encodeURIComponent(currentScope);
         a.download = '';
         document.body.appendChild(a);
         a.click();
@@ -2340,7 +3206,7 @@ html, body {
             try {
                 var parentPath = path.substring(0, path.lastIndexOf('/')) || '/';
                 var newPath = parentPath + '/' + newName;
-                await api('POST', '/api/rename', { old_path: path, new_path: newPath });
+                await api('POST', '/api/rename', { old_path: path, new_path: newPath, scope: currentScope });
                 showToast(t('renamed_successfully'), 'success');
                 loadFiles();
             } catch (err) {
@@ -2393,6 +3259,7 @@ html, body {
             var entry = entries[i];
             try {
                 var body = { path: entry.path };
+                body.scope = currentScope;
                 if (entry.is_dir && !entry.is_empty) {
                     body.recursive = true;
                 }
@@ -2505,11 +3372,12 @@ html, body {
         pasteBtn.title = !hasClipboard ? t('paste') : (canUseRootActions() ? t('paste') : t('root_required_clipboard'));
     }
 
-    function setClipboard(mode, paths) {
+    function setClipboard(mode, paths, scope) {
         var nextPaths = Array.isArray(paths) ? paths.slice() : [];
         clipboardState = {
             mode: nextPaths.length ? mode : null,
-            paths: nextPaths
+            paths: nextPaths,
+            scope: nextPaths.length ? (scope || currentScope || defaultScope) : defaultScope
         };
         updateClipboardUI();
     }
@@ -2567,6 +3435,7 @@ html, body {
             folderBtn.setAttribute('aria-label', canUseRootActions() ? t('new_folder_title') : t('root_required_create_folder'));
         }
 
+        updateNavigationContextUI();
         updateClipboardUI();
         updateSelectionUI();
         if (currentEntries.length) {
@@ -2578,8 +3447,36 @@ html, body {
         closeUploadZone();
         if (currentDetailEntry) {
             _hideDetailInternal();
-            history.replaceState({path: currentPath}, '', '#' + encodeURI(currentPath));
         }
+
+        var previousScope = currentScope;
+        var previousPath = currentPath;
+
+        if (rootUnlocked) {
+            defaultScope = 'system';
+            currentPath = previousScope === 'system'
+                ? normalizeAbsolutePath(previousPath)
+                : toRootScopePath(previousPath);
+            currentScope = 'system';
+            setAvailableScopes([
+                { id: 'system', label: '/', root_path: '/' }
+            ]);
+            canShowHidden = true;
+        } else {
+            defaultScope = 'storage';
+            showHiddenFiles = false;
+            currentPath = toSafeScopePath(previousPath);
+            currentScope = 'storage';
+            setAvailableScopes([
+                { id: 'storage', label: safeRootPath, root_path: safeRootPath }
+            ]);
+            canShowHidden = false;
+        }
+
+        ensureNavigationState();
+        updateNavigationContextUI();
+        updateParentNav();
+        replaceCurrentHistoryState(false);
         await loadFiles();
     }
 
@@ -2703,6 +3600,7 @@ html, body {
                 rootPinExpectedLength = Math.max(4, Number(status.root_pin_length) || 4);
             }
             setSafeExtensions(status && status.safe_extensions);
+            updateNavigationContextFromResponse(status);
 
             if (status.root_unlocked) {
                 await api('POST', '/api/auth/lock', {});
@@ -2712,9 +3610,21 @@ html, body {
             hasRootPin = false;
             rootPinExpectedLength = 4;
             setSafeExtensions([]);
+            setAvailableScopes([]);
+            safeRootPath = '/mnt/us';
+            rootStartPath = '/mnt/us';
+            canShowHidden = false;
+            showHiddenFiles = false;
+            ensureNavigationState();
         }
 
         rootUnlocked = false;
+        if (!canUseRootActions()) {
+            showHiddenFiles = false;
+        }
+        var normalizedInit = normalizeNavigationTarget(currentPath, currentScope, false);
+        currentPath = normalizedInit.path;
+        currentScope = normalizedInit.scope;
         resetRootPinModal();
         updateAuthUI();
     }
@@ -2846,7 +3756,9 @@ html, body {
             try {
                 await api('POST', endpoint, {
                     old_path: sourcePath,
-                    new_path: destinationPath
+                    new_path: destinationPath,
+                    old_scope: operation.sourceScope,
+                    new_scope: operation.destinationScope
                 });
                 completedPaths.push(sourcePath);
             } catch (err) {
@@ -2867,12 +3779,19 @@ html, body {
         var selectBtn = document.getElementById('btnSelect');
         var selectionBar = document.getElementById('selectionBar');
         var selectionCount = document.getElementById('selectionCount');
+        var downloadBtn = document.getElementById('btnSelectionDownload');
         var copyBtn = document.getElementById('btnSelectionCopy');
         var cutBtn = document.getElementById('btnSelectionCut');
         var deleteBtn = document.getElementById('btnSelectionDelete');
         var hasSelection = selectedPaths.length > 0;
         var selectedEntries = getSelectedEntries();
         var canDeleteSelected = hasSelection && canDeleteEntriesInCurrentMode(selectedEntries);
+        var canDownloadSelected = hasSelection && selectedEntries.some(function(entry) {
+            return entry && !entry.is_dir;
+        });
+        var hasSelectedDir = selectedEntries.some(function(entry) {
+            return entry && entry.is_dir;
+        });
         var showBar = selectionMode;
 
         if (selectBtn) {
@@ -2888,6 +3807,12 @@ html, body {
             selectionBar.classList.toggle('visible', showBar);
         }
 
+        if (downloadBtn) {
+            downloadBtn.disabled = !canDownloadSelected;
+            downloadBtn.title = hasSelectedDir && !canDownloadSelected
+                ? t('folder_download_unavailable')
+                : t('download');
+        }
         if (copyBtn) {
             copyBtn.hidden = !canUseRootActions();
             copyBtn.disabled = !hasSelection || !canUseRootActions();
@@ -2950,7 +3875,7 @@ html, body {
             showToast(t('root_required_clipboard'), 'error');
             return;
         }
-        setClipboard('copy', selectedPaths);
+        setClipboard('copy', selectedPaths, currentScope);
         showToast(t('clipboard_copy_ready').replace('{count}', selectedPaths.length), 'success');
         window.cancelSelection();
     };
@@ -2961,9 +3886,32 @@ html, body {
             showToast(t('root_required_clipboard'), 'error');
             return;
         }
-        setClipboard('cut', selectedPaths);
+        setClipboard('cut', selectedPaths, currentScope);
         showToast(t('clipboard_cut_ready').replace('{count}', selectedPaths.length), 'success');
         window.cancelSelection();
+    };
+
+    window.downloadSelectedItems = function() {
+        if (!selectedPaths.length) return;
+        var entries = getSelectedEntries();
+        if (!entries.length) return;
+
+        var downloadableEntries = entries.filter(function(entry) {
+            return entry && !entry.is_dir;
+        });
+
+        if (!downloadableEntries.length) {
+            showToast(t('folder_download_unavailable'), 'error');
+            return;
+        }
+
+        for (var i = 0; i < downloadableEntries.length; i++) {
+            downloadFile(downloadableEntries[i].path);
+        }
+
+        if (downloadableEntries.length !== entries.length) {
+            showToast(t('folder_download_unavailable'), 'error');
+        }
     };
 
     window.pasteClipboardItems = async function() {
@@ -2975,6 +3923,8 @@ html, body {
         var operation = {
             mode: clipboardState.mode,
             paths: clipboardState.paths.slice(),
+            sourceScope: clipboardState.scope || defaultScope,
+            destinationScope: currentScope,
             destination: currentPath
         };
 
@@ -2984,7 +3934,7 @@ html, body {
             if (result.failures.length > 0) {
                 setClipboard('cut', result.failures.map(function(item) {
                     return item.path;
-                }));
+                }), operation.sourceScope);
             } else {
                 clearClipboard();
             }
@@ -3062,6 +4012,7 @@ html, body {
             imagePreviewEl.innerHTML = '<div class="cover-spinner"></div>';
             var previewImg = document.createElement('img');
             previewImg.src = '/api/download?path=' + encodeURIComponent(path) + '&preview=1';
+            previewImg.src += '&scope=' + encodeURIComponent(currentScope);
             previewImg.alt = t('image_preview');
             previewImg.onload = function() {
                 imagePreviewEl.innerHTML = '';
@@ -3102,7 +4053,7 @@ html, body {
         // Build action buttons
         var actHtml = '';
         actHtml += '<button class="btn btn-primary" onclick="detailDownload()">' + icons.download + '<span>' + escapeHtml(t('download')) + '</span></button>';
-        actHtml += '<button class="btn btn-secondary" onclick="detailRename()">' + icons.rename + '<span>' + escapeHtml(t('rename')) + '</span></button>';
+        actHtml += '<button class="btn btn-secondary" onclick="detailEdit()">' + icons.rename + '<span>' + escapeHtml(t('edit')) + '</span></button>';
         if (canUseRootActions()) {
             actHtml += '<button class="btn btn-danger" onclick="detailDelete()">' + icons.trash + '<span>' + escapeHtml(t('delete_label')) + '</span></button>';
         }
@@ -3114,7 +4065,7 @@ html, body {
             coverEl.style.display = 'none';
         } else {
             // Fetch metadata asynchronously for non-image files
-            fetch('/api/metadata?path=' + encodeURIComponent(path))
+            fetch('/api/metadata?path=' + encodeURIComponent(path) + '&scope=' + encodeURIComponent(currentScope))
                 .then(function(res) { return res.json(); })
                 .then(function(meta) {
                     if (!currentDetailEntry || currentDetailEntry.path !== path) return;
@@ -3133,7 +4084,7 @@ html, body {
                     // Handle cover image
                     if (meta.has_cover) {
                         var img = document.createElement('img');
-                        img.src = '/api/cover?path=' + encodeURIComponent(path);
+                        img.src = '/api/cover?path=' + encodeURIComponent(path) + '&scope=' + encodeURIComponent(currentScope);
                         img.alt = t('book_cover');
                         img.onerror = function() {
                             coverEl.innerHTML = buildCoverPlaceholder(typeClass);
@@ -3151,14 +4102,120 @@ html, body {
         }
     }
 
+    // ===== Metadata Edit Modal =====
+    var metadataEditPath = null;
+    var metadataEditScope = null;
+
+    window.openMetadataEditor = function() {
+        if (!currentDetailEntry) return;
+        if (!canUseRootActions()) {
+            showToast(t('metadata_root_required'), 'error');
+            return;
+        }
+        var path = currentDetailEntry.path;
+        metadataEditPath = path;
+        metadataEditScope = currentScope;
+
+        // Update labels
+        document.getElementById('metadataModalTitle').textContent = t('edit_metadata');
+        document.getElementById('metadataModalSubtitle').textContent = t('metadata_epub_only');
+        document.getElementById('metaLabelTitle').textContent = t('metadata_title_label');
+        document.getElementById('metaLabelAuthor').textContent = t('metadata_author_label');
+        document.getElementById('metaLabelPublisher').textContent = t('metadata_publisher_label');
+        document.getElementById('metaLabelDescription').textContent = t('metadata_description_label');
+        document.getElementById('metaCancelBtn').textContent = t('cancel');
+        document.getElementById('metaSaveBtn').textContent = t('metadata_save');
+
+        // Clear fields and show spinner
+        document.getElementById('metaInputTitle').value = '';
+        document.getElementById('metaInputAuthor').value = '';
+        document.getElementById('metaInputPublisher').value = '';
+        document.getElementById('metaInputDescription').value = '';
+        document.getElementById('metaSaveBtn').disabled = true;
+
+        // Show modal
+        document.getElementById('metadataOverlay').classList.add('open');
+
+        // Fetch editable metadata
+        fetch('/api/metadata/editable?path=' + encodeURIComponent(path) + '&scope=' + encodeURIComponent(currentScope))
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (!data.editable) {
+                    showToast(t('metadata_epub_only'), 'error');
+                    hideMetadataModal();
+                    return;
+                }
+                document.getElementById('metaInputTitle').value = data.title || '';
+                document.getElementById('metaInputAuthor').value = data.author || '';
+                document.getElementById('metaInputPublisher').value = data.publisher || '';
+                document.getElementById('metaInputDescription').value = data.description || '';
+                document.getElementById('metaSaveBtn').disabled = false;
+            })
+            .catch(function() {
+                showToast(t('metadata_save_failed') + ' ' + t('network_error'), 'error');
+                hideMetadataModal();
+            });
+    };
+
+    window.closeMetadataModal = function(e) {
+        if (e && e.target && e.target.id === 'metadataOverlay') {
+            hideMetadataModal();
+        }
+    };
+
+    window.hideMetadataModal = function() {
+        document.getElementById('metadataOverlay').classList.remove('open');
+        metadataEditPath = null;
+        metadataEditScope = null;
+    };
+
+    window.saveMetadata = async function() {
+        if (!metadataEditPath) return;
+        var saveBtn = document.getElementById('metaSaveBtn');
+        saveBtn.disabled = true;
+        saveBtn.textContent = '...';
+
+        try {
+            var payload = {
+                path: metadataEditPath,
+                scope: metadataEditScope,
+                title: document.getElementById('metaInputTitle').value,
+                author: document.getElementById('metaInputAuthor').value,
+                publisher: document.getElementById('metaInputPublisher').value,
+                description: document.getElementById('metaInputDescription').value
+            };
+
+            var res = await fetch('/api/metadata/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            var result = await res.json();
+
+            if (res.ok && result.success) {
+                showToast(t('metadata_saved'), 'success');
+                hideMetadataModal();
+                // Refresh the detail view to show updated metadata
+                if (currentDetailEntry) {
+                    _showDetailInternal(currentDetailEntry.path);
+                }
+            } else {
+                showToast(t('metadata_save_failed') + ' ' + (result.error || t('server_error')), 'error');
+            }
+        } catch (e) {
+            showToast(t('metadata_save_failed') + ' ' + t('network_error'), 'error');
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.textContent = t('metadata_save');
+        }
+    };
+
     // Public showFileDetail: shows detail and pushes a history entry
     window.showFileDetail = function(path) {
         _showDetailInternal(path);
-        var currentHash;
-        try { currentHash = decodeURIComponent(window.location.hash); } catch(e) { currentHash = window.location.hash; }
-        var hashTarget = '#' + path + '!detail';
-        if (currentHash !== hashTarget) {
-            history.pushState({path: path, detail: true}, '', '#' + encodeURI(path) + '!detail');
+        var hashTarget = buildHistoryHash(path, currentScope, true);
+        if (window.location.hash !== hashTarget) {
+            history.pushState({ path: path, scope: currentScope, detail: true }, '', hashTarget);
         }
     };
 
@@ -3193,6 +4250,18 @@ html, body {
             showToast(t('downloading') + ' ' + currentDetailEntry.name, 'info');
             downloadFile(currentDetailEntry.path);
         }
+    };
+
+    window.detailEdit = function() {
+        if (!currentDetailEntry) return;
+        var fileExt = (currentDetailEntry.name.split('.').pop() || '').toLowerCase();
+
+        if (fileExt === 'epub' && canUseRootActions()) {
+            openMetadataEditor();
+            return;
+        }
+
+        detailRename();
     };
 
     window.detailRename = function() {
@@ -3251,11 +4320,11 @@ html, body {
             try {
                 var parentPath = entry.path.substring(0, entry.path.lastIndexOf('/')) || '/';
                 var newPath = parentPath + '/' + finalName;
-                await api('POST', '/api/rename', { old_path: entry.path, new_path: newPath });
+                await api('POST', '/api/rename', { old_path: entry.path, new_path: newPath, scope: currentScope });
                 showToast(t('renamed_successfully'), 'success');
                 restoreModalInput();
                 _hideDetailInternal();
-                history.replaceState({path: currentPath}, '', '#' + encodeURI(currentPath));
+                replaceCurrentHistoryState(false);
                 loadFiles();
             } catch (err) {
                 showToast(t('rename_failed') + ' ' + err.message, 'error');
@@ -3289,13 +4358,14 @@ html, body {
             async function() {
                 try {
                     var body = { path: entry.path };
+                    body.scope = currentScope;
                     if (showSdrCheckbox) {
                         body.delete_sdr = document.getElementById('confirmSdrCheckbox').checked;
                     }
                     await api('POST', '/api/delete', body);
                     showToast(t('deleted_successfully'), 'success');
                     _hideDetailInternal();
-                    history.replaceState({path: currentPath}, '', '#' + encodeURI(currentPath));
+                    replaceCurrentHistoryState(false);
                     loadFiles();
                 } catch (err) {
                     showToast(t('delete_failed') + ' ' + err.message, 'error');
@@ -3314,7 +4384,7 @@ html, body {
             if (!name) return;
             try {
                 var newPath = (currentPath === '/' ? '' : currentPath) + '/' + name;
-                await api('POST', '/api/mkdir', { path: newPath });
+                await api('POST', '/api/mkdir', { path: newPath, scope: currentScope });
                 showToast(t('folder_created'), 'success');
                 loadFiles();
             } catch (err) {
@@ -3335,31 +4405,45 @@ html, body {
         document.getElementById('dropzone').classList.toggle('visible', uploadZoneVisible);
     };
 
-    window.handleFileSelect = function(files) {
+    function processSelectedUploads(files, preserveRelativePath) {
         if (!files || files.length === 0) return;
-        var filesToUpload = [];
         for (var fi = 0; fi < files.length; fi++) {
             var file = files[fi];
+            var relativePath = preserveRelativePath ? (file.webkitRelativePath || '') : '';
+            var displayName = relativePath || file.name;
             if (!canUseRootActions() && !isSafeUploadFilename(file.name)) {
-                showToast(file.name + ': ' + t('root_required_upload'), 'error');
+                showToast(displayName + ': ' + t('root_required_upload'), 'error');
                 continue;
             }
-            filesToUpload.push(file);
+            uploadFile({
+                file: file,
+                relativePath: relativePath,
+                displayName: displayName,
+            });
         }
-        for (var ui = 0; ui < filesToUpload.length; ui++) {
-            uploadFile(filesToUpload[ui]);
-        }
+    }
+
+    window.handleFileSelect = function(files) {
+        processSelectedUploads(files, false);
         document.getElementById('fileInput').value = '';
     };
 
-    async function uploadFile(file) {
+    window.handleFolderSelect = function(files) {
+        processSelectedUploads(files, true);
+        document.getElementById('folderInput').value = '';
+    };
+
+    async function uploadFile(uploadEntry) {
+        var file = uploadEntry.file || uploadEntry;
+        var relativePath = uploadEntry.relativePath || '';
+        var displayName = uploadEntry.displayName || relativePath || file.name;
         var container = document.getElementById('uploadProgress');
         var id = 'upload-' + Date.now() + '-' + Math.random().toString(36).substring(2, 8);
 
         var item = document.createElement('div');
         item.className = 'upload-item';
         item.id = id;
-        item.innerHTML = '<span class="upload-item-name">' + escapeHtml(file.name) + '</span>' +
+        item.innerHTML = '<span class="upload-item-name">' + escapeHtml(displayName) + '</span>' +
             '<div class="progress-bar"><div class="progress-bar-fill" id="' + id + '-bar"></div></div>' +
             '<span class="upload-item-status" id="' + id + '-status">0%</span>';
         container.prepend(item);
@@ -3367,9 +4451,12 @@ html, body {
         try {
             var formData = new FormData();
             formData.append('file', file);
+            if (relativePath) {
+                formData.append('relative_path', relativePath);
+            }
 
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/api/upload?path=' + encodeURIComponent(currentPath));
+            xhr.open('POST', '/api/upload?path=' + encodeURIComponent(currentPath) + '&scope=' + encodeURIComponent(currentScope));
 
             xhr.upload.onprogress = function(e) {
                 if (e.lengthComputable) {
@@ -3402,7 +4489,7 @@ html, body {
             var status = document.getElementById(id + '-status');
             if (bar) { bar.style.width = '100%'; bar.classList.add('complete'); }
             if (status) { status.textContent = t('done'); status.classList.add('success'); }
-            showToast(file.name + ' ' + t('uploaded'), 'success');
+            showToast(displayName + ' ' + t('uploaded'), 'success');
             closeUploadZone();
             loadFiles();
 
@@ -3416,7 +4503,7 @@ html, body {
             var status2 = document.getElementById(id + '-status');
             if (bar2) { bar2.style.width = '100%'; bar2.classList.add('error'); }
             if (status2) { status2.textContent = t('failed'); status2.classList.add('error'); }
-            showToast(t('upload_failed') + ' ' + err.message, 'error');
+            showToast(t('upload_failed') + ' ' + displayName + ': ' + err.message, 'error');
         }
     }
 
@@ -3581,47 +4668,73 @@ html, body {
     }
 
     // ===== History / popstate =====
-    // Parse the current hash and return {path, detail} without modifying state
+    // Parse the current hash and return {path, scope, detail} without modifying state
     function _parseHash() {
         var hash = window.location.hash;
         if (!hash || hash === '#' || hash === '#/') {
-            return {path: '/', detail: false};
+            return { path: '/', scope: currentScope || defaultScope || 'storage', detail: false };
         }
-        // Strip leading '#' and decode URL-encoded characters (spaces, parens, etc.)
-        var raw;
-        try { raw = decodeURIComponent(hash.substring(1)); } catch(e) { raw = hash.substring(1); }
+
+        var raw = hash.substring(1);
+        if (raw.indexOf('path=') !== -1 || raw.indexOf('scope=') !== -1 || raw.indexOf('detail=') !== -1) {
+            var params = new URLSearchParams(raw);
+            return {
+                path: params.get('path') || '/',
+                scope: params.get('scope') || currentScope || defaultScope || 'storage',
+                detail: params.get('detail') === '1' || params.get('detail') === 'true'
+            };
+        }
+
+        try {
+            raw = decodeURIComponent(raw);
+        } catch (e) {}
         if (raw.endsWith('!detail')) {
-            return {path: raw.substring(0, raw.length - 7), detail: true};
+            return {
+                path: raw.substring(0, raw.length - 7) || '/',
+                scope: currentScope || defaultScope || 'storage',
+                detail: true
+            };
         }
-        return {path: raw || '/', detail: false};
+        return {
+            path: raw || '/',
+            scope: currentScope || defaultScope || 'storage',
+            detail: false
+        };
     }
 
-    window.addEventListener('popstate', function() {
-        var state = _parseHash();
+    window.addEventListener('popstate', function(event) {
+        var parsedState = event.state || _parseHash();
+        var state = normalizeNavigationTarget(parsedState.path, parsedState.scope, parsedState.detail);
         if (state.detail) {
             // If navigating to a detail view and we're already showing it, skip
-            if (currentDetailEntry && currentDetailEntry.path === state.path) return;
+            if (currentDetailEntry && currentDetailEntry.path === state.path && currentScope === state.scope) return;
             // We might need to navigate to the parent directory first to load entries
-            var parentPath = state.path.substring(0, state.path.lastIndexOf('/')) || '/';
-            if (currentPath !== parentPath) {
+            var parentPath = getParentPath(state.path);
+            if (currentPath !== parentPath || currentScope !== state.scope) {
                 // Need to load the directory first, then show detail once loaded
                 currentPath = parentPath;
+                currentScope = state.scope;
                 currentFilter = '';
                 document.getElementById('searchInput').value = '';
+                showHiddenFiles = false;
+                ensureNavigationState();
                 updateParentNav();
+                updateNavigationContextUI();
                 var params = new URLSearchParams({
                     path: currentPath,
+                    scope: currentScope,
                     sort: currentSort,
                     order: currentOrder,
                     filter: currentFilter
                 });
                 api('GET', '/api/files?' + params).then(function(data) {
+                    updateNavigationContextFromResponse(data);
                     renderBreadcrumbs(data.breadcrumbs);
                     renderFiles(data.entries);
                     _showDetailInternal(state.path);
                 }).catch(function() {
                     // If loading fails, just navigate to the directory
-                    _navigateInternal(parentPath);
+                    _navigateInternal(parentPath, state.scope);
                 });
             } else {
                 _showDetailInternal(state.path);
@@ -3631,29 +4744,33 @@ html, body {
             if (currentDetailEntry) {
                 _hideDetailInternal();
             }
-            _navigateInternal(state.path);
+            _navigateInternal(state.path, state.scope);
         }
     });
 
     // ===== Init =====
     // Read hash to determine initial state before loading
     var initState = _parseHash();
+    currentScope = initState.scope || currentScope;
     if (initState.detail) {
         // For detail view, start at the parent directory
-        var initParent = initState.path.substring(0, initState.path.lastIndexOf('/')) || '/';
+        var initParent = getParentPath(initState.path);
         currentPath = initParent;
     } else {
         currentPath = initState.path;
     }
     // Set the initial history entry (replaceState so we don't add an extra entry)
     history.replaceState(
-        initState.detail ? {path: initState.path, detail: true} : {path: currentPath},
+        initState.detail
+            ? { path: initState.path, scope: currentScope, detail: true }
+            : { path: currentPath, scope: currentScope, detail: false },
         '',
-        window.location.hash || '#/'
+        window.location.hash || buildHistoryHash(currentPath, currentScope, initState.detail)
     );
 
     // Fetch language setting from server, then apply translations and load files
     var _initDetailPath = initState.detail ? initState.path : null;
+    var _initDetailScope = initState.scope || currentScope;
     fetch('/api/lang')
         .then(function(res) { return res.json(); })
         .then(function(data) {
@@ -3669,11 +4786,20 @@ html, body {
             return initializeAuthState();
         })
         .then(function() {
+            if (_initDetailPath && currentScope === _initDetailScope) {
+                history.replaceState(
+                    { path: _initDetailPath, scope: currentScope, detail: true },
+                    '',
+                    buildHistoryHash(_initDetailPath, currentScope, true)
+                );
+            } else {
+                replaceCurrentHistoryState(false);
+            }
             return loadFiles();
         })
         .then(function() {
             // After files are loaded, open detail view if hash indicated one
-            if (_initDetailPath) {
+            if (_initDetailPath && currentScope === _initDetailScope) {
                 _showDetailInternal(_initDetailPath);
             }
         });

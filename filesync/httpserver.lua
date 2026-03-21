@@ -3,7 +3,7 @@ local socket = require("socket")
 local UIManager = require("ui/uimanager")
 
 local HttpServer = {
-    port = 8080,
+    port = 80,
     root_dir = "/mnt/us",
     _server_socket = nil,
     _running = false,
@@ -38,7 +38,8 @@ function HttpServer:start()
 
     local server, err = socket.bind("*", self.port)
     if not server then
-        error("Could not bind to port " .. self.port .. ": " .. tostring(err))
+        error("Could not bind to port " .. self.port .. ": " .. tostring(err)
+              .. (self.port < 1024 and " (ports below 1024 may require root privileges)" or ""))
     end
     server:settimeout(0) -- Non-blocking
     self._server_socket = server
@@ -134,6 +135,48 @@ function HttpServer:_registerUnlockFailure()
         return true, self:_getUnlockRetryAfter()
     end
     return false, 0
+end
+
+function HttpServer:_getSessionSafeMode(has_root_pin, root_unlocked)
+    return not (has_root_pin and root_unlocked)
+end
+
+function HttpServer:_parseHiddenFlag(value)
+    return value == "1" or value == "true"
+end
+
+function HttpServer:_getNavigationContext(session_safe_mode)
+    local FileOps = self._fileops
+    local safe_scope = FileOps:getScopeInfo("storage", false)
+    local root_scope = FileOps:getScopeInfo("system", true) or safe_scope
+
+    if session_safe_mode then
+        return {
+            default_scope = safe_scope.id,
+            available_scopes = { safe_scope },
+            can_show_hidden = false,
+            safe_root_path = safe_scope.root_path,
+            root_start_path = safe_scope.root_path,
+        }
+    end
+
+    return {
+        default_scope = root_scope.id,
+        available_scopes = { root_scope },
+        can_show_hidden = root_scope.id == "system",
+        safe_root_path = safe_scope.root_path,
+        root_start_path = safe_scope.root_path,
+    }
+end
+
+function HttpServer:_buildFileOptions(scope_id, session_safe_mode, include_hidden)
+    local navigation = self:_getNavigationContext(session_safe_mode)
+    return {
+        scope = scope_id or navigation.default_scope,
+        allow_root_scopes = not session_safe_mode,
+        safe_mode = session_safe_mode,
+        include_hidden = (not session_safe_mode) and include_hidden == true,
+    }
 end
 
 function HttpServer:_handleClient(client)
@@ -242,7 +285,7 @@ function HttpServer:_route(client, method, path, query, headers, body)
         local FileSyncManager = require("filesync/filesyncmanager")
         local has_root_pin = FileSyncManager:hasRootPin()
         local root_unlocked = self:isRootUnlocked()
-        local session_safe_mode = not (has_root_pin and root_unlocked)
+        local session_safe_mode = self:_getSessionSafeMode(has_root_pin, root_unlocked)
 
         -- Language endpoint for web UI i18n
         if method == "GET" and path == "/api/lang" then
@@ -252,11 +295,17 @@ function HttpServer:_route(client, method, path, query, headers, body)
         end
 
         if method == "GET" and path == "/api/auth/status" then
+            local navigation = self:_getNavigationContext(session_safe_mode)
             self:_sendJSON(client, 200, {
                 has_root_pin = has_root_pin,
                 root_unlocked = root_unlocked,
                 root_pin_length = FileSyncManager:getRootPinLength(),
                 safe_extensions = FileOps:getSafeExtensions(),
+                default_scope = navigation.default_scope,
+                available_scopes = navigation.available_scopes,
+                can_show_hidden = navigation.can_show_hidden,
+                safe_root_path = navigation.safe_root_path,
+                root_start_path = navigation.root_start_path,
             })
             return
         end
@@ -320,6 +369,7 @@ function HttpServer:_route(client, method, path, query, headers, body)
 
         if method == "GET" and path == "/api/metadata" then
             local file_path = query.path
+            local file_options = self:_buildFileOptions(query.scope, session_safe_mode, false)
             if not file_path then
                 self:_sendJSON(client, 400, {error = "Missing path parameter"})
                 return
@@ -332,20 +382,57 @@ function HttpServer:_route(client, method, path, query, headers, body)
                     return
                 end
             end
-            local result, err_msg = FileOps:getMetadata(file_path)
+            local result, err_msg = FileOps:getMetadata(file_path, file_options)
             if result then
                 self:_sendJSON(client, 200, result)
             else
                 self:_sendJSON(client, 400, {error = err_msg or "Cannot get metadata"})
             end
 
-        elseif method == "GET" and path == "/api/cover" then
+        elseif method == "GET" and path == "/api/metadata/editable" then
             local file_path = query.path
+            local file_options = self:_buildFileOptions(query.scope, session_safe_mode, false)
             if not file_path then
                 self:_sendJSON(client, 400, {error = "Missing path parameter"})
                 return
             end
-            local ok, err_msg = FileOps:getBookCover(client, file_path, self)
+            local result, err_msg = FileOps:readEpubEditableMetadata(file_path, file_options)
+            if result then
+                self:_sendJSON(client, 200, result)
+            else
+                self:_sendJSON(client, 400, {error = err_msg or "Cannot read editable metadata"})
+            end
+
+        elseif method == "POST" and path == "/api/metadata/update" then
+            local data = self:_parseJSON(body)
+            if not root_unlocked then
+                self:_sendJSON(client, 403, {error = "Root mode required to edit metadata", code = "root_required_metadata"})
+            elseif not data or not data.path then
+                self:_sendJSON(client, 400, {error = "Missing path"})
+            else
+                local file_options = self:_buildFileOptions(data.scope, session_safe_mode, false)
+                file_options.allow_root_scopes = not session_safe_mode
+                local ok, err_msg = FileOps:updateEpubMetadata(data.path, {
+                    title = data.title,
+                    author = data.author,
+                    publisher = data.publisher,
+                    description = data.description,
+                }, file_options)
+                if ok then
+                    self:_sendJSON(client, 200, {success = true})
+                else
+                    self:_sendJSON(client, 400, {error = err_msg or "Cannot update metadata"})
+                end
+            end
+
+        elseif method == "GET" and path == "/api/cover" then
+            local file_path = query.path
+            local file_options = self:_buildFileOptions(query.scope, session_safe_mode, false)
+            if not file_path then
+                self:_sendJSON(client, 400, {error = "Missing path parameter"})
+                return
+            end
+            local ok, err_msg = FileOps:getBookCover(client, file_path, self, file_options)
             if not ok then
                 self:_sendJSON(client, 404, {error = err_msg or "Cover not found"})
             end
@@ -355,8 +442,16 @@ function HttpServer:_route(client, method, path, query, headers, body)
             local sort_by = query.sort or "name"
             local sort_order = query.order or "asc"
             local filter = query.filter or ""
-            local result, err_msg = FileOps:listDirectory(dir, sort_by, sort_order, filter, session_safe_mode)
+            local file_options = self:_buildFileOptions(query.scope, session_safe_mode, self:_parseHiddenFlag(query.hidden))
+            local navigation = self:_getNavigationContext(session_safe_mode)
+            local result, err_msg = FileOps:listDirectory(dir, sort_by, sort_order, filter, file_options)
             if result then
+                result.available_scopes = navigation.available_scopes
+                result.default_scope = navigation.default_scope
+                result.can_show_hidden = navigation.can_show_hidden
+                result.include_hidden = file_options.include_hidden
+                result.safe_root_path = navigation.safe_root_path
+                result.root_start_path = navigation.root_start_path
                 self:_sendJSON(client, 200, result)
             else
                 self:_sendJSON(client, 400, {error = err_msg or "Cannot list directory"})
@@ -364,6 +459,7 @@ function HttpServer:_route(client, method, path, query, headers, body)
 
         elseif method == "GET" and path == "/api/download" then
             local file_path = query.path
+            local file_options = self:_buildFileOptions(query.scope, session_safe_mode, false)
             if not file_path then
                 self:_sendJSON(client, 400, {error = "Missing path parameter"})
                 return
@@ -377,20 +473,19 @@ function HttpServer:_route(client, method, path, query, headers, body)
                 end
             end
             local inline = query.preview == "1"
-            local ok, err_msg = FileOps:downloadFile(client, file_path, self, inline)
+            local ok, err_msg = FileOps:downloadFile(client, file_path, self, inline, file_options)
             if not ok then
                 self:_sendJSON(client, 400, {error = err_msg or "Cannot download file"})
             end
 
         elseif method == "POST" and path == "/api/upload" then
             local dir = query.path or "/"
+            local file_options = self:_buildFileOptions(query.scope, session_safe_mode, false)
             local content_type = headers["content-type"] or ""
             if content_type:match("multipart/form%-data") then
                 local boundary = content_type:match("boundary=([^\r\n;]+)")
                 if boundary then
-                    local ok, err_msg = FileOps:handleUpload(dir, body, boundary, {
-                        safe_mode = session_safe_mode,
-                    })
+                    local ok, err_msg = FileOps:handleUpload(dir, body, boundary, file_options)
                     if ok then
                         self:_sendJSON(client, 200, {success = true, message = "Upload complete"})
                     elseif err_msg == "Root mode required for this file type" then
@@ -413,7 +508,7 @@ function HttpServer:_route(client, method, path, query, headers, body)
             if session_safe_mode then
                 self:_sendJSON(client, 403, {error = "Root mode required to create folders", code = "root_required_create_folder"})
             elseif data and data.path then
-                local ok, err_msg = FileOps:createDirectory(data.path)
+                local ok, err_msg = FileOps:createDirectory(data.path, self:_buildFileOptions(data.scope, session_safe_mode, false))
                 if ok then
                     self:_sendJSON(client, 200, {success = true})
                 else
@@ -426,7 +521,7 @@ function HttpServer:_route(client, method, path, query, headers, body)
         elseif method == "POST" and path == "/api/rename" then
             local data = self:_parseJSON(body)
             if data and data.old_path and data.new_path then
-                local ok, err_msg = FileOps:rename(data.old_path, data.new_path)
+                local ok, err_msg = FileOps:rename(data.old_path, data.new_path, self:_buildFileOptions(data.scope, session_safe_mode, false))
                 if ok then
                     self:_sendJSON(client, 200, {success = true})
                 else
@@ -441,7 +536,11 @@ function HttpServer:_route(client, method, path, query, headers, body)
             if not root_unlocked then
                 self:_sendJSON(client, 403, {error = "Root mode required", code = "root_required"})
             elseif data and data.old_path and data.new_path then
-                local ok, err_msg = FileOps:move(data.old_path, data.new_path)
+                local ok, err_msg = FileOps:move(data.old_path, data.new_path, {
+                    old_scope = data.old_scope,
+                    new_scope = data.new_scope,
+                    allow_root_scopes = true,
+                })
                 if ok then
                     self:_sendJSON(client, 200, {success = true})
                 else
@@ -456,7 +555,11 @@ function HttpServer:_route(client, method, path, query, headers, body)
             if not root_unlocked then
                 self:_sendJSON(client, 403, {error = "Root mode required", code = "root_required"})
             elseif data and data.old_path and data.new_path then
-                local ok, err_msg = FileOps:copyFile(data.old_path, data.new_path)
+                local ok, err_msg = FileOps:copyFile(data.old_path, data.new_path, {
+                    old_scope = data.old_scope,
+                    new_scope = data.new_scope,
+                    allow_root_scopes = true,
+                })
                 if ok then
                     self:_sendJSON(client, 200, {success = true})
                 else
@@ -477,6 +580,8 @@ function HttpServer:_route(client, method, path, query, headers, body)
                     safe_mode = session_safe_mode,
                     delete_sdr = data.delete_sdr == true,
                     recursive = data.recursive == true,
+                    scope = data.scope,
+                    allow_root_scopes = not session_safe_mode,
                 }
                 local ok, err_msg = FileOps:delete(data.path, delete_options)
                 if ok then

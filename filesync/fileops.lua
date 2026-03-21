@@ -32,19 +32,135 @@ local MOBI_EXTENSIONS = {
     mobi = true, azw = true, azw3 = true, prc = true, pdb = true,
 }
 
+local function normalize_root_path(path)
+    local normalized = tostring(path or "/")
+    normalized = normalized:gsub("//+", "/"):gsub("^%s+", ""):gsub("%s+$", "")
+    if normalized == "" then
+        normalized = "/"
+    end
+    if normalized ~= "/" and normalized:sub(-1) == "/" then
+        normalized = normalized:sub(1, -2)
+    end
+    if normalized:sub(1, 1) ~= "/" then
+        normalized = "/" .. normalized
+    end
+    return normalized
+end
+
+local function is_path_within_root(full_path, root_path)
+    if root_path == "/" then
+        return full_path:sub(1, 1) == "/"
+    end
+    return full_path == root_path or full_path:sub(1, #root_path + 1) == root_path .. "/"
+end
+
 local FileOps = {
     _root_dir = "/mnt/us",
+    _default_scope_id = "storage",
+    _scope_configs = nil,
 }
 
 function FileOps:setRootDir(dir)
-    self._root_dir = dir
+    self._root_dir = normalize_root_path(dir)
+    self:_rebuildScopeConfigs()
+end
+
+function FileOps:getRootDir()
+    return self._root_dir
+end
+
+function FileOps:_rebuildScopeConfigs()
+    local storage_root = normalize_root_path(self._root_dir)
+    self._scope_configs = {
+        storage = {
+            id = "storage",
+            label = storage_root,
+            root_path = storage_root,
+            root_only = false,
+        },
+    }
+
+    if storage_root ~= "/" then
+        self._scope_configs.system = {
+            id = "system",
+            label = "/",
+            root_path = "/",
+            root_only = true,
+        }
+    end
+end
+
+function FileOps:_ensureScopeConfigs()
+    if not self._scope_configs then
+        self:_rebuildScopeConfigs()
+    end
+end
+
+function FileOps:getDefaultScopeId()
+    return self._default_scope_id
+end
+
+function FileOps:getNavigationScopes(allow_root_scopes)
+    self:_ensureScopeConfigs()
+    local scopes = {}
+
+    for _, scope_id in ipairs({ self._default_scope_id, "system" }) do
+        local scope = self._scope_configs[scope_id]
+        if scope and (not scope.root_only or allow_root_scopes) then
+            table.insert(scopes, {
+                id = scope.id,
+                label = scope.label,
+                root_path = scope.root_path,
+            })
+        end
+    end
+
+    return scopes
+end
+
+function FileOps:getScopeInfo(scope_id, allow_root_scopes)
+    local scope, err = self:_getScopeConfig(scope_id, {
+        allow_root_scopes = allow_root_scopes == true,
+    })
+    if not scope then
+        return nil, err
+    end
+
+    return {
+        id = scope.id,
+        label = scope.label,
+        root_path = scope.root_path,
+    }
+end
+
+function FileOps:_getScopeConfig(scope_id, options)
+    self:_ensureScopeConfigs()
+    options = options or {}
+
+    local resolved_scope_id = scope_id or self._default_scope_id
+    local scope = self._scope_configs[resolved_scope_id]
+    if not scope then
+        return nil, "Unknown filesystem scope"
+    end
+
+    if scope.root_only and not options.allow_root_scopes then
+        return nil, "Scope not available in current mode"
+    end
+
+    return scope
 end
 
 --- Resolve and validate a path, preventing path traversal.
 --- Returns the full absolute path, or nil and an error message.
-function FileOps:_resolvePath(rel_path)
+function FileOps:_resolvePath(rel_path, options)
+    options = options or {}
     if not rel_path or rel_path == "" then
         rel_path = "/"
+    end
+
+    local scope, scope_err = self:_getScopeConfig(options.scope, options)
+    if not scope then
+        return nil, scope_err
     end
 
     -- Normalize: remove double slashes, trim whitespace
@@ -60,7 +176,7 @@ function FileOps:_resolvePath(rel_path)
         rel_path = "/" .. rel_path
     end
 
-    local full_path = self._root_dir .. rel_path
+    local full_path = scope.root_path .. rel_path
 
     -- Normalize again after combining
     full_path = full_path:gsub("//+", "/")
@@ -71,11 +187,11 @@ function FileOps:_resolvePath(rel_path)
     end
 
     -- Verify the resolved path is under root_dir
-    if full_path:sub(1, #self._root_dir) ~= self._root_dir then
+    if not is_path_within_root(full_path, scope.root_path) then
         return nil, "Access denied: path outside root directory"
     end
 
-    return full_path
+    return full_path, nil, scope
 end
 
 --- Validate a filename (no slashes, no dots-only, no null bytes)
@@ -95,10 +211,12 @@ function FileOps:_validateFilename(name)
     return true
 end
 
---- Get the relative path from root_dir
-function FileOps:_getRelativePath(full_path)
-    if full_path:sub(1, #self._root_dir) == self._root_dir then
-        local rel = full_path:sub(#self._root_dir + 1)
+--- Get the relative path from a scope root
+function FileOps:_getRelativePath(full_path, scope_id)
+    local scope = self._scope_configs and self._scope_configs[scope_id or self._default_scope_id]
+    local root_path = scope and scope.root_path or self._root_dir
+    if is_path_within_root(full_path, root_path) then
+        local rel = full_path:sub(#root_path + 1)
         if rel == "" then rel = "/" end
         return rel
     end
@@ -204,9 +322,121 @@ function FileOps:getSafeExtensions()
     return extensions
 end
 
+function FileOps:_joinRelativePaths(base_rel_path, child_rel_path)
+    local base = base_rel_path or "/"
+    local child = child_rel_path or ""
+
+    child = child:gsub("^/+", "")
+    if base == "/" or base == "" then
+        return "/" .. child
+    end
+
+    return base:gsub("/+$", "") .. "/" .. child
+end
+
+function FileOps:_normalizeUploadRelativePath(relative_path, fallback_filename)
+    local normalized = tostring(relative_path or fallback_filename or "")
+    normalized = normalized:gsub("\\", "/")
+    normalized = normalized:gsub("//+", "/")
+    normalized = normalized:gsub("^%s+", ""):gsub("%s+$", "")
+    normalized = normalized:gsub("^/+", ""):gsub("/+$", "")
+
+    if normalized == "" then
+        return nil, "Empty upload path"
+    end
+
+    if normalized:match("%.%.") then
+        return nil, "Path traversal not allowed"
+    end
+
+    local segments = {}
+    for segment in normalized:gmatch("[^/]+") do
+        local valid, valid_err = self:_validateFilename(segment)
+        if not valid then
+            return nil, valid_err
+        end
+        table.insert(segments, segment)
+    end
+
+    if #segments == 0 then
+        return nil, "Empty upload path"
+    end
+
+    if fallback_filename then
+        segments[#segments] = fallback_filename
+    end
+
+    return table.concat(segments, "/")
+end
+
+function FileOps:_collectUploadDirectories(full_dir_path, pending_dirs, scope_root)
+    scope_root = normalize_root_path(scope_root or self._root_dir)
+
+    if not full_dir_path or full_dir_path == "" or full_dir_path == scope_root then
+        return true
+    end
+
+    if not is_path_within_root(full_dir_path, scope_root) then
+        return false, "Access denied: path outside root directory"
+    end
+
+    local rel = full_dir_path:sub(#scope_root + 1):gsub("^/+", "")
+    if rel == "" then
+        return true
+    end
+
+    local current = scope_root
+    for segment in rel:gmatch("[^/]+") do
+        local valid, valid_err = self:_validateFilename(segment)
+        if not valid then
+            return false, valid_err
+        end
+
+        current = current .. "/" .. segment
+        local attr = lfs.attributes(current)
+        if attr then
+            if attr.mode ~= "directory" then
+                return false, "Cannot create directory: path component is not a directory"
+            end
+        else
+            pending_dirs[current] = true
+        end
+    end
+
+    return true
+end
+
+function FileOps:_createPendingDirectories(pending_dirs)
+    local paths = {}
+    for path in pairs(pending_dirs) do
+        table.insert(paths, path)
+    end
+
+    table.sort(paths, function(a, b)
+        return #a < #b
+    end)
+
+    for _, path in ipairs(paths) do
+        local attr = lfs.attributes(path)
+        if attr then
+            if attr.mode ~= "directory" then
+                return false, "Cannot create directory: path component is not a directory"
+            end
+        else
+            local ok, mkdir_err = lfs.mkdir(path)
+            if not ok then
+                return false, "Cannot create directory: " .. tostring(mkdir_err)
+            end
+        end
+    end
+
+    return true
+end
+
 --- List directory contents
-function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
-    local full_path, err = self:_resolvePath(rel_path)
+function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, options)
+    options = options or {}
+    local full_path, err, scope = self:_resolvePath(rel_path, options)
     if not full_path then
         return nil, err
     end
@@ -216,12 +446,13 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
         return nil, "Not a directory"
     end
 
+    local include_hidden = options.include_hidden == true and not options.safe_mode
     local entries = {}
     local ok, iter_err = pcall(function()
         for name in lfs.dir(full_path) do
             if name ~= "." and name ~= ".." then
                 -- Skip hidden files starting with .
-                if name:sub(1, 1) ~= "." then
+                if include_hidden or name:sub(1, 1) ~= "." then
                     -- Apply filter if present
                     local include = true
                     if filter and filter ~= "" then
@@ -234,14 +465,14 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
                         if entry_attr then
                             local is_dir = entry_attr.mode == "directory"
                             -- Apply safe mode filter: only dirs and whitelisted extensions
-                            if safe_mode and not is_dir and not self:isExtensionSafe(name) then
+                            if options.safe_mode and not is_dir and not self:isExtensionSafe(name) then
                                 -- skip non-whitelisted file
-                            elseif safe_mode and is_dir and name:match("%.sdr$") then
+                            elseif options.safe_mode and is_dir and name:match("%.sdr$") then
                                 -- skip .sdr metadata directories in safe mode
                             else
                                 local entry = {
                                     name = name,
-                                    path = self:_getRelativePath(entry_path),
+                                    path = self:_getRelativePath(entry_path, scope.id),
                                     is_dir = is_dir,
                                     size = entry_attr.size or 0,
                                     size_formatted = self:_formatSize(entry_attr.size or 0),
@@ -326,6 +557,9 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
     end
 
     return {
+        scope = scope.id,
+        scope_root = scope.root_path,
+        scope_label = scope.label,
         path = rel_path or "/",
         entries = entries,
         breadcrumbs = breadcrumbs,
@@ -335,8 +569,8 @@ end
 
 --- Download a file, sending it directly to the client socket
 --- When inline is true, serve with Content-Disposition: inline (for image previews)
-function FileOps:downloadFile(client, rel_path, server, inline)
-    local full_path, err = self:_resolvePath(rel_path)
+function FileOps:downloadFile(client, rel_path, server, inline, options)
+    local full_path, err = self:_resolvePath(rel_path, options)
     if not full_path then
         return false, err
     end
@@ -385,7 +619,7 @@ end
 --- Handle multipart file upload
 function FileOps:handleUpload(rel_dir, body, boundary, options)
     options = options or {}
-    local dir_path, err = self:_resolvePath(rel_dir)
+    local dir_path, err, scope = self:_resolvePath(rel_dir, options)
     if not dir_path then
         return false, err
     end
@@ -418,6 +652,7 @@ function FileOps:handleUpload(rel_dir, body, boundary, options)
         search_start = next_boundary
     end
 
+    local form_fields = {}
     local upload_entries = {}
     for _, part in ipairs(parts) do
         -- Split headers from body
@@ -425,6 +660,7 @@ function FileOps:handleUpload(rel_dir, body, boundary, options)
         if header_end then
             local headers_str = part:sub(1, header_end - 1)
             local file_data = part:sub(header_end + 4)
+            local field_name = headers_str:match('name="([^"]+)"')
 
             -- Extract filename from Content-Disposition
             local filename = headers_str:match('filename="([^"]+)"')
@@ -452,6 +688,8 @@ function FileOps:handleUpload(rel_dir, body, boundary, options)
                 else
                     logger.warn("FileSync: Invalid filename:", filename, valid_err)
                 end
+            elseif field_name and field_name ~= "" then
+                form_fields[field_name] = file_data:gsub("\r\n$", "")
             end
         end
     end
@@ -460,21 +698,60 @@ function FileOps:handleUpload(rel_dir, body, boundary, options)
         return false, "No files were uploaded"
     end
 
-    local uploaded_count = 0
+    local pending_dirs = {}
+    local planned_targets = {}
+    local prepared_entries = {}
+
     for _, entry in ipairs(upload_entries) do
-        local file_path = dir_path .. "/" .. entry.filename
-        local f = io.open(file_path, "wb")
+        local upload_rel_path, path_err = self:_normalizeUploadRelativePath(form_fields.relative_path, entry.filename)
+        if not upload_rel_path then
+            return false, path_err
+        end
+
+        local target_rel_path = self:_joinRelativePaths(rel_dir, upload_rel_path)
+        local target_full_path, target_err = self:_resolvePath(target_rel_path, options)
+        if not target_full_path then
+            return false, target_err
+        end
+
+        local target_attr = lfs.attributes(target_full_path)
+        if target_attr or planned_targets[target_full_path] then
+            return false, "Destination already exists"
+        end
+
+        local parent_dir = target_full_path:match("(.+)/[^/]+$")
+        local ok_dirs, dir_err = self:_collectUploadDirectories(parent_dir, pending_dirs, scope.root_path)
+        if not ok_dirs then
+            return false, dir_err
+        end
+
+        planned_targets[target_full_path] = true
+        table.insert(prepared_entries, {
+            full_path = target_full_path,
+            relative_path = upload_rel_path,
+            data = entry.data,
+        })
+    end
+
+    local ok_dirs, dir_err = self:_createPendingDirectories(pending_dirs)
+    if not ok_dirs then
+        return false, dir_err
+    end
+
+    local uploaded_count = 0
+    for _, entry in ipairs(prepared_entries) do
+        local f = io.open(entry.full_path, "wb")
         if f then
             f:write(entry.data)
             f:close()
             uploaded_count = uploaded_count + 1
-            logger.info("FileSync: Uploaded", entry.filename, "to", dir_path)
+            logger.info("FileSync: Uploaded", entry.relative_path, "to", dir_path)
         else
-            logger.warn("FileSync: Cannot write file", file_path)
+            logger.warn("FileSync: Cannot write file", entry.full_path)
         end
     end
 
-    if uploaded_count == #upload_entries then
+    if uploaded_count == #prepared_entries then
         return true
     end
 
@@ -486,8 +763,8 @@ function FileOps:handleUpload(rel_dir, body, boundary, options)
 end
 
 --- Create a directory
-function FileOps:createDirectory(rel_path)
-    local full_path, err = self:_resolvePath(rel_path)
+function FileOps:createDirectory(rel_path, options)
+    local full_path, err = self:_resolvePath(rel_path, options)
     if not full_path then
         return false, err
     end
@@ -524,13 +801,13 @@ function FileOps:createDirectory(rel_path)
 end
 
 --- Rename a file or directory
-function FileOps:rename(old_rel_path, new_rel_path)
-    local old_path, err1 = self:_resolvePath(old_rel_path)
+function FileOps:rename(old_rel_path, new_rel_path, options)
+    local old_path, err1 = self:_resolvePath(old_rel_path, options)
     if not old_path then
         return false, err1
     end
 
-    local new_path, err2 = self:_resolvePath(new_rel_path)
+    local new_path, err2 = self:_resolvePath(new_rel_path, options)
     if not new_path then
         return false, err2
     end
@@ -586,18 +863,25 @@ function FileOps:_isPathInside(parent_path, child_path)
 end
 
 --- Move a file or directory
-function FileOps:move(old_rel_path, new_rel_path)
-    local old_path, err1 = self:_resolvePath(old_rel_path)
+function FileOps:move(old_rel_path, new_rel_path, options)
+    options = options or {}
+    local old_path, err1, old_scope = self:_resolvePath(old_rel_path, {
+        scope = options.old_scope or options.scope,
+        allow_root_scopes = options.allow_root_scopes,
+    })
     if not old_path then
         return false, err1
     end
 
-    local new_path, err2 = self:_resolvePath(new_rel_path)
+    local new_path, err2, new_scope = self:_resolvePath(new_rel_path, {
+        scope = options.new_scope or options.scope,
+        allow_root_scopes = options.allow_root_scopes,
+    })
     if not new_path then
         return false, err2
     end
 
-    if old_path == self._root_dir then
+    if old_path == old_scope.root_path then
         return false, "Cannot move root directory"
     end
 
@@ -616,7 +900,7 @@ function FileOps:move(old_rel_path, new_rel_path)
         return false, valid_err
     end
 
-    if src_attr.mode == "directory" and self:_isPathInside(old_path, new_path) then
+    if src_attr.mode == "directory" and old_scope.id == new_scope.id and self:_isPathInside(old_path, new_path) then
         return false, "Cannot move directory inside itself"
     end
 
@@ -630,13 +914,20 @@ function FileOps:move(old_rel_path, new_rel_path)
 end
 
 --- Copy a file in chunks without loading it entirely into memory
-function FileOps:copyFile(src_rel_path, dst_rel_path)
-    local src_path, err1 = self:_resolvePath(src_rel_path)
+function FileOps:copyFile(src_rel_path, dst_rel_path, options)
+    options = options or {}
+    local src_path, err1 = self:_resolvePath(src_rel_path, {
+        scope = options.old_scope or options.scope,
+        allow_root_scopes = options.allow_root_scopes,
+    })
     if not src_path then
         return false, err1
     end
 
-    local dst_path, err2 = self:_resolvePath(dst_rel_path)
+    local dst_path, err2 = self:_resolvePath(dst_rel_path, {
+        scope = options.new_scope or options.scope,
+        allow_root_scopes = options.allow_root_scopes,
+    })
     if not dst_path then
         return false, err2
     end
@@ -706,13 +997,14 @@ end
 ---   - safe_mode (bool): when true, auto-delete associated .sdr directory for book files
 ---   - delete_sdr (bool): when true (and not safe_mode), delete associated .sdr directory
 function FileOps:delete(rel_path, options)
-    local full_path, err = self:_resolvePath(rel_path)
+    options = options or {}
+    local full_path, err, scope = self:_resolvePath(rel_path, options)
     if not full_path then
         return false, err
     end
 
     -- Prevent deleting the root directory
-    if full_path == self._root_dir then
+    if full_path == scope.root_path then
         return false, "Cannot delete root directory"
     end
 
@@ -721,7 +1013,6 @@ function FileOps:delete(rel_path, options)
         return false, "Path does not exist"
     end
 
-    options = options or {}
     local is_file = attr.mode ~= "directory"
 
     if attr.mode == "directory" then
@@ -1189,8 +1480,8 @@ function FileOps:_epubHasCover(full_path)
 end
 
 --- Get metadata for a file
-function FileOps:getMetadata(rel_path)
-    local full_path, err = self:_resolvePath(rel_path)
+function FileOps:getMetadata(rel_path, options)
+    local full_path, err = self:_resolvePath(rel_path, options)
     if not full_path then
         return nil, err
     end
@@ -1342,8 +1633,8 @@ function FileOps:getMetadata(rel_path)
 end
 
 --- Extract and stream cover image from an ebook file (EPUB, MOBI, AZW3)
-function FileOps:getBookCover(client, rel_path, server)
-    local full_path, err = self:_resolvePath(rel_path)
+function FileOps:getBookCover(client, rel_path, server, options)
+    local full_path, err = self:_resolvePath(rel_path, options)
     if not full_path then
         return false, err
     end
@@ -1516,6 +1807,238 @@ function FileOps:getBookCover(client, rel_path, server)
         return false, "Send error: " .. tostring(send_err)
     end
 
+    return true
+end
+
+--- Read editable metadata fields from an EPUB's OPF file.
+--- Returns { editable=true, format="epub", title, author, publisher, description, opf_path }
+--- or { editable=false } for non-EPUB files.
+function FileOps:readEpubEditableMetadata(rel_path, options)
+    local full_path, err = self:_resolvePath(rel_path, options)
+    if not full_path then
+        return nil, err
+    end
+
+    local attr = lfs.attributes(full_path)
+    if not attr or attr.mode ~= "file" then
+        return nil, "Not a file"
+    end
+
+    local extension = full_path:match("%.([^%.]+)$")
+    if not extension or extension:lower() ~= "epub" then
+        return { editable = false }
+    end
+
+    local escaped_path = self:_shellEscape(full_path)
+
+    -- Read container.xml to find OPF path
+    local container_cmd = "unzip -p " .. escaped_path .. " META-INF/container.xml 2>/dev/null"
+    local container_handle = io.popen(container_cmd)
+    if not container_handle then
+        return nil, "Cannot read EPUB"
+    end
+    local container_xml = container_handle:read("*all")
+    container_handle:close()
+
+    if not container_xml or #container_xml == 0 then
+        return nil, "Invalid EPUB: no container.xml"
+    end
+
+    local opf_path = container_xml:match('full%-path="([^"]+)"')
+    if not opf_path then
+        return nil, "Invalid EPUB: no OPF path"
+    end
+
+    -- Read OPF content
+    local opf_cmd = "unzip -p " .. escaped_path .. " " .. self:_shellEscape(opf_path) .. " 2>/dev/null"
+    local opf_handle = io.popen(opf_cmd)
+    if not opf_handle then
+        return nil, "Cannot read OPF"
+    end
+    local opf_content = opf_handle:read("*all")
+    opf_handle:close()
+
+    if not opf_content or #opf_content == 0 then
+        return nil, "Invalid EPUB: empty OPF"
+    end
+
+    -- Extract metadata fields from OPF
+    local title = opf_content:match("<dc:title[^>]*>([^<]+)</dc:title>")
+    local author = opf_content:match("<dc:creator[^>]*>([^<]+)</dc:creator>")
+    local publisher = opf_content:match("<dc:publisher[^>]*>([^<]+)</dc:publisher>")
+
+    -- Description may contain XML entities and be multiline
+    local description = opf_content:match("<dc:description[^>]*>(.-)</dc:description>")
+
+    -- Trim whitespace
+    local function trim(s)
+        if not s then return nil end
+        return s:gsub("^%s+", ""):gsub("%s+$", "")
+    end
+
+    return {
+        editable = true,
+        format = "epub",
+        opf_path = opf_path,
+        title = trim(title) or "",
+        author = trim(author) or "",
+        publisher = trim(publisher) or "",
+        description = trim(description) or "",
+    }
+end
+
+--- Helper: replace or insert a Dublin Core element in an OPF XML string.
+--- If the element exists, replaces its content. If not, inserts it inside <metadata>.
+function FileOps:_setDcElement(opf_content, element_name, new_value)
+    -- Pattern to match existing element (with optional attributes)
+    local pattern = "(<dc:" .. element_name .. "[^>]*>)(.-)(</dc:" .. element_name .. ">)"
+    if opf_content:match(pattern) then
+        -- Replace existing element content
+        return opf_content:gsub(pattern, "%1" .. new_value:gsub("%%", "%%%%") .. "%3", 1)
+    else
+        -- Element doesn't exist; insert before </metadata>
+        local insert_tag = "<dc:" .. element_name .. ">" .. new_value .. "</dc:" .. element_name .. ">"
+        -- Try </metadata> first, then </opf:metadata>
+        if opf_content:match("</metadata>") then
+            return opf_content:gsub("</metadata>", insert_tag .. "\n</metadata>", 1)
+        elseif opf_content:match("</opf:metadata>") then
+            return opf_content:gsub("</opf:metadata>", insert_tag .. "\n</opf:metadata>", 1)
+        end
+        -- Fallback: cannot find metadata closing tag
+        return opf_content
+    end
+end
+
+--- Helper: escape special XML characters in a string value
+function FileOps:_escapeXml(s)
+    if not s then return "" end
+    return s:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;"):gsub('"', "&quot;"):gsub("'", "&apos;")
+end
+
+--- Update metadata fields in an EPUB file.
+--- Uses a safe temp-file flow: copy → modify temp → atomic rename.
+--- @param rel_path string: relative path to the EPUB file
+--- @param fields table: { title, author, publisher, description }
+--- @param options table|nil: resolution options (scope, etc.)
+--- @return true on success, or nil + error message
+function FileOps:updateEpubMetadata(rel_path, fields, options)
+    local full_path, err = self:_resolvePath(rel_path, options)
+    if not full_path then
+        return nil, err
+    end
+
+    local attr = lfs.attributes(full_path)
+    if not attr or attr.mode ~= "file" then
+        return nil, "Not a file"
+    end
+
+    local extension = full_path:match("%.([^%.]+)$")
+    if not extension or extension:lower() ~= "epub" then
+        return nil, "Metadata editing is only supported for EPUB files"
+    end
+
+    -- Step 1: Read the current OPF to get the path and content
+    local meta, meta_err = self:readEpubEditableMetadata(rel_path, options)
+    if not meta then
+        return nil, meta_err
+    end
+    if not meta.editable then
+        return nil, "File is not editable"
+    end
+
+    local opf_path = meta.opf_path
+    local escaped_path = self:_shellEscape(full_path)
+
+    -- Re-read the raw OPF content (we need the full XML for modification)
+    local opf_cmd = "unzip -p " .. escaped_path .. " " .. self:_shellEscape(opf_path) .. " 2>/dev/null"
+    local opf_handle = io.popen(opf_cmd)
+    if not opf_handle then
+        return nil, "Cannot read OPF from EPUB"
+    end
+    local opf_content = opf_handle:read("*all")
+    opf_handle:close()
+
+    if not opf_content or #opf_content == 0 then
+        return nil, "Empty OPF content"
+    end
+
+    -- Step 2: Apply field changes to the OPF
+    if fields.title ~= nil then
+        opf_content = self:_setDcElement(opf_content, "title", self:_escapeXml(fields.title))
+    end
+    if fields.author ~= nil then
+        opf_content = self:_setDcElement(opf_content, "creator", self:_escapeXml(fields.author))
+    end
+    if fields.publisher ~= nil then
+        opf_content = self:_setDcElement(opf_content, "publisher", self:_escapeXml(fields.publisher))
+    end
+    if fields.description ~= nil then
+        opf_content = self:_setDcElement(opf_content, "description", self:_escapeXml(fields.description))
+    end
+
+    -- Step 3: Safe write flow
+    -- 3a. Write updated OPF to a temporary file
+    local tmp_opf_path = "/tmp/filesync_opf_" .. os.time() .. "_" .. math.random(10000, 99999) .. ".opf"
+    local opf_file = io.open(tmp_opf_path, "w")
+    if not opf_file then
+        return nil, "Cannot create temporary OPF file"
+    end
+    opf_file:write(opf_content)
+    opf_file:close()
+
+    -- 3b. Copy the original EPUB to a temp file
+    local tmp_epub_path = full_path .. ".filesync.tmp"
+    local copy_cmd = "cp " .. escaped_path .. " " .. self:_shellEscape(tmp_epub_path) .. " 2>/dev/null"
+    local copy_ok = os.execute(copy_cmd)
+    if copy_ok ~= 0 and copy_ok ~= true then
+        os.remove(tmp_opf_path)
+        return nil, "Cannot create temporary EPUB copy"
+    end
+
+    -- 3c. Replace the OPF inside the temp EPUB using zip
+    -- The OPF path inside the ZIP must match exactly
+    -- We use a subshell: cd to /tmp-dir, then zip with the correct internal path
+    local opf_dir = opf_path:match("(.+)/[^/]+$")
+    local opf_filename = opf_path:match("([^/]+)$")
+    local zip_cmd
+    if opf_dir and opf_dir ~= "" then
+        -- OPF is in a subdirectory (e.g., OEBPS/content.opf)
+        -- Create the directory structure in /tmp, copy the OPF there, then zip
+        local tmp_dir = "/tmp/filesync_epub_" .. os.time() .. "_" .. math.random(10000, 99999)
+        local mkdir_cmd = "mkdir -p " .. self:_shellEscape(tmp_dir .. "/" .. opf_dir) .. " 2>/dev/null"
+        os.execute(mkdir_cmd)
+        local mv_cmd = "mv " .. self:_shellEscape(tmp_opf_path) .. " " .. self:_shellEscape(tmp_dir .. "/" .. opf_path) .. " 2>/dev/null"
+        os.execute(mv_cmd)
+        zip_cmd = "cd " .. self:_shellEscape(tmp_dir) .. " && zip -q " .. self:_shellEscape(tmp_epub_path) .. " " .. self:_shellEscape(opf_path) .. " 2>/dev/null"
+        local zip_ok = os.execute(zip_cmd)
+        -- Cleanup temp directory
+        os.execute("rm -rf " .. self:_shellEscape(tmp_dir) .. " 2>/dev/null")
+        if zip_ok ~= 0 and zip_ok ~= true then
+            os.remove(tmp_epub_path)
+            return nil, "Failed to update OPF inside EPUB"
+        end
+    else
+        -- OPF is at the root of the ZIP (rare but possible)
+        -- Rename temp OPF to the correct filename
+        local renamed_opf = "/tmp/" .. opf_filename
+        os.rename(tmp_opf_path, renamed_opf)
+        zip_cmd = "cd /tmp && zip -q " .. self:_shellEscape(tmp_epub_path) .. " " .. self:_shellEscape(opf_filename) .. " 2>/dev/null"
+        local zip_ok = os.execute(zip_cmd)
+        os.remove(renamed_opf)
+        if zip_ok ~= 0 and zip_ok ~= true then
+            os.remove(tmp_epub_path)
+            return nil, "Failed to update OPF inside EPUB"
+        end
+    end
+
+    -- 3d. Atomic replace: rename temp to original
+    local rename_ok, rename_err = os.rename(tmp_epub_path, full_path)
+    if not rename_ok then
+        os.remove(tmp_epub_path)
+        return nil, "Failed to replace original EPUB: " .. tostring(rename_err)
+    end
+
+    logger.info("FileSync: Updated EPUB metadata for", full_path)
     return true
 end
 

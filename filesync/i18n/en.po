@@ -48,7 +48,7 @@ msgstr ""
 msgid "Port set to %1. Restart the server for changes to take effect."
 msgstr ""
 
-msgid "Invalid port. Please enter a number between 1024 and 65535."
+msgid "Invalid port. Please enter a number between 1 and 65535."
 msgstr ""
 
 msgid "FileSync server is already running."

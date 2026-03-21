@@ -47,8 +47,8 @@ msgstr "Guardar"
 msgid "Port set to %1. Restart the server for changes to take effect."
 msgstr "Puerto configurado a %1. Reinicia el servidor para que los cambios surtan efecto."
 
-msgid "Invalid port. Please enter a number between 1024 and 65535."
-msgstr "Puerto no válido. Introduce un número entre 1024 y 65535."
+msgid "Invalid port. Please enter a number between 1 and 65535."
+msgstr "Puerto no válido. Introduce un número entre 1 y 65535."
 
 msgid "FileSync server is already running."
 msgstr "El servidor FileSync ya está en ejecución."

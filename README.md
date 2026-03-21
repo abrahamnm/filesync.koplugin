@@ -139,7 +139,7 @@ Once connected, the web interface lets you:
 
 1. Open the plugin menu
 2. Tap **Server port**
-3. Enter a port number between 1024 and 65535 (default: 8080)
+3. Enter a port number between 1 and 65535 (default: 80)
 4. Restart the server for the change to take effect
 
 ### Safe Mode
