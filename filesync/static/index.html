@@ -90,13 +90,95 @@ html, body {
     color: var(--primary);
 }
 
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    min-width: 0;
+}
+
 .header-actions {
     display: flex;
     gap: 8px;
     align-items: center;
 }
 
+.mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.mode-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    border-radius: 0;
+    min-width: 0;
+    min-height: 0;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.mode-toggle-btn + .mode-toggle-btn {
+    border-left: 1px solid var(--border);
+}
+
+.mode-toggle-btn svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.mode-toggle-label {
+    white-space: nowrap;
+}
+
+.mode-toggle-btn:hover:not(:disabled) {
+    color: var(--text);
+    background: var(--surface-hover);
+}
+
+.mode-toggle-btn.active.safe {
+    background: #16a34a;
+    color: #fff;
+}
+
+.mode-toggle-btn.active.root {
+    background: #d97706;
+    color: #fff;
+}
+
+.mode-toggle-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
 @media (max-width: 640px) {
+    .header-controls {
+        gap: 6px;
+    }
+
+    .mode-toggle {
+        gap: 0;
+    }
+
     .header-actions {
         gap: 6px;
     }
@@ -106,6 +188,20 @@ html, body {
     }
 
     .header-actions .btn span {
+        display: none;
+    }
+
+    .mode-toggle-btn {
+        padding: 6px 8px;
+        gap: 0;
+    }
+
+    .mode-toggle-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .mode-toggle-label {
         display: none;
     }
 }
@@ -323,6 +419,13 @@ html, body {
     background: var(--surface-hover);
     color: var(--text);
     border-color: var(--border);
+}
+
+.btn-icon:disabled,
+.btn-icon.is-disabled {
+    opacity: 0.45;
+    cursor: default;
+    pointer-events: none;
 }
 
 .btn-sm {
@@ -791,6 +894,12 @@ html, body {
     margin-bottom: 16px;
 }
 
+.modal-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
 .modal-input {
     width: 100%;
     padding: 10px 14px;
@@ -819,6 +928,173 @@ html, body {
     min-width: 80px;
     padding: 10px 18px;
     font-size: 14px;
+}
+
+/* ===== Root PIN Overlay ===== */
+#rootPinOverlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.56);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.22s ease, visibility 0.22s ease;
+    z-index: 240;
+}
+
+#rootPinOverlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+#rootPinModal {
+    position: relative;
+    width: min(100%, 360px);
+    padding: 26px 24px 22px;
+    border-radius: 24px;
+    background: #fff;
+    border: 1px solid rgba(226, 229, 233, 0.9);
+    box-shadow: 0 24px 64px rgba(15, 23, 42, 0.22);
+    text-align: center;
+}
+
+.root-pin-badge {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 12px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 0;
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.04) 100%);
+    color: #b45309;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.root-pin-badge svg {
+    display: block;
+    width: 22px;
+    height: 22px;
+    transform: translate(0.5px, 0.5px);
+}
+
+.root-pin-title {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+
+.root-pin-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0 auto 20px;
+    max-width: 270px;
+    line-height: 1.45;
+}
+
+.root-pin-entry {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    margin-bottom: 10px;
+    cursor: text;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#rootPinDots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.root-pin-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    border: 1.5px solid #cbd5e1;
+    background: #fff;
+    transition: transform var(--transition), background var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+
+.root-pin-dot.filled {
+    background: #16a34a;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.08);
+}
+
+.root-pin-dot.error {
+    border-color: #ef4444;
+    background: #fee2e2;
+    box-shadow: none;
+}
+
+#rootPinError {
+    min-height: 18px;
+    margin-bottom: 0;
+    font-size: 13px;
+    color: var(--danger);
+}
+
+#rootPinInput {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    opacity: 0.01;
+    background: transparent;
+    color: transparent;
+    caret-color: transparent;
+    -webkit-text-fill-color: transparent;
+    font-size: 16px;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+}
+
+.root-pin-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.root-pin-actions .btn {
+    min-width: 140px;
+}
+
+@media (max-width: 640px) {
+    #rootPinOverlay {
+        padding: 16px;
+    }
+
+    #rootPinModal {
+        width: min(100%, 340px);
+        padding: 24px 18px 18px;
+        border-radius: 22px;
+    }
+
+    .root-pin-badge {
+        width: 44px;
+        height: 44px;
+    }
+
+    .root-pin-actions .btn {
+        flex: 1;
+        min-width: 0;
+    }
 }
 
 /* ===== Toast Notifications ===== */
@@ -1139,40 +1415,59 @@ html, body {
             </svg>
             <span data-i18n="filesync">FileSync</span>
         </a>
-        <div class="header-actions">
-            <button class="btn btn-secondary btn-sm" onclick="pasteClipboardItems()" id="btnPaste" title="Paste" disabled>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M8 4h8"/>
-                    <path d="M9 3h6a1 1 0 011 1v2H8V4a1 1 0 011-1z"/>
-                    <path d="M8 6H7a2 2 0 00-2 2v11a2 2 0 002 2h10a2 2 0 002-2V8a2 2 0 00-2-2h-1"/>
-                    <path d="M10 12h6"/>
-                    <path d="M10 16h4"/>
-                </svg>
-                <span data-i18n="paste">Paste</span>
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="toggleSelectionMode()" id="btnSelect" title="Select items">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <polyline points="9 12 11 14 15 10"/>
-                </svg>
-                <span data-i18n="select">Select</span>
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="toggleUploadZone()" id="btnUpload" title="Upload files">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                <span data-i18n="upload">Upload</span>
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="showNewFolderModal()" id="btnFolder" title="New folder">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                    <line x1="12" y1="11" x2="12" y2="17"/>
-                    <line x1="9" y1="14" x2="15" y2="14"/>
-                </svg>
-                <span data-i18n="folder">Folder</span>
-            </button>
+        <div class="header-controls">
+            <div class="mode-toggle" id="authModeToggle" role="group" aria-label="Access mode">
+                <button class="mode-toggle-btn safe active" type="button" id="btnSafeMode" onclick="activateSafeMode()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3z"/>
+                        <path d="M9.5 12.2l1.7 1.8 3.5-3.8"/>
+                    </svg>
+                    <span class="mode-toggle-label" data-i18n="secure_mode">Secure</span>
+                </button>
+                <button class="mode-toggle-btn root" type="button" id="btnRootMode" onclick="requestRootMode()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3.25l6.25 2.55v4.85c0 4.2-2.75 7.28-6.25 8.95-3.5-1.67-6.25-4.75-6.25-8.95V5.8L12 3.25z"/>
+                        <rect x="8.7" y="10.8" width="6.6" height="5.6" rx="1.1"/>
+                        <path d="M10.35 10.8V9.45a1.65 1.65 0 013.3 0v1.35"/>
+                    </svg>
+                    <span class="mode-toggle-label" data-i18n="root_mode">Root</span>
+                </button>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary btn-sm" onclick="pasteClipboardItems()" id="btnPaste" title="Paste" disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 4h8"/>
+                        <path d="M9 3h6a1 1 0 011 1v2H8V4a1 1 0 011-1z"/>
+                        <path d="M8 6H7a2 2 0 00-2 2v11a2 2 0 002 2h10a2 2 0 002-2V8a2 2 0 00-2-2h-1"/>
+                        <path d="M10 12h6"/>
+                        <path d="M10 16h4"/>
+                    </svg>
+                    <span data-i18n="paste">Paste</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="toggleSelectionMode()" id="btnSelect" title="Select items">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <polyline points="9 12 11 14 15 10"/>
+                    </svg>
+                    <span data-i18n="select">Select</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="toggleUploadZone()" id="btnUpload" title="Upload files">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <span data-i18n="upload">Upload</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="showNewFolderModal()" id="btnFolder" title="New folder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                        <line x1="12" y1="11" x2="12" y2="17"/>
+                        <line x1="9" y1="14" x2="15" y2="14"/>
+                    </svg>
+                    <span data-i18n="folder">Folder</span>
+                </button>
+            </div>
         </div>
     </div>
 </header>
@@ -1302,6 +1597,29 @@ html, body {
     </div>
 </div>
 
+<!-- Root PIN Overlay -->
+<div id="rootPinOverlay" onclick="closeRootPinOverlay(event)">
+    <div id="rootPinModal" onclick="focusRootPinInput(); event.stopPropagation();">
+        <div class="root-pin-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3.25l6.25 2.55v4.85c0 4.2-2.75 7.28-6.25 8.95-3.5-1.67-6.25-4.75-6.25-8.95V5.8L12 3.25z"/>
+                <rect x="8.7" y="10.8" width="6.6" height="5.6" rx="1.1"/>
+                <path d="M10.35 10.8V9.45a1.65 1.65 0 013.3 0v1.35"/>
+            </svg>
+        </div>
+        <div class="root-pin-title" id="rootPinTitle"></div>
+        <p class="root-pin-subtitle" id="rootPinMessage"></p>
+        <div class="root-pin-entry" onclick="focusRootPinInput(); event.stopPropagation();" onpointerdown="focusRootPinInput(); event.stopPropagation();">
+            <div id="rootPinDots" aria-hidden="true"></div>
+            <p id="rootPinError" role="alert" aria-live="polite"></p>
+            <input type="tel" id="rootPinInput" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" enterkeyhint="done" maxlength="4" readonly autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Root PIN" oninput="handleRootPinInput()" onkeydown="handleRootPinKeydown(event)">
+        </div>
+        <div class="root-pin-actions">
+            <button class="btn btn-primary" id="rootPinConfirmBtn" onclick="confirmRootPinModal()">Unlock</button>
+        </div>
+    </div>
+</div>
+
 <!-- File Detail View -->
 <div class="file-detail" id="fileDetail">
     <div class="detail-header">
@@ -1336,6 +1654,9 @@ html, body {
     var translations = {
         en: {
             filesync: "FileSync",
+            access_mode: "Access mode",
+            secure_mode: "Secure",
+            root_mode: "Root",
             upload: "Upload",
             paste: "Paste",
             select: "Select",
@@ -1408,6 +1729,18 @@ html, body {
             paste_placeholder: "Paste will be implemented next",
             clipboard_copy_ready: "{count} items copied",
             clipboard_cut_ready: "{count} items cut",
+            root_pin_title: "Unlock Root mode",
+            root_pin_message: "Enter the Root PIN configured on the Kindle.",
+            unlock: "Unlock",
+            root_mode_enabled: "Root mode enabled",
+            secure_mode_enabled: "Secure mode enabled",
+            root_pin_invalid: "Incorrect Root PIN",
+            root_pin_missing: "Root PIN is not configured on this Kindle",
+            root_pin_required: "Enter the Root PIN to unlock Root mode.",
+            root_pin_throttled: "Too many attempts. Wait {seconds}s and try again.",
+            root_pin_unavailable: "Set a Root PIN on the Kindle first.",
+            root_required_clipboard: "Root mode is required to copy, cut, or paste items.",
+            root_required_recursive_delete: "Root mode is required to delete non-empty folders.",
             invalid_server_response: "Invalid server response",
             server_error: "Server error",
             request_failed: "Request failed",
@@ -1415,6 +1748,9 @@ html, body {
         },
         es: {
             filesync: "FileSync",
+            access_mode: "Modo de acceso",
+            secure_mode: "Seguro",
+            root_mode: "Root",
             upload: "Subir",
             paste: "Pegar",
             select: "Seleccionar",
@@ -1487,6 +1823,18 @@ html, body {
             paste_placeholder: "Pegar se implementar\u00e1 despu\u00e9s",
             clipboard_copy_ready: "{count} elementos copiados",
             clipboard_cut_ready: "{count} elementos cortados",
+            root_pin_title: "Desbloquear modo Root",
+            root_pin_message: "Introduce el PIN Root configurado en el Kindle.",
+            unlock: "Desbloquear",
+            root_mode_enabled: "Modo Root activado",
+            secure_mode_enabled: "Modo Seguro activado",
+            root_pin_invalid: "PIN Root incorrecto",
+            root_pin_missing: "El PIN Root no est\u00e1 configurado en este Kindle",
+            root_pin_required: "Introduce el PIN Root para desbloquear el modo Root.",
+            root_pin_throttled: "Demasiados intentos. Espera {seconds}s e int\u00e9ntalo de nuevo.",
+            root_pin_unavailable: "Configura primero un PIN Root en el Kindle.",
+            root_required_clipboard: "El modo Root es necesario para copiar, cortar o pegar elementos.",
+            root_required_recursive_delete: "El modo Root es necesario para eliminar carpetas no vac\u00edas.",
             invalid_server_response: "Respuesta inv\u00e1lida del servidor",
             server_error: "Error del servidor",
             request_failed: "Solicitud fallida",
@@ -1494,6 +1842,9 @@ html, body {
         },
         pt_BR: {
             filesync: "FileSync",
+            access_mode: "Modo de acesso",
+            secure_mode: "Seguro",
+            root_mode: "Root",
             upload: "Enviar",
             paste: "Colar",
             select: "Selecionar",
@@ -1566,6 +1917,18 @@ html, body {
             paste_placeholder: "Colar ser\u00e1 implementado em seguida",
             clipboard_copy_ready: "{count} itens copiados",
             clipboard_cut_ready: "{count} itens recortados",
+            root_pin_title: "Desbloquear modo Root",
+            root_pin_message: "Digite o PIN Root configurado no Kindle.",
+            unlock: "Desbloquear",
+            root_mode_enabled: "Modo Root ativado",
+            secure_mode_enabled: "Modo Seguro ativado",
+            root_pin_invalid: "PIN Root incorreto",
+            root_pin_missing: "O PIN Root n\u00e3o est\u00e1 configurado neste Kindle",
+            root_pin_required: "Digite o PIN Root para desbloquear o modo Root.",
+            root_pin_throttled: "Muitas tentativas. Aguarde {seconds}s e tente novamente.",
+            root_pin_unavailable: "Defina primeiro um PIN Root no Kindle.",
+            root_required_clipboard: "O modo Root \u00e9 necess\u00e1rio para copiar, recortar ou colar itens.",
+            root_required_recursive_delete: "O modo Root \u00e9 necess\u00e1rio para excluir pastas n\u00e3o vazias.",
             invalid_server_response: "Resposta inv\u00e1lida do servidor",
             server_error: "Erro do servidor",
             request_failed: "Falha na requisi\u00e7\u00e3o",
@@ -1593,6 +1956,11 @@ html, body {
         });
         // Placeholder
         document.getElementById('searchInput').placeholder = t('filter_placeholder');
+        document.getElementById('authModeToggle').setAttribute('aria-label', t('access_mode'));
+        document.getElementById('btnSafeMode').title = t('secure_mode');
+        document.getElementById('btnSafeMode').setAttribute('aria-label', t('secure_mode'));
+        document.getElementById('btnRootMode').title = hasRootPin ? t('root_mode') : t('root_pin_unavailable');
+        document.getElementById('btnRootMode').setAttribute('aria-label', t('root_mode'));
         // Button titles
         document.getElementById('btnUpload').title = t('upload_files_title');
         document.getElementById('btnUpload').setAttribute('aria-label', t('upload_files_title'));
@@ -1614,7 +1982,11 @@ html, body {
         // Modal default buttons
         document.getElementById('modalCancelBtn').textContent = t('cancel');
         document.getElementById('confirmCancelBtn').textContent = t('cancel');
+        document.getElementById('rootPinTitle').textContent = t('root_pin_title');
+        document.getElementById('rootPinMessage').textContent = t('root_pin_message');
+        document.getElementById('rootPinConfirmBtn').textContent = t('unlock');
         updateParentNav();
+        updateAuthUI();
         updateClipboardUI();
         updateSelectionUI();
     }
@@ -1633,6 +2005,14 @@ html, body {
     var selectionMode = false;
     var selectedPaths = [];
     var clipboardState = { mode: null, paths: [] };
+    var hasRootPin = false;
+    var rootUnlocked = false;
+    var authRequestPending = false;
+    var rootPinExpectedLength = 4;
+    var longPressState = null;
+    var suppressNextSelectionClick = null;
+    var LONG_PRESS_DURATION = 500;
+    var LONG_PRESS_MOVE_TOLERANCE = 12;
 
     // ===== Icons =====
     var icons = {
@@ -1666,7 +2046,11 @@ html, body {
             throw new Error(res.ok ? t('invalid_server_response') : t('server_error') + ' (' + res.status + ')');
         }
         if (!res.ok || data.error) {
-            throw new Error(data.error || t('request_failed') + ' (' + res.status + ')');
+            var apiError = new Error(data.error || t('request_failed') + ' (' + res.status + ')');
+            apiError.code = data && data.code;
+            apiError.status = res.status;
+            apiError.retryAfter = data && data.retry_after;
+            throw apiError;
         }
         return data;
     }
@@ -1675,6 +2059,7 @@ html, body {
     // Internal navigation: sets state and loads files WITHOUT pushing history
     function _navigateInternal(path) {
         path = path || '/';
+        cancelPendingLongPress();
         if (currentPath !== path) {
             selectionMode = false;
             selectedPaths = [];
@@ -1751,10 +2136,106 @@ html, body {
         el.innerHTML = html;
     }
 
+    function isFileActionTarget(target) {
+        return !!(target && target.closest && target.closest('.file-actions'));
+    }
+
+    function clearSuppressedSelectionClick() {
+        suppressNextSelectionClick = null;
+    }
+
+    function shouldSuppressSelectionClick(path) {
+        if (!suppressNextSelectionClick) return false;
+        if (suppressNextSelectionClick.path !== path) return false;
+        if (Date.now() > suppressNextSelectionClick.expiresAt) {
+            clearSuppressedSelectionClick();
+            return false;
+        }
+        clearSuppressedSelectionClick();
+        return true;
+    }
+
+    function cancelPendingLongPress() {
+        if (!longPressState) return;
+        clearTimeout(longPressState.timer);
+        longPressState = null;
+    }
+
+    function enterSelectionModeFromLongPress(path) {
+        cancelPendingLongPress();
+        clearSuppressedSelectionClick();
+        suppressNextSelectionClick = {
+            path: path,
+            expiresAt: Date.now() + 350
+        };
+        selectionMode = true;
+        selectedPaths = [path];
+        closeUploadZone();
+        updateSelectionUI();
+        renderFiles(currentEntries);
+        if (navigator.vibrate) {
+            navigator.vibrate(12);
+        }
+    }
+
+    function matchesLongPressPointer(event) {
+        return !!(longPressState && event && event.pointerId === longPressState.pointerId);
+    }
+
+    window.handleFilePointerDown = function(event, path) {
+        if (selectionMode || !event) return;
+        if (event.pointerType === 'mouse') return;
+        if (event.button !== undefined && event.button !== 0) return;
+        if (isFileActionTarget(event.target)) return;
+
+        cancelPendingLongPress();
+        longPressState = {
+            pointerId: event.pointerId,
+            path: path,
+            startX: event.clientX,
+            startY: event.clientY,
+            timer: setTimeout(function() {
+                enterSelectionModeFromLongPress(path);
+            }, LONG_PRESS_DURATION)
+        };
+    };
+
+    window.handleFilePointerMove = function(event) {
+        if (!matchesLongPressPointer(event)) return;
+
+        var dx = Math.abs(event.clientX - longPressState.startX);
+        var dy = Math.abs(event.clientY - longPressState.startY);
+        if (dx > LONG_PRESS_MOVE_TOLERANCE || dy > LONG_PRESS_MOVE_TOLERANCE) {
+            cancelPendingLongPress();
+        }
+    };
+
+    window.handleFilePointerEnd = function(event) {
+        if (!matchesLongPressPointer(event)) return;
+        cancelPendingLongPress();
+    };
+
+    window.handleFilePointerCancel = function(event) {
+        if (!longPressState) return;
+        if (event && event.pointerId !== undefined && event.pointerId !== longPressState.pointerId) return;
+        cancelPendingLongPress();
+    };
+
+    window.handleFileContextMenu = function(event, path) {
+        if (shouldSuppressSelectionClick(path)) {
+            event.preventDefault();
+            suppressNextSelectionClick = {
+                path: path,
+                expiresAt: Date.now() + 200
+            };
+        }
+    };
+
     function renderFiles(entries) {
         currentEntries = entries || [];
         syncSelectedPaths(currentEntries);
         var list = document.getElementById('fileList');
+        var showQuickDelete = canUseRootActions();
         if (!entries || entries.length === 0) {
             list.innerHTML = '<div class="empty-state">' + icons.empty +
                 '<div class="empty-state-text">' + escapeHtml(t('empty_folder')) + '</div>' +
@@ -1777,7 +2258,14 @@ html, body {
             if (selectionMode) itemClass += ' selection-mode';
             if (isSelected) itemClass += ' selected';
 
-            html += '<div class="' + itemClass + '" onclick="onFileClick(event, ' + (entry.is_dir ? 'true' : 'false') + ', \'' + escapeAttr(entry.path) + '\')">';
+            html += '<div class="' + itemClass + '"' +
+                ' onclick="onFileClick(event, ' + (entry.is_dir ? 'true' : 'false') + ', \'' + escapeAttr(entry.path) + '\')"' +
+                ' onpointerdown="handleFilePointerDown(event, \'' + escapeAttr(entry.path) + '\')"' +
+                ' onpointermove="handleFilePointerMove(event)"' +
+                ' onpointerup="handleFilePointerEnd(event)"' +
+                ' onpointercancel="handleFilePointerCancel(event)"' +
+                ' onpointerleave="handleFilePointerCancel(event)"' +
+                ' oncontextmenu="handleFileContextMenu(event, \'' + escapeAttr(entry.path) + '\')">';
             html += '<div class="file-select-marker">' + icons.check + '</div>';
             html += '<div class="file-icon ' + typeClass + '">' + icon + '</div>';
             html += '<div class="file-info">';
@@ -1789,12 +2277,16 @@ html, body {
             if (entry.is_dir) {
                 html += '<div class="file-actions">';
                 html += '<button class="btn-icon" onclick="event.stopPropagation(); renameItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\')" title="' + escapeHtml(t('rename')) + '">' + icons.rename + '</button>';
-                html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\')" title="' + escapeHtml(t('delete_label')) + '">' + icons.trash + '</button>';
+                if (showQuickDelete) {
+                    html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\')" title="' + escapeHtml(t('delete_label')) + '">' + icons.trash + '</button>';
+                }
                 html += '</div>';
             } else {
                 html += '<div class="file-actions">';
                 html += '<button class="btn-icon" onclick="event.stopPropagation(); renameItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\')" title="' + escapeHtml(t('rename')) + '">' + icons.rename + '</button>';
-                html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\')" title="' + escapeHtml(t('delete_label')) + '">' + icons.trash + '</button>';
+                if (showQuickDelete) {
+                    html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\')" title="' + escapeHtml(t('delete_label')) + '">' + icons.trash + '</button>';
+                }
                 html += '<span class="file-chevron"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>';
                 html += '</div>';
             }
@@ -1804,6 +2296,10 @@ html, body {
     }
 
     window.onFileClick = function(event, isDir, path) {
+        if (shouldSuppressSelectionClick(path)) {
+            event.preventDefault();
+            return;
+        }
         if (selectionMode) {
             event.preventDefault();
             togglePathSelection(path);
@@ -1850,14 +2346,31 @@ html, body {
         return null;
     }
 
+    function requiresRootForRecursiveDelete(entry) {
+        return !!(entry && entry.is_dir && !entry.is_empty);
+    }
+
+    function canUseRootActions() {
+        return rootUnlocked === true;
+    }
+
     function canDeleteEntry(entry) {
-        return !!entry && (!entry.is_dir || entry.is_empty);
+        return !!entry && (!requiresRootForRecursiveDelete(entry) || canUseRootActions());
     }
 
     function getSelectedEntries() {
         return selectedPaths.map(function(path) {
             return getEntryByPath(path);
         }).filter(Boolean);
+    }
+
+    function canDeleteEntriesInCurrentMode(entries) {
+        for (var i = 0; i < entries.length; i++) {
+            if (!canDeleteEntry(entries[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 
     async function deleteEntries(entries, deleteSdr) {
@@ -1890,17 +2403,14 @@ html, body {
     function confirmDeleteEntries(entries, onSuccess) {
         if (!entries || !entries.length) return;
 
-        if (entries.length > 1) {
-            for (var i = 0; i < entries.length; i++) {
-                if (!canDeleteEntry(entries[i])) {
-                    showToast(t('delete_only_files_empty_folders'), 'error');
-                    return;
-                }
-            }
+        if (!canDeleteEntriesInCurrentMode(entries)) {
+            showToast(t('root_required_recursive_delete'), 'error');
+            return;
         }
 
         var singleEntry = entries.length === 1 ? entries[0] : null;
         var isRecursiveDirDelete = !!(singleEntry && singleEntry.is_dir && !singleEntry.is_empty);
+        var hasRecursiveDelete = entries.some(requiresRootForRecursiveDelete);
         var titleStr = singleEntry
             ? (singleEntry.is_dir
                 ? (singleEntry.is_empty ? t('delete_empty_folder') : t('delete_folder'))
@@ -1909,7 +2419,8 @@ html, body {
         var msgStr = singleEntry
             ? (t('confirm_delete') + ' "' + escapeHtml(singleEntry.name) + '"?'
                 + (isRecursiveDirDelete ? ' ' + t('confirm_delete_contents') : ''))
-            : t('confirm_delete_selected').replace('{count}', entries.length);
+            : (t('confirm_delete_selected').replace('{count}', entries.length)
+                + (hasRecursiveDelete ? ' ' + t('confirm_delete_contents') : ''));
         var showSdrCheckbox = !!(singleEntry && !singleEntry.is_dir && singleEntry.has_sdr);
 
         showConfirm(
@@ -1938,6 +2449,10 @@ html, body {
     window.deleteItem = function(path) {
         var entry = getEntryByPath(path);
         if (!entry) return;
+        if (!canDeleteEntry(entry)) {
+            showToast(t('root_required_recursive_delete'), 'error');
+            return;
+        }
         confirmDeleteEntries([entry], function() {
             loadFiles();
         });
@@ -1968,12 +2483,14 @@ html, body {
     function updateClipboardUI() {
         var pasteBtn = document.getElementById('btnPaste');
         var hasClipboard = hasClipboardItems();
+        var canPaste = hasClipboard && canUseRootActions();
 
         if (!pasteBtn) return;
 
-        pasteBtn.disabled = !hasClipboard;
-        pasteBtn.classList.toggle('active', hasClipboard);
-        pasteBtn.setAttribute('aria-disabled', hasClipboard ? 'false' : 'true');
+        pasteBtn.disabled = !canPaste;
+        pasteBtn.classList.toggle('active', canPaste);
+        pasteBtn.setAttribute('aria-disabled', canPaste ? 'false' : 'true');
+        pasteBtn.title = !hasClipboard ? t('paste') : (canUseRootActions() ? t('paste') : t('root_required_clipboard'));
     }
 
     function setClipboard(mode, paths) {
@@ -1988,6 +2505,274 @@ html, body {
     function clearClipboard() {
         setClipboard(null, []);
     }
+
+    function updateAuthUI() {
+        var safeBtn = document.getElementById('btnSafeMode');
+        var rootBtn = document.getElementById('btnRootMode');
+
+        if (safeBtn) {
+            safeBtn.classList.toggle('active', !rootUnlocked);
+            safeBtn.setAttribute('aria-pressed', !rootUnlocked ? 'true' : 'false');
+        }
+
+        if (rootBtn) {
+            rootBtn.classList.toggle('active', rootUnlocked);
+            rootBtn.disabled = !hasRootPin || authRequestPending;
+            rootBtn.setAttribute('aria-pressed', rootUnlocked ? 'true' : 'false');
+            rootBtn.title = hasRootPin ? t('root_mode') : t('root_pin_unavailable');
+        }
+
+        updateClipboardUI();
+        updateSelectionUI();
+        if (currentEntries.length) {
+            renderFiles(currentEntries);
+        }
+    }
+
+    async function refreshAfterAuthModeChange() {
+        closeUploadZone();
+        if (currentDetailEntry) {
+            _hideDetailInternal();
+            history.replaceState({path: currentPath}, '', '#' + encodeURI(currentPath));
+        }
+        await loadFiles();
+    }
+
+    function getRootPinLength() {
+        return rootPinExpectedLength > 0 ? rootPinExpectedLength : 4;
+    }
+
+    function updateRootPinDots(pinValue, showError) {
+        var dotsEl = document.getElementById('rootPinDots');
+        if (!dotsEl) return;
+
+        var expectedLength = getRootPinLength();
+        var safeValue = String(pinValue || '');
+        var html = '';
+
+        for (var i = 0; i < expectedLength; i++) {
+            var classes = ['root-pin-dot'];
+            if (i < safeValue.length) {
+                classes.push('filled');
+            }
+            if (showError) {
+                classes.push('error');
+            }
+            html += '<span class="' + classes.join(' ') + '"></span>';
+        }
+
+        dotsEl.innerHTML = html;
+    }
+
+    function setRootPinError(message) {
+        var errorEl = document.getElementById('rootPinError');
+        if (!errorEl) return;
+        errorEl.textContent = message || '';
+    }
+
+    function resetRootPinModal() {
+        var input = document.getElementById('rootPinInput');
+        var confirmBtn = document.getElementById('rootPinConfirmBtn');
+
+        if (input) {
+            input.value = '';
+            input.maxLength = getRootPinLength();
+            input.setAttribute('maxlength', getRootPinLength());
+            input.setAttribute('readonly', 'readonly');
+        }
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = t('unlock');
+        }
+
+        setRootPinError('');
+        updateRootPinDots('', false);
+    }
+
+    window.focusRootPinInput = function() {
+        var input = document.getElementById('rootPinInput');
+        if (!input) return;
+
+        input.removeAttribute('readonly');
+
+        try {
+            input.focus({ preventScroll: true });
+        } catch (err) {
+            input.focus();
+        }
+
+        if (typeof input.click === 'function') {
+            input.click();
+        }
+
+        if (input.setSelectionRange) {
+            var valueLength = input.value.length;
+            input.setSelectionRange(valueLength, valueLength);
+        }
+    };
+
+    function scheduleRootPinFocus() {
+        focusRootPinInput();
+        requestAnimationFrame(function() {
+            focusRootPinInput();
+        });
+        setTimeout(function() {
+            focusRootPinInput();
+        }, 60);
+    }
+
+    window.handleRootPinInput = function() {
+        var input = document.getElementById('rootPinInput');
+        var confirmBtn = document.getElementById('rootPinConfirmBtn');
+        if (!input || !confirmBtn) return;
+
+        var normalized = input.value.replace(/\D+/g, '').slice(0, getRootPinLength());
+        if (normalized !== input.value) {
+            input.value = normalized;
+        }
+
+        setRootPinError('');
+        updateRootPinDots(normalized, false);
+        confirmBtn.disabled = normalized.length < getRootPinLength() || authRequestPending;
+    };
+
+    window.handleRootPinKeydown = function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            confirmRootPinModal();
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            hideRootPinModal();
+        }
+    };
+
+    async function initializeAuthState() {
+        rootUnlocked = false;
+        hasRootPin = false;
+        rootPinExpectedLength = 4;
+
+        try {
+            var status = await api('GET', '/api/auth/status');
+            hasRootPin = !!status.has_root_pin;
+            if (status && status.root_pin_length) {
+                rootPinExpectedLength = Math.max(4, Number(status.root_pin_length) || 4);
+            }
+
+            if (status.root_unlocked) {
+                await api('POST', '/api/auth/lock', {});
+            }
+        } catch (err) {
+            rootUnlocked = false;
+            hasRootPin = false;
+            rootPinExpectedLength = 4;
+        }
+
+        rootUnlocked = false;
+        resetRootPinModal();
+        updateAuthUI();
+    }
+
+    function showRootPinModal() {
+        resetRootPinModal();
+        document.getElementById('rootPinTitle').textContent = t('root_pin_title');
+        document.getElementById('rootPinMessage').textContent = t('root_pin_message');
+        document.getElementById('rootPinConfirmBtn').textContent = t('unlock');
+        document.getElementById('rootPinOverlay').classList.add('open');
+        scheduleRootPinFocus();
+    }
+
+    window.hideRootPinModal = function() {
+        var input = document.getElementById('rootPinInput');
+        if (input) {
+            input.blur();
+        }
+        document.getElementById('rootPinOverlay').classList.remove('open');
+        resetRootPinModal();
+    };
+
+    window.closeRootPinOverlay = function(e) {
+        if (e.target === document.getElementById('rootPinOverlay')) {
+            hideRootPinModal();
+        }
+    };
+
+    window.confirmRootPinModal = async function() {
+        if (authRequestPending) return;
+        var pinInput = document.getElementById('rootPinInput');
+        var confirmBtn = document.getElementById('rootPinConfirmBtn');
+        var pin = pinInput.value.trim();
+        if (pin.length < getRootPinLength()) {
+            setRootPinError(t('root_pin_required'));
+            pinInput.focus();
+            return;
+        }
+
+        authRequestPending = true;
+        confirmBtn.disabled = true;
+        updateAuthUI();
+
+        try {
+            await api('POST', '/api/auth/unlock', { pin: pin });
+            rootUnlocked = true;
+            hideRootPinModal();
+            updateAuthUI();
+            await refreshAfterAuthModeChange();
+            showToast(t('root_mode_enabled'), 'success');
+        } catch (err) {
+            rootUnlocked = false;
+            updateAuthUI();
+            resetRootPinModal();
+            pinInput.focus();
+
+            if (err.code === 'invalid_root_pin') {
+                setRootPinError(t('root_pin_invalid'));
+                updateRootPinDots('', true);
+            } else if (err.code === 'auth_throttled') {
+                var seconds = err.retryAfter || 5;
+                setRootPinError(t('root_pin_throttled').replace('{seconds}', seconds));
+                updateRootPinDots('', true);
+            } else if (err.code === 'root_pin_missing') {
+                hasRootPin = false;
+                rootPinExpectedLength = 4;
+                updateAuthUI();
+                hideRootPinModal();
+                showToast(t('root_pin_missing'), 'error');
+            } else {
+                setRootPinError(err.message || t('request_failed'));
+                updateRootPinDots('', true);
+            }
+        } finally {
+            authRequestPending = false;
+            confirmBtn.disabled = false;
+            handleRootPinInput();
+            updateAuthUI();
+        }
+    };
+
+    window.requestRootMode = function() {
+        if (rootUnlocked) return;
+        if (!hasRootPin) {
+            showToast(t('root_pin_unavailable'), 'error');
+            return;
+        }
+        showRootPinModal();
+    };
+
+    window.activateSafeMode = async function() {
+        if (!rootUnlocked) {
+            updateAuthUI();
+            return;
+        }
+        try {
+            await api('POST', '/api/auth/lock', {});
+            rootUnlocked = false;
+            updateAuthUI();
+            await refreshAfterAuthModeChange();
+            showToast(t('secure_mode_enabled'), 'info');
+        } catch (err) {
+            showToast(err.message || t('request_failed'), 'error');
+        }
+    };
 
     function getPathName(path) {
         if (!path) return '';
@@ -2039,6 +2824,8 @@ html, body {
         var cutBtn = document.getElementById('btnSelectionCut');
         var deleteBtn = document.getElementById('btnSelectionDelete');
         var hasSelection = selectedPaths.length > 0;
+        var selectedEntries = getSelectedEntries();
+        var canDeleteSelected = hasSelection && canDeleteEntriesInCurrentMode(selectedEntries);
         var showBar = selectionMode;
 
         if (selectBtn) {
@@ -2054,9 +2841,21 @@ html, body {
             selectionBar.classList.toggle('visible', showBar);
         }
 
-        if (copyBtn) copyBtn.disabled = !hasSelection;
-        if (cutBtn) cutBtn.disabled = !hasSelection;
-        if (deleteBtn) deleteBtn.disabled = !hasSelection;
+        if (copyBtn) {
+            copyBtn.disabled = !hasSelection || !canUseRootActions();
+            copyBtn.title = canUseRootActions() ? t('copy') : t('root_required_clipboard');
+        }
+        if (cutBtn) {
+            cutBtn.disabled = !hasSelection || !canUseRootActions();
+            cutBtn.title = canUseRootActions() ? t('cut') : t('root_required_clipboard');
+        }
+        if (deleteBtn) {
+            deleteBtn.hidden = !canUseRootActions();
+            deleteBtn.disabled = !canUseRootActions() || !canDeleteSelected;
+            deleteBtn.title = !canUseRootActions()
+                ? t('root_required_recursive_delete')
+                : (!hasSelection ? t('delete_label') : (canDeleteSelected ? t('delete_label') : t('root_required_recursive_delete')));
+        }
     }
 
     function togglePathSelection(path) {
@@ -2066,11 +2865,17 @@ html, body {
         } else {
             selectedPaths.splice(index, 1);
         }
+
+        if (selectionMode && selectedPaths.length === 0) {
+            selectionMode = false;
+        }
+
         updateSelectionUI();
         renderFiles(currentEntries);
     }
 
     window.toggleSelectionMode = function() {
+        cancelPendingLongPress();
         selectionMode = !selectionMode;
         if (selectionMode) {
             closeUploadZone();
@@ -2083,6 +2888,7 @@ html, body {
     };
 
     window.cancelSelection = function() {
+        cancelPendingLongPress();
         selectionMode = false;
         selectedPaths = [];
         updateSelectionUI();
@@ -2091,6 +2897,10 @@ html, body {
 
     window.copySelectedItems = function() {
         if (!selectedPaths.length) return;
+        if (!canUseRootActions()) {
+            showToast(t('root_required_clipboard'), 'error');
+            return;
+        }
         setClipboard('copy', selectedPaths);
         showToast(t('clipboard_copy_ready').replace('{count}', selectedPaths.length), 'success');
         window.cancelSelection();
@@ -2098,6 +2908,10 @@ html, body {
 
     window.cutSelectedItems = function() {
         if (!selectedPaths.length) return;
+        if (!canUseRootActions()) {
+            showToast(t('root_required_clipboard'), 'error');
+            return;
+        }
         setClipboard('cut', selectedPaths);
         showToast(t('clipboard_cut_ready').replace('{count}', selectedPaths.length), 'success');
         window.cancelSelection();
@@ -2105,6 +2919,10 @@ html, body {
 
     window.pasteClipboardItems = async function() {
         if (!hasClipboardItems()) return;
+        if (!canUseRootActions()) {
+            showToast(t('root_required_clipboard'), 'error');
+            return;
+        }
         var operation = {
             mode: clipboardState.mode,
             paths: clipboardState.paths.slice(),
@@ -2143,6 +2961,7 @@ html, body {
     };
 
     window.deleteSelectedItems = function() {
+        if (!canUseRootActions()) return;
         var entries = getSelectedEntries();
         if (!entries.length) return;
         confirmDeleteEntries(entries, clearSelectionAndReload);
@@ -2151,6 +2970,7 @@ html, body {
     // ===== File Detail View =====
     // Internal detail show: renders the detail view WITHOUT pushing history
     function _showDetailInternal(path) {
+        cancelPendingLongPress();
         var entry = null;
         for (var i = 0; i < currentEntries.length; i++) {
             if (currentEntries[i].path === path) {
@@ -2559,6 +3379,10 @@ html, body {
         }
     });
 
+    window.addEventListener('scroll', function() {
+        cancelPendingLongPress();
+    }, { passive: true });
+
     // ===== Sort & Filter =====
     window.onSortChange = function() {
         var val = document.getElementById('sortSelect').value;
@@ -2774,6 +3598,9 @@ html, body {
         })
         .then(function() {
             applyStaticTranslations();
+            return initializeAuthState();
+        })
+        .then(function() {
             return loadFiles();
         })
         .then(function() {

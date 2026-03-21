@@ -86,3 +86,51 @@ msgstr ""
 
 msgid "Image preview"
 msgstr ""
+
+msgid "Define Root PIN"
+msgstr ""
+
+msgid "Change Root PIN"
+msgstr ""
+
+msgid "Reveal Root PIN"
+msgstr ""
+
+msgid "Remove Root PIN"
+msgstr ""
+
+msgid "PIN cannot be empty."
+msgstr ""
+
+msgid "PIN must contain digits only."
+msgstr ""
+
+msgid "PIN must be between 4 and 8 digits."
+msgstr ""
+
+msgid "Root PIN saved."
+msgstr ""
+
+msgid "Root PIN updated."
+msgstr ""
+
+msgid "Root PIN is not set."
+msgstr ""
+
+msgid "The Root PIN will appear on the Kindle screen. Continue?"
+msgstr ""
+
+msgid "Reveal"
+msgstr ""
+
+msgid "Root PIN: %1"
+msgstr ""
+
+msgid "Remove the saved Root PIN from this device?"
+msgstr ""
+
+msgid "Remove"
+msgstr ""
+
+msgid "Root PIN removed."
+msgstr ""

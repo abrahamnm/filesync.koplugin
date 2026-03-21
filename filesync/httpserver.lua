@@ -9,6 +9,9 @@ local HttpServer = {
     _running = false,
     _static_cache = {},
     _fileops = nil,
+    _root_unlocked = false,
+    _unlock_failed_attempts = 0,
+    _unlock_blocked_until = 0,
 }
 
 function HttpServer:new(o)
@@ -40,6 +43,9 @@ function HttpServer:start()
     server:settimeout(0) -- Non-blocking
     self._server_socket = server
     self._running = true
+    self._root_unlocked = false
+    self._unlock_failed_attempts = 0
+    self._unlock_blocked_until = 0
     logger.info("FileSync HTTP: Listening on port", self.port)
 
     -- Schedule polling via UIManager
@@ -48,6 +54,9 @@ end
 
 function HttpServer:stop()
     self._running = false
+    self._root_unlocked = false
+    self._unlock_failed_attempts = 0
+    self._unlock_blocked_until = 0
     if self._server_socket then
         self._server_socket:close()
         self._server_socket = nil
@@ -87,6 +96,44 @@ function HttpServer:_poll()
     end
 
     self:_schedulePoll()
+end
+
+function HttpServer:setRootUnlocked(enabled)
+    self._root_unlocked = enabled == true
+end
+
+function HttpServer:isRootUnlocked()
+    return self._root_unlocked == true
+end
+
+function HttpServer:_getNow()
+    if socket.gettime then
+        return socket.gettime()
+    end
+    return os.time()
+end
+
+function HttpServer:_resetUnlockAttempts()
+    self._unlock_failed_attempts = 0
+    self._unlock_blocked_until = 0
+end
+
+function HttpServer:_getUnlockRetryAfter()
+    local remaining = self._unlock_blocked_until - self:_getNow()
+    if remaining <= 0 then
+        return 0
+    end
+    return math.ceil(remaining)
+end
+
+function HttpServer:_registerUnlockFailure()
+    self._unlock_failed_attempts = (self._unlock_failed_attempts or 0) + 1
+    if self._unlock_failed_attempts >= 3 then
+        self._unlock_failed_attempts = 0
+        self._unlock_blocked_until = self:_getNow() + 5
+        return true, self:_getUnlockRetryAfter()
+    end
+    return false, 0
 end
 
 function HttpServer:_handleClient(client)
@@ -194,11 +241,70 @@ function HttpServer:_route(client, method, path, query, headers, body)
         local FileOps = self._fileops
         local FileSyncManager = require("filesync/filesyncmanager")
         local safe_mode = FileSyncManager:getSafeMode()
+        local has_root_pin = FileSyncManager:hasRootPin()
+        local root_unlocked = self:isRootUnlocked()
+        local session_safe_mode
+        if has_root_pin then
+            session_safe_mode = not root_unlocked
+        else
+            session_safe_mode = safe_mode
+        end
 
         -- Language endpoint for web UI i18n
         if method == "GET" and path == "/api/lang" then
             local lang = G_reader_settings:readSetting("language") or "en"
             self:_sendJSON(client, 200, {lang = lang})
+            return
+        end
+
+        if method == "GET" and path == "/api/auth/status" then
+            self:_sendJSON(client, 200, {
+                has_root_pin = has_root_pin,
+                root_unlocked = root_unlocked,
+                root_pin_length = FileSyncManager:getRootPinLength(),
+            })
+            return
+        end
+
+        if method == "POST" and path == "/api/auth/unlock" then
+            local data = self:_parseJSON(body)
+            if not has_root_pin then
+                self:setRootUnlocked(false)
+                self:_sendJSON(client, 400, {error = "Root PIN is not configured", code = "root_pin_missing"})
+            elseif not data or data.pin == nil then
+                self:setRootUnlocked(false)
+                self:_sendJSON(client, 400, {error = "Missing pin", code = "missing_pin"})
+            elseif self:_getUnlockRetryAfter() > 0 then
+                self:setRootUnlocked(false)
+                self:_sendJSON(client, 429, {
+                    error = "Too many attempts. Try again soon.",
+                    code = "auth_throttled",
+                    retry_after = self:_getUnlockRetryAfter(),
+                })
+            elseif FileSyncManager:verifyRootPin(data.pin) then
+                self:setRootUnlocked(true)
+                self:_resetUnlockAttempts()
+                self:_sendJSON(client, 200, {success = true, root_unlocked = true})
+            else
+                self:setRootUnlocked(false)
+                local throttled, retry_after = self:_registerUnlockFailure()
+                if throttled then
+                    self:_sendJSON(client, 429, {
+                        error = "Too many attempts. Try again soon.",
+                        code = "auth_throttled",
+                        retry_after = retry_after,
+                    })
+                else
+                    self:_sendJSON(client, 403, {error = "Invalid Root PIN", code = "invalid_root_pin"})
+                end
+            end
+            return
+        end
+
+        if method == "POST" and path == "/api/auth/lock" then
+            self:setRootUnlocked(false)
+            self:_resetUnlockAttempts()
+            self:_sendJSON(client, 200, {success = true, root_unlocked = false})
             return
         end
 
@@ -224,7 +330,7 @@ function HttpServer:_route(client, method, path, query, headers, body)
                 return
             end
             -- Block non-whitelisted files in safe mode
-            if safe_mode then
+            if session_safe_mode then
                 local filename = file_path:match("([^/]+)$")
                 if filename and not FileOps:isExtensionSafe(filename) then
                     self:_sendJSON(client, 403, {error = "Access denied: file type not allowed in safe mode"})
@@ -254,7 +360,7 @@ function HttpServer:_route(client, method, path, query, headers, body)
             local sort_by = query.sort or "name"
             local sort_order = query.order or "asc"
             local filter = query.filter or ""
-            local result, err_msg = FileOps:listDirectory(dir, sort_by, sort_order, filter, safe_mode)
+            local result, err_msg = FileOps:listDirectory(dir, sort_by, sort_order, filter, session_safe_mode)
             if result then
                 self:_sendJSON(client, 200, result)
             else
@@ -268,7 +374,7 @@ function HttpServer:_route(client, method, path, query, headers, body)
                 return
             end
             -- Block non-whitelisted files in safe mode
-            if safe_mode then
+            if session_safe_mode then
                 local filename = file_path:match("([^/]+)$")
                 if filename and not FileOps:isExtensionSafe(filename) then
                     self:_sendJSON(client, 403, {error = "Access denied: file type not allowed in safe mode"})
@@ -328,7 +434,9 @@ function HttpServer:_route(client, method, path, query, headers, body)
 
         elseif method == "POST" and path == "/api/move" then
             local data = self:_parseJSON(body)
-            if data and data.old_path and data.new_path then
+            if not root_unlocked then
+                self:_sendJSON(client, 403, {error = "Root mode required", code = "root_required"})
+            elseif data and data.old_path and data.new_path then
                 local ok, err_msg = FileOps:move(data.old_path, data.new_path)
                 if ok then
                     self:_sendJSON(client, 200, {success = true})
@@ -341,7 +449,9 @@ function HttpServer:_route(client, method, path, query, headers, body)
 
         elseif method == "POST" and path == "/api/copy" then
             local data = self:_parseJSON(body)
-            if data and data.old_path and data.new_path then
+            if not root_unlocked then
+                self:_sendJSON(client, 403, {error = "Root mode required", code = "root_required"})
+            elseif data and data.old_path and data.new_path then
                 local ok, err_msg = FileOps:copyFile(data.old_path, data.new_path)
                 if ok then
                     self:_sendJSON(client, 200, {success = true})
@@ -355,8 +465,12 @@ function HttpServer:_route(client, method, path, query, headers, body)
         elseif method == "POST" and path == "/api/delete" then
             local data = self:_parseJSON(body)
             if data and data.path then
+                if data.recursive == true and not root_unlocked then
+                    self:_sendJSON(client, 403, {error = "Root mode required", code = "root_required"})
+                    return
+                end
                 local delete_options = {
-                    safe_mode = safe_mode,
+                    safe_mode = session_safe_mode,
                     delete_sdr = data.delete_sdr == true,
                     recursive = data.recursive == true,
                 }

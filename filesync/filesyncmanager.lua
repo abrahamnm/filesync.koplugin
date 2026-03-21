@@ -38,6 +38,9 @@ local FileSyncManager = {
 }
 
 local DEFAULT_PORT = 8080
+-- The Root PIN is stored in plain plugin settings because this first version
+-- needs to reveal it locally on the device. This is convenient, not secure.
+local ROOT_PIN_SETTING_KEY = "filesync_root_pin"
 
 function FileSyncManager:getPort()
     if self._port then return self._port end
@@ -58,6 +61,182 @@ end
 function FileSyncManager:setSafeMode(enabled)
     G_reader_settings:saveSetting("filesync_safe_mode", enabled)
     G_reader_settings:flush()
+end
+
+function FileSyncManager:_normalizeRootPin(pin)
+    if pin == nil then
+        return ""
+    end
+    return tostring(pin):gsub("^%s+", ""):gsub("%s+$", "")
+end
+
+function FileSyncManager:_validateRootPin(pin)
+    pin = self:_normalizeRootPin(pin)
+    if pin == "" then
+        return nil, _("PIN cannot be empty.")
+    end
+    if not pin:match("^%d+$") then
+        return nil, _("PIN must contain digits only.")
+    end
+    if #pin < 4 or #pin > 8 then
+        return nil, _("PIN must be between 4 and 8 digits.")
+    end
+    return pin
+end
+
+function FileSyncManager:getRootPin()
+    local pin = G_reader_settings:readSetting(ROOT_PIN_SETTING_KEY)
+    pin = self:_normalizeRootPin(pin)
+    if pin == "" then
+        return nil
+    end
+    return pin
+end
+
+function FileSyncManager:hasRootPin()
+    return self:getRootPin() ~= nil
+end
+
+function FileSyncManager:getRootPinLength()
+    local pin = self:getRootPin()
+    if not pin then
+        return nil
+    end
+    return #pin
+end
+
+function FileSyncManager:_resetRootUnlock()
+    if self._server and self._server.setRootUnlocked then
+        self._server:setRootUnlocked(false)
+    elseif self._server then
+        self._server._root_unlocked = false
+    end
+end
+
+function FileSyncManager:setRootPin(pin)
+    local normalized_pin, err = self:_validateRootPin(pin)
+    if not normalized_pin then
+        return false, err
+    end
+
+    G_reader_settings:saveSetting(ROOT_PIN_SETTING_KEY, normalized_pin)
+    G_reader_settings:flush()
+    self:_resetRootUnlock()
+    return true
+end
+
+function FileSyncManager:removeRootPin()
+    if G_reader_settings.delSetting then
+        G_reader_settings:delSetting(ROOT_PIN_SETTING_KEY)
+    else
+        G_reader_settings:saveSetting(ROOT_PIN_SETTING_KEY, nil)
+    end
+    G_reader_settings:flush()
+    self:_resetRootUnlock()
+    return true
+end
+
+function FileSyncManager:verifyRootPin(pin)
+    local saved_pin = self:getRootPin()
+    if not saved_pin then
+        return false
+    end
+    return self:_normalizeRootPin(pin) == saved_pin
+end
+
+function FileSyncManager:promptSetRootPin(is_change)
+    local InputDialog = require("ui/widget/inputdialog")
+    local pin_dialog
+    local title = is_change and _("Change Root PIN") or _("Define Root PIN")
+    local success_message = is_change and _("Root PIN updated.") or _("Root PIN saved.")
+
+    pin_dialog = InputDialog:new{
+        title = title,
+        input = "",
+        input_type = "number",
+        input_hint = "1234",
+        buttons = {
+            {
+                {
+                    text = _("Cancel"),
+                    id = "close",
+                    callback = function()
+                        UIManager:close(pin_dialog)
+                    end,
+                },
+                {
+                    text = _("Save"),
+                    is_enter_default = true,
+                    callback = function()
+                        local ok, err = self:setRootPin(pin_dialog:getInputText())
+                        if not ok then
+                            UIManager:show(InfoMessage:new{
+                                text = err,
+                                timeout = 3,
+                            })
+                            return
+                        end
+
+                        UIManager:close(pin_dialog)
+                        UIManager:show(InfoMessage:new{
+                            text = success_message,
+                            timeout = 3,
+                        })
+                    end,
+                },
+            },
+        },
+    }
+    UIManager:show(pin_dialog)
+    pin_dialog:onShowKeyboard()
+end
+
+function FileSyncManager:confirmRevealRootPin()
+    local pin = self:getRootPin()
+    if not pin then
+        UIManager:show(InfoMessage:new{
+            text = _("Root PIN is not set."),
+            timeout = 3,
+        })
+        return
+    end
+
+    UIManager:show(ConfirmBox:new{
+        title = _("Reveal Root PIN"),
+        text = _("The Root PIN will appear on the Kindle screen. Continue?"),
+        ok_text = _("Reveal"),
+        cancel_text = _("Cancel"),
+        ok_callback = function()
+            UIManager:show(InfoMessage:new{
+                text = T(_("Root PIN: %1"), pin),
+                timeout = 8,
+            })
+        end,
+    })
+end
+
+function FileSyncManager:confirmRemoveRootPin()
+    if not self:hasRootPin() then
+        UIManager:show(InfoMessage:new{
+            text = _("Root PIN is not set."),
+            timeout = 3,
+        })
+        return
+    end
+
+    UIManager:show(ConfirmBox:new{
+        title = _("Remove Root PIN"),
+        text = _("Remove the saved Root PIN from this device?"),
+        ok_text = _("Remove"),
+        cancel_text = _("Cancel"),
+        ok_callback = function()
+            self:removeRootPin()
+            UIManager:show(InfoMessage:new{
+                text = _("Root PIN removed."),
+                timeout = 3,
+            })
+        end,
+    })
 end
 
 function FileSyncManager:configurePort()
@@ -347,7 +526,7 @@ function FileSyncManager:showQRCode()
 
     -- Icon + Title row
     local icon_dir = debug.getinfo(1, "S").source:match("@(.+)"):match("(.*/)")
-    local icon_size = Screen:scaleBySize(36)
+    local icon_size = Screen:scaleBySize(46)
     local icon_widget = ImageWidget:new{
         file = icon_dir .. "icon.png",
         width = icon_size,
@@ -356,14 +535,14 @@ function FileSyncManager:showQRCode()
     }
     local title_text = TextWidget:new{
         text = _("FileSync"),
-        face = Font:getFace("infofont", 48),
+        face = Font:getFace("infofont", 34),
         bold = true,
         fgcolor = Blitbuffer.COLOR_BLACK,
     }
     local title_widget = HorizontalGroup:new{
         align = "center",
         icon_widget,
-        HorizontalSpan:new{ width = Screen:scaleBySize(10) },
+        HorizontalSpan:new{ width = Screen:scaleBySize(8) },
         title_text,
     }
 
@@ -416,19 +595,24 @@ function FileSyncManager:showQRCode()
     }
 
     -- X (close) button in the top-right corner
+    local close_button_box_size = Screen:scaleBySize(40)
     local close_button_text = TextWidget:new{
         text = "\u{00D7}", -- multiplication sign as X
-        face = Font:getFace("infofont", 32),
+        face = Font:getFace("infofont", 30),
         fgcolor = Blitbuffer.COLOR_BLACK,
     }
     local close_button = FrameContainer:new{
         bordersize = Size.border.button,
-        radius = Size.radius.button,
-        padding = Screen:scaleBySize(6),
-        padding_left = Screen:scaleBySize(12),
-        padding_right = Screen:scaleBySize(12),
+        radius = Screen:scaleBySize(8),
+        padding = 0,
         background = Blitbuffer.COLOR_WHITE,
-        close_button_text,
+        CenterContainer:new{
+            dimen = Geom:new{
+                w = close_button_box_size,
+                h = close_button_box_size,
+            },
+            close_button_text,
+        },
     }
     local close_button_row = RightContainer:new{
         dimen = { w = screen_width - Screen:scaleBySize(10), h = close_button:getSize().h + Screen:scaleBySize(10) },

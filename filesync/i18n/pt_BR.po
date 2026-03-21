@@ -90,3 +90,51 @@ msgstr "Servidor em execução em segundo plano. Pare o servidor para economizar
 
 msgid "Image preview"
 msgstr "Prévia de imagem"
+
+msgid "Define Root PIN"
+msgstr "Definir PIN Root"
+
+msgid "Change Root PIN"
+msgstr "Alterar PIN Root"
+
+msgid "Reveal Root PIN"
+msgstr "Revelar PIN Root"
+
+msgid "Remove Root PIN"
+msgstr "Remover PIN Root"
+
+msgid "PIN cannot be empty."
+msgstr "O PIN não pode estar vazio."
+
+msgid "PIN must contain digits only."
+msgstr "O PIN deve conter apenas dígitos."
+
+msgid "PIN must be between 4 and 8 digits."
+msgstr "O PIN deve ter entre 4 e 8 dígitos."
+
+msgid "Root PIN saved."
+msgstr "PIN Root salvo."
+
+msgid "Root PIN updated."
+msgstr "PIN Root atualizado."
+
+msgid "Root PIN is not set."
+msgstr "O PIN Root não está definido."
+
+msgid "The Root PIN will appear on the Kindle screen. Continue?"
+msgstr "O PIN Root aparecerá na tela do Kindle. Continuar?"
+
+msgid "Reveal"
+msgstr "Revelar"
+
+msgid "Root PIN: %1"
+msgstr "PIN Root: %1"
+
+msgid "Remove the saved Root PIN from this device?"
+msgstr "Remover o PIN Root salvo deste dispositivo?"
+
+msgid "Remove"
+msgstr "Remover"
+
+msgid "Root PIN removed."
+msgstr "PIN Root removido."
