@@ -24,6 +24,7 @@ Works on **Kindle** and **Kobo** devices running KOReader.
 - **Create Folders** — Organize your library into directories
 - **Rename & Delete** — Limited file management with confirmation dialogs
 - **Search & Sort** — Filter by name, sort by name/size/date/type
+- **Safe Mode** — Show only books and images, hiding system files
 - **Responsive UI** — Designed for smartphones, works on any screen
 
 ## How It Works
@@ -140,6 +141,16 @@ Once connected, the web interface lets you:
 2. Tap **Server port**
 3. Enter a port number between 1024 and 65535 (default: 8080)
 4. Restart the server for the change to take effect
+
+### Safe Mode
+
+Safe mode is **enabled by default** and limits the web interface to only show files relevant to your reading library. When enabled:
+
+- Only **ebooks** (EPUB, PDF, MOBI, AZW3, FB2, DJVU, CBZ, etc.), **documents** (TXT, DOC, RTF, HTML, etc.), and **images** (JPG, PNG, GIF, WebP) are shown
+- System files, configuration files, and other non-book files are hidden
+- KOReader metadata directories (`.sdr` folders) are hidden and automatically cleaned up when deleting a book
+
+To toggle safe mode, open the plugin menu and tap **Safe mode**. Disabling it will show all files on the device.
 
 ## Troubleshooting
 
