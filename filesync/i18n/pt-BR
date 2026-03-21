@@ -1,0 +1,90 @@
+# Portuguese Brazil translations for FileSync KOReader plugin
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: pt_BR\n"
+
+msgid "FileSync"
+msgstr "FileSync"
+
+msgid "FileSync - Wireless File Manager"
+msgstr "FileSync - Gerenciador de Arquivos Sem Fio"
+
+msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
+msgstr "Inicie um servidor web HTTP local e exiba um código QR. Escaneie com seu telefone para gerenciar livros e arquivos no seu dispositivo sem fio por meio de interface web."
+
+msgid "Stop file server"
+msgstr "Parar servidor de arquivos"
+
+msgid "Start file server"
+msgstr "Iniciar servidor de arquivos"
+
+msgid "Server port"
+msgstr "Porta do servidor"
+
+msgid "Safe mode"
+msgstr "Modo seguro"
+
+msgid "Show QR code"
+msgstr "Mostrar código QR"
+
+msgid "About"
+msgstr "Sobre"
+
+msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
+msgstr "FileSync v1.0.0\n\nGerenciador de arquivos sem fio para KOReader.\n\nInicie o servidor, escaneie o código QR com seu celular e gerencie seus arquivos de qualquer navegador (devem estar na mesma rede WiFi)."
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Save"
+msgstr "Salvar"
+
+msgid "Port set to %1. Restart the server for changes to take effect."
+msgstr "Porta configurada em %1. Reinicie o servidor para realizar as mudanças."
+
+msgid "Invalid port. Please enter a number between 1024 and 65535."
+msgstr "Porta inválida. Insira un número entre 1024 e 65535 (Porta padrão 8080)."
+
+msgid "FileSync server is already running."
+msgstr "O servidor FileSync está em execução."
+
+msgid "WiFi is not enabled. Please turn on WiFi first."
+msgstr "WiFi está desativado. Ative o WiFi primeiro."
+
+msgid "Could not determine device IP address. Make sure WiFi is connected."
+msgstr "Endereço IP não identificado. Certifique-se que o WiFi está conectado."
+
+msgid "Failed to start server: %1"
+msgstr "Erro ao iniciar o servidor: %1"
+
+msgid "FileSync server stopped."
+msgstr "Servidor FileSync parado."
+
+msgid "Low Battery"
+msgstr "Bateria baixa"
+
+msgid "Battery level is at %1%. Running the server may drain the battery quickly."
+msgstr "O nível de bateria está em %1%. Executar o servidor irá drenar a bateria rapidamente."
+
+msgid "Start Anyway"
+msgstr "Forçar inicialização"
+
+msgid "Server is not running."
+msgstr "O servidor não está execução."
+
+msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
+msgstr "Escaneie o código QR ou digite a URL\nem seu navegador.\n\nAmbos os dispositivos devem estar na mesma rede WiFi."
+
+msgid "Stop Server"
+msgstr "Parar o servidor"
+
+msgid "Stopping server..."
+msgstr "Parando o servidor..."
+
+msgid "Server running in the background. Stop the server to save battery."
+msgstr "Servidor em execução no segundo plano. Pare o servidor para economizar bateria."
+
+msgid "Image preview"
+msgstr "Prévia de imagem"
