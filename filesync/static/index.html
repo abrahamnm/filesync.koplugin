@@ -97,15 +97,37 @@ html, body {
 }
 
 /* ===== Breadcrumbs ===== */
-.breadcrumbs {
+.breadcrumbs-wrap {
     max-width: 800px;
     margin: 0 auto;
     padding: 12px 16px 4px;
     display: flex;
     align-items: center;
+    gap: 8px;
+}
+
+.breadcrumb-back {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 999px;
+    font-size: 16px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.breadcrumb-back.hidden {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.breadcrumbs {
+    display: flex;
+    align-items: center;
     gap: 4px;
     flex-wrap: wrap;
     font-size: 13px;
+    min-width: 0;
 }
 
 .breadcrumb-item {
@@ -231,6 +253,12 @@ html, body {
     flex-shrink: 0;
 }
 
+.btn:disabled {
+    opacity: 0.55;
+    cursor: default;
+    pointer-events: none;
+}
+
 .btn-primary {
     background: var(--primary);
     color: #fff;
@@ -248,6 +276,12 @@ html, body {
 
 .btn-secondary:hover {
     background: var(--surface-hover);
+}
+
+.btn-secondary.active {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-color: rgba(59, 130, 246, 0.28);
 }
 
 .btn-danger {
@@ -315,6 +349,49 @@ html, body {
 
 .file-item:active {
     transform: translateY(0);
+}
+
+.file-item.selection-mode {
+    padding-left: 10px;
+}
+
+.file-item.selected {
+    border-color: rgba(59, 130, 246, 0.3);
+    background: var(--primary-light);
+}
+
+.file-select-marker {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: #fff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--transition);
+}
+
+.file-select-marker svg {
+    width: 12px;
+    height: 12px;
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+
+.file-item.selection-mode .file-select-marker {
+    display: flex;
+}
+
+.file-item.selected .file-select-marker {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.file-item.selected .file-select-marker svg {
+    opacity: 1;
 }
 
 .file-icon {
@@ -397,9 +474,19 @@ html, body {
     opacity: 1;
 }
 
+.file-actions .file-chevron {
+    display: flex;
+    align-items: center;
+    color: var(--text-tertiary);
+}
+
+.file-item.selection-mode .file-actions {
+    display: none;
+}
+
 /* Always show actions on touch devices */
 @media (hover: none) {
-    .file-actions .btn-icon {
+    .file-item.is-dir .file-actions .btn-icon {
         opacity: 1;
     }
 }
@@ -515,6 +602,61 @@ html, body {
 
 .progress-bar-fill.error {
     background: var(--danger);
+}
+
+/* ===== Selection Bar ===== */
+.selection-bar-wrap {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 16px;
+    z-index: 140;
+    padding: 0 16px;
+    pointer-events: none;
+}
+
+.selection-bar {
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 12px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    pointer-events: auto;
+}
+
+.selection-bar.visible {
+    display: flex;
+}
+
+.selection-bar-info {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.selection-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+@media (max-width: 560px) {
+    .selection-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .selection-bar-actions .btn {
+        flex: 1;
+    }
 }
 
 /* ===== Modal ===== */
@@ -714,7 +856,7 @@ html, body {
 /* ===== Responsive tweaks ===== */
 @media (max-width: 400px) {
     .header { padding: 10px 12px; }
-    .breadcrumbs { padding: 10px 12px 2px; }
+    .breadcrumbs-wrap { padding: 10px 12px 2px; }
     .toolbar { padding: 6px 12px; }
     .file-list { padding: 4px 12px 100px; }
     .dropzone { padding: 0 12px; }
@@ -943,6 +1085,23 @@ html, body {
                 </svg>
                 <span data-i18n="upload">Upload</span>
             </button>
+            <button class="btn btn-secondary btn-sm" onclick="pasteClipboardItems()" id="btnPaste" title="Paste" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 4h8"/>
+                    <path d="M9 3h6a1 1 0 011 1v2H8V4a1 1 0 011-1z"/>
+                    <path d="M8 6H7a2 2 0 00-2 2v11a2 2 0 002 2h10a2 2 0 002-2V8a2 2 0 00-2-2h-1"/>
+                    <path d="M10 12h6"/>
+                    <path d="M10 16h4"/>
+                </svg>
+                <span data-i18n="paste">Paste</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleSelectionMode()" id="btnSelect" title="Select items">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                </svg>
+                <span data-i18n="select">Select</span>
+            </button>
             <button class="btn btn-secondary btn-sm" onclick="showNewFolderModal()" id="btnFolder" title="New folder">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
@@ -956,7 +1115,10 @@ html, body {
 </header>
 
 <!-- Breadcrumbs -->
-<nav class="breadcrumbs" id="breadcrumbs"></nav>
+<div class="breadcrumbs-wrap">
+    <button class="btn btn-secondary btn-sm breadcrumb-back hidden" id="btnParentNav" type="button" onclick="navigateUp()" aria-label="Go up" title="Go up">&larr;</button>
+    <nav class="breadcrumbs" id="breadcrumbs"></nav>
+</div>
 
 <!-- Toolbar -->
 <div class="toolbar">
@@ -1002,6 +1164,46 @@ html, body {
 
 <!-- Upload Progress -->
 <div class="upload-progress" id="uploadProgress"></div>
+
+<!-- Selection Bar -->
+<div class="selection-bar-wrap">
+    <div class="selection-bar" id="selectionBar">
+        <div class="selection-bar-info" id="selectionCount"></div>
+        <div class="selection-bar-actions">
+            <button class="btn btn-secondary btn-sm" id="btnSelectionCopy" onclick="copySelectedItems()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="11" height="11" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                </svg>
+                <span data-i18n="copy">Copy</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btnSelectionCut" onclick="cutSelectedItems()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="6" cy="6" r="3"/>
+                    <circle cx="6" cy="18" r="3"/>
+                    <line x1="20" y1="4" x2="8.12" y2="15.88"/>
+                    <line x1="14.47" y1="14.48" x2="20" y2="20"/>
+                    <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+                </svg>
+                <span data-i18n="cut">Cut</span>
+            </button>
+            <button class="btn btn-danger btn-sm" id="btnSelectionDelete" onclick="deleteSelectedItems()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+                <span data-i18n="delete_label">Delete</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btnSelectionCancel" onclick="cancelSelection()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+                <span data-i18n="cancel">Cancel</span>
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- File List -->
 <div class="file-list" id="fileList"></div>
@@ -1070,7 +1272,14 @@ html, body {
         en: {
             filesync: "FileSync",
             upload: "Upload",
+            paste: "Paste",
+            select: "Select",
             folder: "Folder",
+            go_up: "Go up",
+            move: "Move",
+            copy: "Copy",
+            cut: "Cut",
+            selected_label: "Selected",
             filter_placeholder: "Filter files...",
             sort_name_asc: "Name A-Z",
             sort_name_desc: "Name Z-A",
@@ -1113,22 +1322,41 @@ html, body {
             delete_file: "Delete file",
             delete_folder: "Delete folder",
             delete_empty_folder: "Delete empty folder",
+            delete_selected: "Delete selected",
             confirm_delete: "Are you sure you want to delete",
+            confirm_delete_selected: "Are you sure you want to delete {count} selected items?",
             confirm_delete_contents: "This will delete all contents inside.",
+            delete_only_files_empty_folders: "Only files and empty folders can be deleted",
             unknown: "Unknown",
             just_now: "Just now",
             minutes_ago: "m ago",
             hours_ago: "h ago",
             days_ago: "d ago",
+            month_names: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
             upload_files_title: "Upload files",
             new_folder_title: "New folder",
             also_delete_sdr: "Also delete reading metadata (.sdr)",
-            image_preview: "Image preview"
+            image_preview: "Image preview",
+            cut_placeholder: "Cut is ready. Paste will be implemented next",
+            paste_placeholder: "Paste will be implemented next",
+            clipboard_copy_ready: "{count} items copied",
+            clipboard_cut_ready: "{count} items cut",
+            invalid_server_response: "Invalid server response",
+            server_error: "Server error",
+            request_failed: "Request failed",
+            book_cover: "Book cover"
         },
         es: {
             filesync: "FileSync",
             upload: "Subir",
+            paste: "Pegar",
+            select: "Seleccionar",
             folder: "Carpeta",
+            go_up: "Subir",
+            move: "Mover",
+            copy: "Copiar",
+            cut: "Cortar",
+            selected_label: "Seleccionados",
             filter_placeholder: "Filtrar archivos...",
             sort_name_asc: "Nombre A-Z",
             sort_name_desc: "Nombre Z-A",
@@ -1171,23 +1399,121 @@ html, body {
             delete_file: "Eliminar archivo",
             delete_folder: "Eliminar carpeta",
             delete_empty_folder: "Eliminar carpeta vac\u00eda",
+            delete_selected: "Eliminar seleccionados",
             confirm_delete: "\u00bfEst\u00e1s seguro de que quieres eliminar",
+            confirm_delete_selected: "\u00bfEst\u00e1s seguro de que quieres eliminar {count} elementos seleccionados?",
             confirm_delete_contents: "Esto eliminar\u00e1 todo el contenido.",
+            delete_only_files_empty_folders: "Solo se pueden eliminar archivos y carpetas vac\u00edas",
             unknown: "Desconocido",
             just_now: "Ahora",
             minutes_ago: "min",
             hours_ago: "h",
             days_ago: "d",
+            month_names: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
             upload_files_title: "Subir archivos",
             new_folder_title: "Nueva carpeta",
             also_delete_sdr: "Tambi\u00e9n eliminar metadatos de lectura (.sdr)",
-            image_preview: "Vista previa de imagen"
+            image_preview: "Vista previa de imagen",
+            cut_placeholder: "Cortar est\u00e1 listo. Pegar se implementar\u00e1 despu\u00e9s",
+            paste_placeholder: "Pegar se implementar\u00e1 despu\u00e9s",
+            clipboard_copy_ready: "{count} elementos copiados",
+            clipboard_cut_ready: "{count} elementos cortados",
+            invalid_server_response: "Respuesta inv\u00e1lida del servidor",
+            server_error: "Error del servidor",
+            request_failed: "Solicitud fallida",
+            book_cover: "Portada del libro"
+        },
+        pt_BR: {
+            filesync: "FileSync",
+            upload: "Enviar",
+            paste: "Colar",
+            select: "Selecionar",
+            folder: "Pasta",
+            go_up: "Voltar",
+            move: "Mover",
+            copy: "Copiar",
+            cut: "Recortar",
+            selected_label: "Selecionados",
+            filter_placeholder: "Filtrar arquivos...",
+            sort_name_asc: "Nome A-Z",
+            sort_name_desc: "Nome Z-A",
+            sort_newest: "Mais recentes",
+            sort_oldest: "Mais antigos",
+            sort_largest: "Maiores primeiro",
+            sort_smallest: "Menores primeiro",
+            sort_type: "Tipo",
+            dropzone_text: "Arraste e solte arquivos aqui ou",
+            dropzone_browse: "procure",
+            choose_files: "Escolher arquivos",
+            loading: "Carregando...",
+            failed_to_load: "Falha ao carregar arquivos",
+            empty_folder: "Esta pasta est\u00e1 vazia",
+            empty_folder_sub: "Envie arquivos ou crie uma nova pasta",
+            folder_label: "Pasta",
+            file_type: "Tipo de arquivo",
+            size: "Tamanho",
+            modified: "Modificado",
+            download: "Baixar",
+            downloading: "Baixando",
+            rename: "Renomear",
+            delete_label: "Excluir",
+            back: "Voltar",
+            cancel: "Cancelar",
+            create: "Criar",
+            new_folder: "Nova pasta",
+            renamed_successfully: "Renomeado com sucesso",
+            deleted_successfully: "Exclu\u00eddo com sucesso",
+            folder_created: "Pasta criada",
+            uploaded: "enviado",
+            rename_failed: "Erro ao renomear:",
+            delete_failed: "Erro ao excluir:",
+            upload_failed: "Erro ao enviar:",
+            failed_create_folder: "Erro ao criar pasta:",
+            home: "In\u00edcio",
+            done: "Conclu\u00eddo",
+            failed: "Falhou",
+            network_error: "Erro de rede",
+            delete_file: "Excluir arquivo",
+            delete_folder: "Excluir pasta",
+            delete_empty_folder: "Excluir pasta vazia",
+            delete_selected: "Excluir selecionados",
+            confirm_delete: "Tem certeza de que deseja excluir",
+            confirm_delete_selected: "Tem certeza de que deseja excluir {count} itens selecionados?",
+            confirm_delete_contents: "Isso excluir\u00e1 todo o conte\u00fado interno.",
+            delete_only_files_empty_folders: "S\u00f3 \u00e9 poss\u00edvel excluir arquivos e pastas vazias",
+            unknown: "Desconhecido",
+            just_now: "Agora",
+            minutes_ago: "min",
+            hours_ago: "h",
+            days_ago: "d",
+            month_names: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"],
+            upload_files_title: "Enviar arquivos",
+            new_folder_title: "Nova pasta",
+            also_delete_sdr: "Excluir tamb\u00e9m os metadados de leitura (.sdr)",
+            image_preview: "Pr\u00e9via de imagem",
+            cut_placeholder: "Recortar j\u00e1 est\u00e1 pronto. Colar ser\u00e1 implementado em seguida",
+            paste_placeholder: "Colar ser\u00e1 implementado em seguida",
+            clipboard_copy_ready: "{count} itens copiados",
+            clipboard_cut_ready: "{count} itens recortados",
+            invalid_server_response: "Resposta inv\u00e1lida do servidor",
+            server_error: "Erro do servidor",
+            request_failed: "Falha na requisi\u00e7\u00e3o",
+            book_cover: "Capa do livro"
         }
     };
     var currentLang = "en";
 
     function t(key) {
         return (translations[currentLang] && translations[currentLang][key]) || translations.en[key] || key;
+    }
+
+    function getParentPath(path) {
+        path = path || '/';
+        if (path === '/') return '/';
+        var normalized = path.replace(/\/+$/, '') || '/';
+        if (normalized === '/') return '/';
+        var lastSlash = normalized.lastIndexOf('/');
+        return lastSlash > 0 ? normalized.substring(0, lastSlash) : '/';
     }
 
     function applyStaticTranslations() {
@@ -1198,13 +1524,25 @@ html, body {
         document.getElementById('searchInput').placeholder = t('filter_placeholder');
         // Button titles
         document.getElementById('btnUpload').title = t('upload_files_title');
+        document.getElementById('btnPaste').title = t('paste');
+        document.getElementById('btnPaste').setAttribute('aria-label', t('paste'));
+        document.getElementById('btnSelect').title = t('select');
         document.getElementById('btnFolder').title = t('new_folder_title');
+        document.getElementById('btnParentNav').title = t('go_up');
+        document.getElementById('btnParentNav').setAttribute('aria-label', t('go_up'));
+        document.getElementById('btnSelectionCopy').title = t('copy');
+        document.getElementById('btnSelectionCut').title = t('cut');
+        document.getElementById('btnSelectionDelete').title = t('delete_label');
+        document.getElementById('btnSelectionCancel').title = t('cancel');
         // Dropzone text
         var dzText = document.getElementById('dropzoneText');
         dzText.innerHTML = t('dropzone_text') + ' <strong onclick="document.getElementById(\'fileInput\').click()">' + t('dropzone_browse') + '</strong>';
         // Modal default buttons
         document.getElementById('modalCancelBtn').textContent = t('cancel');
         document.getElementById('confirmCancelBtn').textContent = t('cancel');
+        updateParentNav();
+        updateClipboardUI();
+        updateSelectionUI();
     }
 
     // ===== State =====
@@ -1218,6 +1556,9 @@ html, body {
     var filterTimer = null;
     var currentEntries = [];
     var currentDetailEntry = null;
+    var selectionMode = false;
+    var selectedPaths = [];
+    var clipboardState = { mode: null, paths: [] };
 
     // ===== Icons =====
     var icons = {
@@ -1226,6 +1567,7 @@ html, body {
         document: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
         image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
         file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>',
+        check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 12 10 16 18 8"/></svg>',
         download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
         rename: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>',
         trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
@@ -1247,10 +1589,10 @@ html, body {
         try {
             data = JSON.parse(text);
         } catch (e) {
-            throw new Error(res.ok ? 'Invalid server response' : 'Server error (' + res.status + ')');
+            throw new Error(res.ok ? t('invalid_server_response') : t('server_error') + ' (' + res.status + ')');
         }
         if (!res.ok || data.error) {
-            throw new Error(data.error || 'Request failed (' + res.status + ')');
+            throw new Error(data.error || t('request_failed') + ' (' + res.status + ')');
         }
         return data;
     }
@@ -1258,9 +1600,16 @@ html, body {
     // ===== Navigation =====
     // Internal navigation: sets state and loads files WITHOUT pushing history
     function _navigateInternal(path) {
-        currentPath = path || '/';
+        path = path || '/';
+        if (currentPath !== path) {
+            selectionMode = false;
+            selectedPaths = [];
+            updateSelectionUI();
+        }
+        currentPath = path;
         currentFilter = '';
         document.getElementById('searchInput').value = '';
+        updateParentNav();
         loadFiles();
     }
 
@@ -1298,6 +1647,19 @@ html, body {
         }
     }
 
+    function updateParentNav() {
+        var btn = document.getElementById('btnParentNav');
+        if (!btn) return;
+        var atRoot = currentPath === '/';
+        btn.classList.toggle('hidden', atRoot);
+        btn.disabled = atRoot;
+    }
+
+    window.navigateUp = function() {
+        if (currentPath === '/') return;
+        navigate(getParentPath(currentPath));
+    };
+
     function renderBreadcrumbs(crumbs) {
         var el = document.getElementById('breadcrumbs');
         if (!crumbs || !crumbs.length) { el.innerHTML = ''; return; }
@@ -1316,6 +1678,7 @@ html, body {
 
     function renderFiles(entries) {
         currentEntries = entries || [];
+        syncSelectedPaths(currentEntries);
         var list = document.getElementById('fileList');
         if (!entries || entries.length === 0) {
             list.innerHTML = '<div class="empty-state">' + icons.empty +
@@ -1334,8 +1697,13 @@ html, body {
             var meta = [size, date].filter(Boolean).join(' &middot; ');
             var ext = entry.name.split('.').pop().toUpperCase();
             var typeLabel = entry.is_dir ? t('folder_label') : ext;
+            var isSelected = selectedPaths.indexOf(entry.path) !== -1;
+            var itemClass = 'file-item ' + (entry.is_dir ? 'is-dir' : 'is-file');
+            if (selectionMode) itemClass += ' selection-mode';
+            if (isSelected) itemClass += ' selected';
 
-            html += '<div class="file-item" onclick="onFileClick(event, ' + (entry.is_dir ? 'true' : 'false') + ', \'' + escapeAttr(entry.path) + '\')">';
+            html += '<div class="' + itemClass + '" onclick="onFileClick(event, ' + (entry.is_dir ? 'true' : 'false') + ', \'' + escapeAttr(entry.path) + '\')">';
+            html += '<div class="file-select-marker">' + icons.check + '</div>';
             html += '<div class="file-icon ' + typeClass + '">' + icon + '</div>';
             html += '<div class="file-info">';
             html += '<div class="file-name">' + escapeHtml(entry.name) + '</div>';
@@ -1347,11 +1715,15 @@ html, body {
                 html += '<div class="file-actions">';
                 html += '<button class="btn-icon" onclick="event.stopPropagation(); renameItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\')" title="' + escapeHtml(t('rename')) + '">' + icons.rename + '</button>';
                 if (entry.is_empty) {
-                    html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\', true)" title="' + escapeHtml(t('delete_label')) + '">' + icons.trash + '</button>';
+                    html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\')" title="' + escapeHtml(t('delete_label')) + '">' + icons.trash + '</button>';
                 }
                 html += '</div>';
             } else {
-                html += '<div class="file-actions"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--text-tertiary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>';
+                html += '<div class="file-actions">';
+                html += '<button class="btn-icon" onclick="event.stopPropagation(); renameItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\')" title="' + escapeHtml(t('rename')) + '">' + icons.rename + '</button>';
+                html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\')" title="' + escapeHtml(t('delete_label')) + '">' + icons.trash + '</button>';
+                html += '<span class="file-chevron"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>';
+                html += '</div>';
             }
             html += '</div>';
         }
@@ -1359,6 +1731,11 @@ html, body {
     }
 
     window.onFileClick = function(event, isDir, path) {
+        if (selectionMode) {
+            event.preventDefault();
+            togglePathSelection(path);
+            return;
+        }
         if (isDir) {
             navigate(path);
         } else {
@@ -1391,29 +1768,232 @@ html, body {
         });
     };
 
-    window.deleteItem = function(path, name, isDir, hasSdr) {
-        var titleStr = isDir ? t('delete_empty_folder') : t('delete_file');
-        var msgStr = t('confirm_delete') + ' "' + escapeHtml(name) + '"?';
-        var showSdrCheckbox = !isDir && hasSdr;
+    function getEntryByPath(path) {
+        for (var i = 0; i < currentEntries.length; i++) {
+            if (currentEntries[i].path === path) {
+                return currentEntries[i];
+            }
+        }
+        return null;
+    }
+
+    function canDeleteEntry(entry) {
+        return !!entry && (!entry.is_dir || entry.is_empty);
+    }
+
+    function getSelectedEntries() {
+        return selectedPaths.map(function(path) {
+            return getEntryByPath(path);
+        }).filter(Boolean);
+    }
+
+    async function deleteEntries(entries, deleteSdr) {
+        var deletedCount = 0;
+        var failures = [];
+
+        for (var i = 0; i < entries.length; i++) {
+            var entry = entries[i];
+            try {
+                var body = { path: entry.path };
+                if (deleteSdr && !entry.is_dir && entry.has_sdr) {
+                    body.delete_sdr = true;
+                }
+                await api('POST', '/api/delete', body);
+                deletedCount++;
+            } catch (err) {
+                failures.push(entry.name + ': ' + err.message);
+            }
+        }
+
+        return {
+            deletedCount: deletedCount,
+            failures: failures
+        };
+    }
+
+    function confirmDeleteEntries(entries, onSuccess) {
+        if (!entries || !entries.length) return;
+
+        for (var i = 0; i < entries.length; i++) {
+            if (!canDeleteEntry(entries[i])) {
+                showToast(t('delete_only_files_empty_folders'), 'error');
+                return;
+            }
+        }
+
+        var singleEntry = entries.length === 1 ? entries[0] : null;
+        var titleStr = singleEntry
+            ? (singleEntry.is_dir ? t('delete_empty_folder') : t('delete_file'))
+            : t('delete_selected');
+        var msgStr = singleEntry
+            ? t('confirm_delete') + ' "' + escapeHtml(singleEntry.name) + '"?'
+            : t('confirm_delete_selected').replace('{count}', entries.length);
+        var showSdrCheckbox = !!(singleEntry && !singleEntry.is_dir && singleEntry.has_sdr);
+
         showConfirm(
             titleStr,
             msgStr,
             t('delete_label'),
             async function() {
-                try {
-                    var body = { path: path };
-                    if (showSdrCheckbox) {
-                        body.delete_sdr = document.getElementById('confirmSdrCheckbox').checked;
-                    }
-                    await api('POST', '/api/delete', body);
+                var deleteSdr = showSdrCheckbox && document.getElementById('confirmSdrCheckbox').checked;
+                var result = await deleteEntries(entries, deleteSdr);
+
+                if (result.failures.length === 0) {
                     showToast(t('deleted_successfully'), 'success');
-                    loadFiles();
-                } catch (err) {
-                    showToast(t('delete_failed') + ' ' + err.message, 'error');
+                    if (onSuccess) onSuccess();
+                    return;
                 }
+
+                if (result.deletedCount > 0 && onSuccess) {
+                    onSuccess();
+                }
+                showToast(t('delete_failed') + ' ' + result.failures[0], 'error');
             },
             showSdrCheckbox
         );
+    }
+
+    window.deleteItem = function(path) {
+        var entry = getEntryByPath(path);
+        if (!entry) return;
+        confirmDeleteEntries([entry], function() {
+            loadFiles();
+        });
+    };
+
+    function syncSelectedPaths(entries) {
+        if (!selectionMode) {
+            selectedPaths = [];
+            updateSelectionUI();
+            return;
+        }
+
+        var visiblePaths = {};
+        for (var i = 0; i < entries.length; i++) {
+            visiblePaths[entries[i].path] = true;
+        }
+
+        selectedPaths = selectedPaths.filter(function(path) {
+            return !!visiblePaths[path];
+        });
+        updateSelectionUI();
+    }
+
+    function hasClipboardItems() {
+        return !!(clipboardState.mode && clipboardState.paths && clipboardState.paths.length);
+    }
+
+    function updateClipboardUI() {
+        var pasteBtn = document.getElementById('btnPaste');
+        var hasClipboard = hasClipboardItems();
+
+        if (!pasteBtn) return;
+
+        pasteBtn.disabled = !hasClipboard;
+        pasteBtn.classList.toggle('active', hasClipboard);
+        pasteBtn.setAttribute('aria-disabled', hasClipboard ? 'false' : 'true');
+    }
+
+    function setClipboard(mode, paths) {
+        var nextPaths = Array.isArray(paths) ? paths.slice() : [];
+        clipboardState = {
+            mode: nextPaths.length ? mode : null,
+            paths: nextPaths
+        };
+        updateClipboardUI();
+    }
+
+    function updateSelectionUI() {
+        var selectBtn = document.getElementById('btnSelect');
+        var selectionBar = document.getElementById('selectionBar');
+        var selectionCount = document.getElementById('selectionCount');
+        var copyBtn = document.getElementById('btnSelectionCopy');
+        var cutBtn = document.getElementById('btnSelectionCut');
+        var deleteBtn = document.getElementById('btnSelectionDelete');
+        var hasSelection = selectedPaths.length > 0;
+        var showBar = selectionMode;
+
+        if (selectBtn) {
+            selectBtn.classList.toggle('active', selectionMode);
+            selectBtn.setAttribute('aria-pressed', selectionMode ? 'true' : 'false');
+        }
+
+        if (selectionCount) {
+            selectionCount.textContent = t('selected_label') + ': ' + selectedPaths.length;
+        }
+
+        if (selectionBar) {
+            selectionBar.classList.toggle('visible', showBar);
+        }
+
+        if (copyBtn) copyBtn.disabled = !hasSelection;
+        if (cutBtn) cutBtn.disabled = !hasSelection;
+        if (deleteBtn) deleteBtn.disabled = !hasSelection;
+    }
+
+    function togglePathSelection(path) {
+        var index = selectedPaths.indexOf(path);
+        if (index === -1) {
+            selectedPaths.push(path);
+        } else {
+            selectedPaths.splice(index, 1);
+        }
+        updateSelectionUI();
+        renderFiles(currentEntries);
+    }
+
+    window.toggleSelectionMode = function() {
+        selectionMode = !selectionMode;
+        if (!selectionMode) {
+            selectedPaths = [];
+        }
+        updateSelectionUI();
+        renderFiles(currentEntries);
+    };
+
+    window.cancelSelection = function() {
+        selectionMode = false;
+        selectedPaths = [];
+        updateSelectionUI();
+        renderFiles(currentEntries);
+    };
+
+    window.copySelectedItems = function() {
+        if (!selectedPaths.length) return;
+        setClipboard('copy', selectedPaths);
+        showToast(t('clipboard_copy_ready').replace('{count}', selectedPaths.length), 'success');
+        window.cancelSelection();
+    };
+
+    window.cutSelectedItems = function() {
+        if (!selectedPaths.length) return;
+        setClipboard('cut', selectedPaths);
+        showToast(t('clipboard_cut_ready').replace('{count}', selectedPaths.length), 'success');
+        window.cancelSelection();
+    };
+
+    window.pasteClipboardItems = function() {
+        if (!hasClipboardItems()) return;
+        // Prepared for a future backend paste endpoint.
+        var operation = {
+            mode: clipboardState.mode,
+            paths: clipboardState.paths.slice(),
+            destination: currentPath
+        };
+        showToast(operation.mode === 'cut' ? t('cut_placeholder') : t('paste_placeholder'), 'info');
+    };
+
+    function clearSelectionAndReload() {
+        selectionMode = false;
+        selectedPaths = [];
+        updateSelectionUI();
+        loadFiles();
+    };
+
+    window.deleteSelectedItems = function() {
+        var entries = getSelectedEntries();
+        if (!entries.length) return;
+        confirmDeleteEntries(entries, clearSelectionAndReload);
     };
 
     // ===== File Detail View =====
@@ -1530,7 +2110,7 @@ html, body {
                     if (meta.has_cover) {
                         var img = document.createElement('img');
                         img.src = '/api/cover?path=' + encodeURIComponent(path);
-                        img.alt = 'Book cover';
+                        img.alt = t('book_cover');
                         img.onerror = function() {
                             coverEl.innerHTML = buildCoverPlaceholder(typeClass);
                         };
@@ -1941,7 +2521,10 @@ html, body {
         if (diff < 3600000) return Math.floor(diff / 60000) + t('minutes_ago');
         if (diff < 86400000) return Math.floor(diff / 3600000) + t('hours_ago');
         if (diff < 604800000) return Math.floor(diff / 86400000) + t('days_ago');
-        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var months = t('month_names');
+        if (!months || !months.length) {
+            months = translations.en.month_names;
+        }
         return months[d.getMonth()] + ' ' + d.getDate() + (d.getFullYear() !== now.getFullYear() ? ', ' + d.getFullYear() : '');
     }
 
@@ -1973,6 +2556,7 @@ html, body {
                 currentPath = parentPath;
                 currentFilter = '';
                 document.getElementById('searchInput').value = '';
+                updateParentNav();
                 var params = new URLSearchParams({
                     path: currentPath,
                     sort: currentSort,
