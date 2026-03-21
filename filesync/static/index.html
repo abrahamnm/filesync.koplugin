@@ -156,13 +156,15 @@ html, body {
 }
 
 .mode-toggle-btn.active.safe {
-    background: #16a34a;
-    color: #fff;
+    background: rgba(34, 197, 94, 0.14);
+    color: #15803d;
+    box-shadow: inset 0 0 0 1px rgba(22, 163, 74, 0.12);
 }
 
 .mode-toggle-btn.active.root {
-    background: #d97706;
-    color: #fff;
+    background: rgba(245, 158, 11, 0.14);
+    color: #b45309;
+    box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.12);
 }
 
 .mode-toggle-btn:disabled {
@@ -1023,15 +1025,15 @@ html, body {
     width: 14px;
     height: 14px;
     border-radius: 999px;
-    border: 1.5px solid #cbd5e1;
-    background: #fff;
+    border: 1.5px solid rgba(59, 130, 246, 0.26);
+    background: rgba(239, 246, 255, 0.72);
     transition: transform var(--transition), background var(--transition), border-color var(--transition), box-shadow var(--transition);
 }
 
 .root-pin-dot.filled {
-    background: #16a34a;
-    border-color: #16a34a;
-    box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.08);
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
 }
 
 .root-pin-dot.error {
@@ -1738,9 +1740,12 @@ html, body {
             root_pin_missing: "Root PIN is not configured on this Kindle",
             root_pin_required: "Enter the Root PIN to unlock Root mode.",
             root_pin_throttled: "Too many attempts. Wait {seconds}s and try again.",
-            root_pin_unavailable: "Set a Root PIN on the Kindle first.",
+            root_pin_unavailable: "Define the Root PIN on the Kindle to unlock Root mode.",
             root_required_clipboard: "Root mode is required to copy, cut, or paste items.",
+            root_required_delete: "Root mode is required to delete items.",
             root_required_recursive_delete: "Root mode is required to delete non-empty folders.",
+            root_required_create_folder: "Root mode is required to create folders.",
+            root_required_upload: "This file type requires Root mode to upload. Activate Root mode to continue.",
             invalid_server_response: "Invalid server response",
             server_error: "Server error",
             request_failed: "Request failed",
@@ -1832,9 +1837,12 @@ html, body {
             root_pin_missing: "El PIN Root no est\u00e1 configurado en este Kindle",
             root_pin_required: "Introduce el PIN Root para desbloquear el modo Root.",
             root_pin_throttled: "Demasiados intentos. Espera {seconds}s e int\u00e9ntalo de nuevo.",
-            root_pin_unavailable: "Configura primero un PIN Root en el Kindle.",
+            root_pin_unavailable: "Define el PIN Root en el Kindle para desbloquear el modo Root.",
             root_required_clipboard: "El modo Root es necesario para copiar, cortar o pegar elementos.",
+            root_required_delete: "El modo Root es necesario para eliminar elementos.",
             root_required_recursive_delete: "El modo Root es necesario para eliminar carpetas no vac\u00edas.",
+            root_required_create_folder: "El modo Root es necesario para crear carpetas.",
+            root_required_upload: "Este tipo de archivo requiere el modo Root para subirse. Activa Root para continuar.",
             invalid_server_response: "Respuesta inv\u00e1lida del servidor",
             server_error: "Error del servidor",
             request_failed: "Solicitud fallida",
@@ -1926,9 +1934,12 @@ html, body {
             root_pin_missing: "O PIN Root n\u00e3o est\u00e1 configurado neste Kindle",
             root_pin_required: "Digite o PIN Root para desbloquear o modo Root.",
             root_pin_throttled: "Muitas tentativas. Aguarde {seconds}s e tente novamente.",
-            root_pin_unavailable: "Defina primeiro um PIN Root no Kindle.",
+            root_pin_unavailable: "Defina o PIN Root no Kindle para liberar o modo Root.",
             root_required_clipboard: "O modo Root \u00e9 necess\u00e1rio para copiar, recortar ou colar itens.",
+            root_required_delete: "O modo Root \u00e9 necess\u00e1rio para excluir itens.",
             root_required_recursive_delete: "O modo Root \u00e9 necess\u00e1rio para excluir pastas n\u00e3o vazias.",
+            root_required_create_folder: "O modo Root \u00e9 necess\u00e1rio para criar pastas.",
+            root_required_upload: "Esse tipo de arquivo exige o modo Root para upload. Ative o Root para continuar.",
             invalid_server_response: "Resposta inv\u00e1lida do servidor",
             server_error: "Erro do servidor",
             request_failed: "Falha na requisi\u00e7\u00e3o",
@@ -2009,6 +2020,7 @@ html, body {
     var rootUnlocked = false;
     var authRequestPending = false;
     var rootPinExpectedLength = 4;
+    var safeExtensions = {};
     var longPressState = null;
     var suppressNextSelectionClick = null;
     var LONG_PRESS_DURATION = 500;
@@ -2355,7 +2367,7 @@ html, body {
     }
 
     function canDeleteEntry(entry) {
-        return !!entry && (!requiresRootForRecursiveDelete(entry) || canUseRootActions());
+        return !!entry && canUseRootActions();
     }
 
     function getSelectedEntries() {
@@ -2404,7 +2416,7 @@ html, body {
         if (!entries || !entries.length) return;
 
         if (!canDeleteEntriesInCurrentMode(entries)) {
-            showToast(t('root_required_recursive_delete'), 'error');
+            showToast(t('root_required_delete'), 'error');
             return;
         }
 
@@ -2450,7 +2462,7 @@ html, body {
         var entry = getEntryByPath(path);
         if (!entry) return;
         if (!canDeleteEntry(entry)) {
-            showToast(t('root_required_recursive_delete'), 'error');
+            showToast(t('root_required_delete'), 'error');
             return;
         }
         confirmDeleteEntries([entry], function() {
@@ -2506,9 +2518,34 @@ html, body {
         setClipboard(null, []);
     }
 
+    function setSafeExtensions(list) {
+        safeExtensions = {};
+        if (!Array.isArray(list)) return;
+        for (var i = 0; i < list.length; i++) {
+            safeExtensions[String(list[i]).toLowerCase()] = true;
+        }
+    }
+
+    function isSafeUploadFilename(filename) {
+        if (!filename) return false;
+        var lowerName = String(filename).toLowerCase();
+        var parts = lowerName.split('.');
+        if (parts.length < 2) return false;
+
+        if (parts.length >= 3) {
+            var compoundExt = parts.slice(-2).join('.');
+            if (safeExtensions[compoundExt]) {
+                return true;
+            }
+        }
+
+        return !!safeExtensions[parts[parts.length - 1]];
+    }
+
     function updateAuthUI() {
         var safeBtn = document.getElementById('btnSafeMode');
         var rootBtn = document.getElementById('btnRootMode');
+        var folderBtn = document.getElementById('btnFolder');
 
         if (safeBtn) {
             safeBtn.classList.toggle('active', !rootUnlocked);
@@ -2517,9 +2554,17 @@ html, body {
 
         if (rootBtn) {
             rootBtn.classList.toggle('active', rootUnlocked);
-            rootBtn.disabled = !hasRootPin || authRequestPending;
+            rootBtn.disabled = authRequestPending;
             rootBtn.setAttribute('aria-pressed', rootUnlocked ? 'true' : 'false');
+            rootBtn.setAttribute('aria-disabled', authRequestPending ? 'true' : 'false');
             rootBtn.title = hasRootPin ? t('root_mode') : t('root_pin_unavailable');
+        }
+
+        if (folderBtn) {
+            folderBtn.disabled = !canUseRootActions();
+            folderBtn.setAttribute('aria-disabled', canUseRootActions() ? 'false' : 'true');
+            folderBtn.title = canUseRootActions() ? t('new_folder_title') : t('root_required_create_folder');
+            folderBtn.setAttribute('aria-label', canUseRootActions() ? t('new_folder_title') : t('root_required_create_folder'));
         }
 
         updateClipboardUI();
@@ -2657,6 +2702,7 @@ html, body {
             if (status && status.root_pin_length) {
                 rootPinExpectedLength = Math.max(4, Number(status.root_pin_length) || 4);
             }
+            setSafeExtensions(status && status.safe_extensions);
 
             if (status.root_unlocked) {
                 await api('POST', '/api/auth/lock', {});
@@ -2665,6 +2711,7 @@ html, body {
             rootUnlocked = false;
             hasRootPin = false;
             rootPinExpectedLength = 4;
+            setSafeExtensions([]);
         }
 
         rootUnlocked = false;
@@ -2842,10 +2889,12 @@ html, body {
         }
 
         if (copyBtn) {
+            copyBtn.hidden = !canUseRootActions();
             copyBtn.disabled = !hasSelection || !canUseRootActions();
             copyBtn.title = canUseRootActions() ? t('copy') : t('root_required_clipboard');
         }
         if (cutBtn) {
+            cutBtn.hidden = !canUseRootActions();
             cutBtn.disabled = !hasSelection || !canUseRootActions();
             cutBtn.title = canUseRootActions() ? t('cut') : t('root_required_clipboard');
         }
@@ -2853,8 +2902,8 @@ html, body {
             deleteBtn.hidden = !canUseRootActions();
             deleteBtn.disabled = !canUseRootActions() || !canDeleteSelected;
             deleteBtn.title = !canUseRootActions()
-                ? t('root_required_recursive_delete')
-                : (!hasSelection ? t('delete_label') : (canDeleteSelected ? t('delete_label') : t('root_required_recursive_delete')));
+                ? t('root_required_delete')
+                : (!hasSelection ? t('delete_label') : (canDeleteSelected ? t('delete_label') : t('root_required_delete')));
         }
     }
 
@@ -3054,7 +3103,9 @@ html, body {
         var actHtml = '';
         actHtml += '<button class="btn btn-primary" onclick="detailDownload()">' + icons.download + '<span>' + escapeHtml(t('download')) + '</span></button>';
         actHtml += '<button class="btn btn-secondary" onclick="detailRename()">' + icons.rename + '<span>' + escapeHtml(t('rename')) + '</span></button>';
-        actHtml += '<button class="btn btn-danger" onclick="detailDelete()">' + icons.trash + '<span>' + escapeHtml(t('delete_label')) + '</span></button>';
+        if (canUseRootActions()) {
+            actHtml += '<button class="btn btn-danger" onclick="detailDelete()">' + icons.trash + '<span>' + escapeHtml(t('delete_label')) + '</span></button>';
+        }
         actionsEl.innerHTML = actHtml;
 
         // For image files, skip metadata fetch (no book metadata to show)
@@ -3225,6 +3276,10 @@ html, body {
 
     window.detailDelete = function() {
         if (!currentDetailEntry) return;
+        if (!canUseRootActions()) {
+            showToast(t('root_required_delete'), 'error');
+            return;
+        }
         var entry = currentDetailEntry;
         var showSdrCheckbox = !entry.is_dir && entry.has_sdr;
         showConfirm(
@@ -3251,6 +3306,10 @@ html, body {
     };
 
     window.showNewFolderModal = function() {
+        if (!canUseRootActions()) {
+            showToast(t('root_required_create_folder'), 'error');
+            return;
+        }
         showModal(t('new_folder'), '', t('create'), async function(name) {
             if (!name) return;
             try {
@@ -3278,8 +3337,17 @@ html, body {
 
     window.handleFileSelect = function(files) {
         if (!files || files.length === 0) return;
+        var filesToUpload = [];
         for (var fi = 0; fi < files.length; fi++) {
-            uploadFile(files[fi]);
+            var file = files[fi];
+            if (!canUseRootActions() && !isSafeUploadFilename(file.name)) {
+                showToast(file.name + ': ' + t('root_required_upload'), 'error');
+                continue;
+            }
+            filesToUpload.push(file);
+        }
+        for (var ui = 0; ui < filesToUpload.length; ui++) {
+            uploadFile(filesToUpload[ui]);
         }
         document.getElementById('fileInput').value = '';
     };

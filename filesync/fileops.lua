@@ -193,6 +193,17 @@ function FileOps:isExtensionSafe(filename)
     return SAFE_MODE_EXTENSIONS[ext:lower()] == true
 end
 
+function FileOps:getSafeExtensions()
+    local extensions = {}
+    for ext, allowed in pairs(SAFE_MODE_EXTENSIONS) do
+        if allowed then
+            table.insert(extensions, ext)
+        end
+    end
+    table.sort(extensions)
+    return extensions
+end
+
 --- List directory contents
 function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
     local full_path, err = self:_resolvePath(rel_path)
@@ -372,7 +383,8 @@ function FileOps:downloadFile(client, rel_path, server, inline)
 end
 
 --- Handle multipart file upload
-function FileOps:handleUpload(rel_dir, body, boundary)
+function FileOps:handleUpload(rel_dir, body, boundary, options)
+    options = options or {}
     local dir_path, err = self:_resolvePath(rel_dir)
     if not dir_path then
         return false, err
@@ -406,7 +418,7 @@ function FileOps:handleUpload(rel_dir, body, boundary)
         search_start = next_boundary
     end
 
-    local uploaded_count = 0
+    local upload_entries = {}
     for _, part in ipairs(parts) do
         -- Split headers from body
         local header_end = part:find("\r\n\r\n", 1, true)
@@ -430,16 +442,13 @@ function FileOps:handleUpload(rel_dir, body, boundary)
                 -- Validate filename
                 local valid, valid_err = self:_validateFilename(filename)
                 if valid then
-                    local file_path = dir_path .. "/" .. filename
-                    local f = io.open(file_path, "wb")
-                    if f then
-                        f:write(file_data)
-                        f:close()
-                        uploaded_count = uploaded_count + 1
-                        logger.info("FileSync: Uploaded", filename, "to", dir_path)
-                    else
-                        logger.warn("FileSync: Cannot write file", file_path)
+                    if options.safe_mode and not self:isExtensionSafe(filename) then
+                        return false, "Root mode required for this file type"
                     end
+                    table.insert(upload_entries, {
+                        filename = filename,
+                        data = file_data,
+                    })
                 else
                     logger.warn("FileSync: Invalid filename:", filename, valid_err)
                 end
@@ -447,11 +456,33 @@ function FileOps:handleUpload(rel_dir, body, boundary)
         end
     end
 
-    if uploaded_count > 0 then
-        return true
-    else
+    if #upload_entries == 0 then
         return false, "No files were uploaded"
     end
+
+    local uploaded_count = 0
+    for _, entry in ipairs(upload_entries) do
+        local file_path = dir_path .. "/" .. entry.filename
+        local f = io.open(file_path, "wb")
+        if f then
+            f:write(entry.data)
+            f:close()
+            uploaded_count = uploaded_count + 1
+            logger.info("FileSync: Uploaded", entry.filename, "to", dir_path)
+        else
+            logger.warn("FileSync: Cannot write file", file_path)
+        end
+    end
+
+    if uploaded_count == #upload_entries then
+        return true
+    end
+
+    if uploaded_count > 0 then
+        return false, "Some files could not be uploaded"
+    end
+
+    return false, "No files were uploaded"
 end
 
 --- Create a directory

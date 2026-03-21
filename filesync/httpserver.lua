@@ -240,15 +240,9 @@ function HttpServer:_route(client, method, path, query, headers, body)
     if path:match("^/api/") then
         local FileOps = self._fileops
         local FileSyncManager = require("filesync/filesyncmanager")
-        local safe_mode = FileSyncManager:getSafeMode()
         local has_root_pin = FileSyncManager:hasRootPin()
         local root_unlocked = self:isRootUnlocked()
-        local session_safe_mode
-        if has_root_pin then
-            session_safe_mode = not root_unlocked
-        else
-            session_safe_mode = safe_mode
-        end
+        local session_safe_mode = not (has_root_pin and root_unlocked)
 
         -- Language endpoint for web UI i18n
         if method == "GET" and path == "/api/lang" then
@@ -262,6 +256,7 @@ function HttpServer:_route(client, method, path, query, headers, body)
                 has_root_pin = has_root_pin,
                 root_unlocked = root_unlocked,
                 root_pin_length = FileSyncManager:getRootPinLength(),
+                safe_extensions = FileOps:getSafeExtensions(),
             })
             return
         end
@@ -393,9 +388,16 @@ function HttpServer:_route(client, method, path, query, headers, body)
             if content_type:match("multipart/form%-data") then
                 local boundary = content_type:match("boundary=([^\r\n;]+)")
                 if boundary then
-                    local ok, err_msg = FileOps:handleUpload(dir, body, boundary)
+                    local ok, err_msg = FileOps:handleUpload(dir, body, boundary, {
+                        safe_mode = session_safe_mode,
+                    })
                     if ok then
                         self:_sendJSON(client, 200, {success = true, message = "Upload complete"})
+                    elseif err_msg == "Root mode required for this file type" then
+                        self:_sendJSON(client, 403, {
+                            error = err_msg,
+                            code = "root_required_upload",
+                        })
                     else
                         self:_sendJSON(client, 400, {error = err_msg or "Upload failed"})
                     end
@@ -408,7 +410,9 @@ function HttpServer:_route(client, method, path, query, headers, body)
 
         elseif method == "POST" and path == "/api/mkdir" then
             local data = self:_parseJSON(body)
-            if data and data.path then
+            if session_safe_mode then
+                self:_sendJSON(client, 403, {error = "Root mode required to create folders", code = "root_required_create_folder"})
+            elseif data and data.path then
                 local ok, err_msg = FileOps:createDirectory(data.path)
                 if ok then
                     self:_sendJSON(client, 200, {success = true})
@@ -465,8 +469,8 @@ function HttpServer:_route(client, method, path, query, headers, body)
         elseif method == "POST" and path == "/api/delete" then
             local data = self:_parseJSON(body)
             if data and data.path then
-                if data.recursive == true and not root_unlocked then
-                    self:_sendJSON(client, 403, {error = "Root mode required", code = "root_required"})
+                if session_safe_mode then
+                    self:_sendJSON(client, 403, {error = "Root mode required to delete items", code = "root_required_delete"})
                     return
                 end
                 local delete_options = {
