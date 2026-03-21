@@ -96,6 +96,20 @@ html, body {
     align-items: center;
 }
 
+@media (max-width: 640px) {
+    .header-actions {
+        gap: 6px;
+    }
+
+    .header-actions .btn {
+        padding: 6px 8px;
+    }
+
+    .header-actions .btn span {
+        display: none;
+    }
+}
+
 /* ===== Breadcrumbs ===== */
 .breadcrumbs-wrap {
     max-width: 800px;
@@ -518,14 +532,14 @@ html, body {
     background: var(--primary-light);
 }
 
-.dropzone-area svg {
+.dropzone-area > svg {
     width: 40px;
     height: 40px;
     color: var(--text-tertiary);
     margin-bottom: 8px;
 }
 
-.dropzone-area.active svg {
+.dropzone-area.active > svg {
     color: var(--primary);
 }
 
@@ -538,6 +552,57 @@ html, body {
 .dropzone-text strong {
     color: var(--primary);
     cursor: pointer;
+}
+
+.dropzone-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 8px 16px 8px 10px;
+    border: none;
+    border-radius: 999px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+}
+
+.dropzone-cta:hover {
+    background: var(--primary-hover);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.dropzone-cta:active {
+    transform: translateY(0);
+}
+
+.dropzone-cta-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dropzone-cta-icon svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+}
+
+.dropzone-cta-label {
+    display: block;
+    transform: translateY(-0.5px);
+    white-space: nowrap;
 }
 
 /* ===== Upload Progress ===== */
@@ -861,8 +926,6 @@ html, body {
     .file-list { padding: 4px 12px 100px; }
     .dropzone { padding: 0 12px; }
     .upload-progress { padding: 0 12px; }
-    .btn span { display: none; }
-    .btn svg + span { display: none; }
     .file-item { padding: 10px; gap: 10px; }
 }
 
@@ -1077,14 +1140,6 @@ html, body {
             <span data-i18n="filesync">FileSync</span>
         </a>
         <div class="header-actions">
-            <button class="btn btn-secondary btn-sm" onclick="toggleUploadZone()" id="btnUpload" title="Upload files">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                <span data-i18n="upload">Upload</span>
-            </button>
             <button class="btn btn-secondary btn-sm" onclick="pasteClipboardItems()" id="btnPaste" title="Paste" disabled>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M8 4h8"/>
@@ -1101,6 +1156,14 @@ html, body {
                     <polyline points="9 12 11 14 15 10"/>
                 </svg>
                 <span data-i18n="select">Select</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="toggleUploadZone()" id="btnUpload" title="Upload files">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <span data-i18n="upload">Upload</span>
             </button>
             <button class="btn btn-secondary btn-sm" onclick="showNewFolderModal()" id="btnFolder" title="New folder">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1152,12 +1215,14 @@ html, body {
             Drag and drop files here, or <strong onclick="document.getElementById('fileInput').click()">browse</strong>
         </div>
         <input type="file" id="fileInput" multiple style="display:none" onchange="handleFileSelect(this.files)">
-        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            <span data-i18n="choose_files">Choose Files</span>
+        <button class="dropzone-cta" onclick="document.getElementById('fileInput').click()">
+            <span class="dropzone-cta-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+            </span>
+            <span class="dropzone-cta-label" data-i18n="choose_files">Choose Files</span>
         </button>
     </div>
 </div>
@@ -1530,10 +1595,13 @@ html, body {
         document.getElementById('searchInput').placeholder = t('filter_placeholder');
         // Button titles
         document.getElementById('btnUpload').title = t('upload_files_title');
+        document.getElementById('btnUpload').setAttribute('aria-label', t('upload_files_title'));
         document.getElementById('btnPaste').title = t('paste');
         document.getElementById('btnPaste').setAttribute('aria-label', t('paste'));
         document.getElementById('btnSelect').title = t('select');
+        document.getElementById('btnSelect').setAttribute('aria-label', t('select'));
         document.getElementById('btnFolder').title = t('new_folder_title');
+        document.getElementById('btnFolder').setAttribute('aria-label', t('new_folder_title'));
         document.getElementById('btnParentNav').title = t('go_up');
         document.getElementById('btnParentNav').setAttribute('aria-label', t('go_up'));
         document.getElementById('btnSelectionCopy').title = t('copy');
@@ -1799,6 +1867,9 @@ html, body {
             var entry = entries[i];
             try {
                 var body = { path: entry.path };
+                if (entry.is_dir && !entry.is_empty) {
+                    body.recursive = true;
+                }
                 if (deleteSdr && !entry.is_dir && entry.has_sdr) {
                     body.delete_sdr = true;
                 }
@@ -1828,11 +1899,15 @@ html, body {
         }
 
         var singleEntry = entries.length === 1 ? entries[0] : null;
+        var isRecursiveDirDelete = !!(singleEntry && singleEntry.is_dir && !singleEntry.is_empty);
         var titleStr = singleEntry
-            ? (singleEntry.is_dir ? t('delete_folder') : t('delete_file'))
+            ? (singleEntry.is_dir
+                ? (singleEntry.is_empty ? t('delete_empty_folder') : t('delete_folder'))
+                : t('delete_file'))
             : t('delete_selected');
         var msgStr = singleEntry
-            ? t('confirm_delete') + ' "' + escapeHtml(singleEntry.name) + '"?'
+            ? (t('confirm_delete') + ' "' + escapeHtml(singleEntry.name) + '"?'
+                + (isRecursiveDirDelete ? ' ' + t('confirm_delete_contents') : ''))
             : t('confirm_delete_selected').replace('{count}', entries.length);
         var showSdrCheckbox = !!(singleEntry && !singleEntry.is_dir && singleEntry.has_sdr);
 

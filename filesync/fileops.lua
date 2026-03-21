@@ -690,10 +690,10 @@ function FileOps:delete(rel_path, options)
         return false, "Path does not exist"
     end
 
+    options = options or {}
     local is_file = attr.mode ~= "directory"
 
     if attr.mode == "directory" then
-        -- Only allow deletion of empty directories (safety measure)
         local child_count = 0
         for child_name in lfs.dir(full_path) do
             if child_name ~= "." and child_name ~= ".." then
@@ -701,12 +701,19 @@ function FileOps:delete(rel_path, options)
                 break
             end
         end
-        if child_count > 0 then
-            return false, "Cannot delete non-empty directory"
-        end
-        local ok, del_err = lfs.rmdir(full_path)
-        if not ok then
-            return false, "Cannot delete directory: " .. tostring(del_err)
+
+        if child_count == 0 then
+            local ok, del_err = lfs.rmdir(full_path)
+            if not ok then
+                return false, "Cannot delete directory: " .. tostring(del_err)
+            end
+        elseif options.recursive == true then
+            local ok, del_err = self:_deleteRecursive(full_path)
+            if not ok then
+                return false, "Cannot delete directory: " .. tostring(del_err)
+            end
+        else
+            return false, "Cannot delete non-empty directory without recursive flag"
         end
     else
         local ok, del_err = os.remove(full_path)

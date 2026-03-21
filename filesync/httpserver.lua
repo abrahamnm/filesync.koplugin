@@ -358,6 +358,7 @@ function HttpServer:_route(client, method, path, query, headers, body)
                 local delete_options = {
                     safe_mode = safe_mode,
                     delete_sdr = data.delete_sdr == true,
+                    recursive = data.recursive == true,
                 }
                 local ok, err_msg = FileOps:delete(data.path, delete_options)
                 if ok then
