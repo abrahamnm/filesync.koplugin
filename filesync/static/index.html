@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="color-scheme" content="light dark">
 <title data-i18n="filesync">FileSync</title>
 <style>
 *, *::before, *::after {
@@ -13,6 +14,7 @@
     padding: 0;
 }
 
+/* Light theme (default) */
 :root {
     --bg: #f7f8fa;
     --surface: #ffffff;
@@ -41,6 +43,58 @@
     --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Dark theme */
+[data-theme="dark"] {
+    --bg: #0a0c10;
+    --surface: #1a1d23;
+    --surface-hover: #252a33;
+    --border: #2d313a;
+    --border-light: #252a33;
+    --text: #e5e7eb;
+    --text-secondary: #9ca3af;
+    --text-tertiary: #6b7280;
+    --primary: #60a5fa;
+    --primary-hover: #3b82f6;
+    --primary-light: #1e3a8a;
+    --danger: #f87171;
+    --danger-hover: #ef4444;
+    --danger-light: #7f1a1a;
+    --success: #4ade80;
+    --success-light: #14532d;
+    --warning: #fbbf24;
+    --warning-light: #78350f;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Auto-detect system preference */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #0a0c10;
+        --surface: #1a1d23;
+        --surface-hover: #252a33;
+        --border: #2d313a;
+        --border-light: #252a33;
+        --text: #e5e7eb;
+        --text-secondary: #9ca3af;
+        --text-tertiary: #6b7280;
+        --primary: #60a5fa;
+        --primary-hover: #3b82f6;
+        --primary-light: #1e3a8a;
+        --danger: #f87171;
+        --danger-hover: #ef4444;
+        --danger-light: #7f1a1a;
+        --success: #4ade80;
+        --success-light: #14532d;
+        --warning: #fbbf24;
+        --warning-light: #78350f;
+        --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2);
+        --shadow-lg: 0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3);
+    }
+}
+
 html, body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     background: var(--bg);
@@ -51,6 +105,7 @@ html, body {
     overflow-x: hidden;
     min-height: 100vh;
     min-height: -webkit-fill-available;
+    transition: background-color var(--transition), color var(--transition);
 }
 
 /* ===== Header ===== */
@@ -94,6 +149,30 @@ html, body {
     display: flex;
     gap: 8px;
     align-items: center;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text);
+    transition: all var(--transition);
+}
+
+.theme-toggle:hover {
+    background: var(--surface-hover);
+}
+
+.theme-toggle svg {
+    width: 16px;
+    height: 16px;
 }
 
 /* ===== Breadcrumbs ===== */
@@ -337,6 +416,11 @@ html, body {
     color: #d97706;
 }
 
+[data-theme="dark"] .file-icon.dir {
+    background: #78350f;
+    color: #fbbf24;
+}
+
 .file-icon.ebook {
     background: var(--primary-light);
     color: var(--primary);
@@ -347,14 +431,29 @@ html, body {
     color: #16a34a;
 }
 
+[data-theme="dark"] .file-icon.document {
+    background: #14532d;
+    color: #4ade80;
+}
+
 .file-icon.image {
     background: #fdf2f8;
     color: #db2777;
 }
 
+[data-theme="dark"] .file-icon.image {
+    background: #831843;
+    color: #f9a8d4;
+}
+
 .file-icon.file {
     background: #f1f5f9;
     color: #64748b;
+}
+
+[data-theme="dark"] .file-icon.file {
+    background: #334155;
+    color: #94a3b8;
 }
 
 .file-info {
@@ -726,8 +825,9 @@ html, body {
 
 /* ===== Scrollbar ===== */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-track { background: var(--border-light); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
 
 /* ===== File Detail View ===== */
 .file-detail {
@@ -769,7 +869,7 @@ html, body {
     margin: 0 auto 24px;
     border-radius: 8px;
     overflow: hidden;
-    background: #f1f5f9;
+    background: var(--bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -809,7 +909,7 @@ html, body {
     margin: 0 auto 24px;
     border-radius: 8px;
     overflow: hidden;
-    background: #f1f5f9;
+    background: var(--bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -935,6 +1035,23 @@ html, body {
             <span data-i18n="filesync">FileSync</span>
         </a>
         <div class="header-actions">
+            <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <svg class="theme-icon-dark" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <span id="themeText">Dark</span>
+            </button>
             <button class="btn btn-secondary btn-sm" onclick="toggleUploadZone()" id="btnUpload" title="Upload files">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
@@ -1065,6 +1182,93 @@ html, body {
 (function() {
     'use strict';
 
+    // ===== Theme Management =====
+    var THEME_STORAGE_KEY = 'filesync_theme';
+    
+    function getStoredTheme() {
+        try {
+            return localStorage.getItem(THEME_STORAGE_KEY);
+        } catch(e) {
+            return null;
+        }
+    }
+    
+    function setStoredTheme(theme) {
+        try {
+            localStorage.setItem(THEME_STORAGE_KEY, theme);
+        } catch(e) {
+            // Ignore storage errors
+        }
+    }
+    
+    function applyTheme(theme) {
+        var html = document.documentElement;
+        if (theme === 'dark') {
+            html.setAttribute('data-theme', 'dark');
+            document.getElementById('themeText').textContent = 'Light';
+            document.querySelector('.theme-icon-light').style.display = 'none';
+            document.querySelector('.theme-icon-dark').style.display = 'inline';
+        } else if (theme === 'light') {
+            html.setAttribute('data-theme', 'light');
+            document.getElementById('themeText').textContent = 'Dark';
+            document.querySelector('.theme-icon-light').style.display = 'inline';
+            document.querySelector('.theme-icon-dark').style.display = 'none';
+        } else {
+            // Auto: remove data-theme to let prefers-color-scheme work
+            html.removeAttribute('data-theme');
+            // Update button text based on current effective theme
+            var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.getElementById('themeText').textContent = isDark ? 'Light' : 'Dark';
+            if (isDark) {
+                document.querySelector('.theme-icon-light').style.display = 'none';
+                document.querySelector('.theme-icon-dark').style.display = 'inline';
+            } else {
+                document.querySelector('.theme-icon-light').style.display = 'inline';
+                document.querySelector('.theme-icon-dark').style.display = 'none';
+            }
+        }
+    }
+    
+    function toggleTheme() {
+        var currentTheme = document.documentElement.getAttribute('data-theme');
+        var newTheme;
+        
+        if (currentTheme === 'dark') {
+            newTheme = 'light';
+        } else if (currentTheme === 'light') {
+            newTheme = 'auto';
+        } else {
+            newTheme = 'dark';
+        }
+        
+        applyTheme(newTheme);
+        setStoredTheme(newTheme);
+    }
+    
+    function initTheme() {
+        var storedTheme = getStoredTheme();
+        if (storedTheme) {
+            applyTheme(storedTheme);
+        } else {
+            // Auto mode by default
+            applyTheme('auto');
+        }
+        
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addListener(function(e) {
+            var currentTheme = document.documentElement.getAttribute('data-theme');
+            if (!currentTheme) {
+                // Only auto-update if in auto mode
+                applyTheme('auto');
+            }
+        });
+        
+        var themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', toggleTheme);
+        }
+    }
+
     // ===== i18n =====
     var translations = {
         en: {
@@ -1132,21 +1336,21 @@ html, body {
             filter_placeholder: "Filtrar archivos...",
             sort_name_asc: "Nombre A-Z",
             sort_name_desc: "Nombre Z-A",
-            sort_newest: "M\u00e1s recientes",
-            sort_oldest: "M\u00e1s antiguos",
-            sort_largest: "M\u00e1s grandes",
-            sort_smallest: "M\u00e1s peque\u00f1os",
+            sort_newest: "Más recientes",
+            sort_oldest: "Más antiguos",
+            sort_largest: "Más grandes",
+            sort_smallest: "Más pequeños",
             sort_type: "Tipo",
-            dropzone_text: "Arrastra archivos aqu\u00ed, o",
+            dropzone_text: "Arrastra archivos aquí, o",
             dropzone_browse: "busca",
             choose_files: "Elegir archivos",
             loading: "Cargando...",
             failed_to_load: "Error al cargar archivos",
-            empty_folder: "Esta carpeta est\u00e1 vac\u00eda",
+            empty_folder: "Esta carpeta está vacía",
             empty_folder_sub: "Sube archivos o crea una nueva carpeta",
             folder_label: "Carpeta",
             file_type: "Tipo de archivo",
-            size: "Tama\u00f1o",
+            size: "Tamaño",
             modified: "Modificado",
             download: "Descargar",
             downloading: "Descargando",
@@ -1170,9 +1374,9 @@ html, body {
             network_error: "Error de red",
             delete_file: "Eliminar archivo",
             delete_folder: "Eliminar carpeta",
-            delete_empty_folder: "Eliminar carpeta vac\u00eda",
-            confirm_delete: "\u00bfEst\u00e1s seguro de que quieres eliminar",
-            confirm_delete_contents: "Esto eliminar\u00e1 todo el contenido.",
+            delete_empty_folder: "Eliminar carpeta vacía",
+            confirm_delete: "¿Estás seguro de que quieres eliminar",
+            confirm_delete_contents: "Esto eliminará todo el contenido.",
             unknown: "Desconocido",
             just_now: "Ahora",
             minutes_ago: "min",
@@ -1180,33 +1384,95 @@ html, body {
             days_ago: "d",
             upload_files_title: "Subir archivos",
             new_folder_title: "Nueva carpeta",
-            also_delete_sdr: "Tambi\u00e9n eliminar metadatos de lectura (.sdr)",
+            also_delete_sdr: "También eliminar metadatos de lectura (.sdr)",
             image_preview: "Vista previa de imagen"
+        },
+        'pt-BR': {
+            filesync: "FileSync",
+            upload: "Enviar",
+            folder: "Pasta",
+            filter_placeholder: "Filtrar arquivos...",
+            sort_name_asc: "Nome A-Z",
+            sort_name_desc: "Nome Z-A",
+            sort_newest: "Mais recentes",
+            sort_oldest: "Mais antigos",
+            sort_largest: "Maiores",
+            sort_smallest: "Menores",
+            sort_type: "Tipo",
+            dropzone_text: "Arraste arquivos aqui, ou",
+            dropzone_browse: "procure",
+            choose_files: "Escolher arquivos",
+            loading: "Carregando...",
+            failed_to_load: "Falha ao carregar arquivos",
+            empty_folder: "Esta pasta está vazia",
+            empty_folder_sub: "Envie arquivos ou crie uma nova pasta",
+            folder_label: "Pasta",
+            file_type: "Tipo de arquivo",
+            size: "Tamanho",
+            modified: "Modificado",
+            download: "Baixar",
+            downloading: "Baixando",
+            rename: "Renomear",
+            delete_label: "Excluir",
+            back: "Voltar",
+            cancel: "Cancelar",
+            create: "Criar",
+            new_folder: "Nova pasta",
+            renamed_successfully: "Renomeado com sucesso",
+            deleted_successfully: "Excluído com sucesso",
+            folder_created: "Pasta criada",
+            uploaded: "enviado",
+            rename_failed: "Falha ao renomear:",
+            delete_failed: "Falha ao excluir:",
+            upload_failed: "Falha ao enviar:",
+            failed_create_folder: "Falha ao criar pasta:",
+            home: "Início",
+            done: "Concluído",
+            failed: "Falhou",
+            network_error: "Erro de rede",
+            delete_file: "Excluir arquivo",
+            delete_folder: "Excluir pasta",
+            delete_empty_folder: "Excluir pasta vazia",
+            confirm_delete: "Tem certeza que deseja excluir",
+            confirm_delete_contents: "Isso excluirá todo o conteúdo dentro.",
+            unknown: "Desconhecido",
+            just_now: "Agora",
+            minutes_ago: "min",
+            hours_ago: "h",
+            days_ago: "d",
+            upload_files_title: "Enviar arquivos",
+            new_folder_title: "Nova pasta",
+            also_delete_sdr: "Excluir também metadados de leitura (.sdr)",
+            image_preview: "Pré-visualização da imagem"
         }
     };
+    
     var currentLang = "en";
-
+    
     function t(key) {
         return (translations[currentLang] && translations[currentLang][key]) || translations.en[key] || key;
     }
-
+    
     function applyStaticTranslations() {
         document.querySelectorAll('[data-i18n]').forEach(function(el) {
             el.textContent = t(el.dataset.i18n);
         });
-        // Placeholder
-        document.getElementById('searchInput').placeholder = t('filter_placeholder');
-        // Button titles
-        document.getElementById('btnUpload').title = t('upload_files_title');
-        document.getElementById('btnFolder').title = t('new_folder_title');
-        // Dropzone text
+        var searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.placeholder = t('filter_placeholder');
+        var btnUpload = document.getElementById('btnUpload');
+        if (btnUpload) btnUpload.title = t('upload_files_title');
+        var btnFolder = document.getElementById('btnFolder');
+        if (btnFolder) btnFolder.title = t('new_folder_title');
         var dzText = document.getElementById('dropzoneText');
-        dzText.innerHTML = t('dropzone_text') + ' <strong onclick="document.getElementById(\'fileInput\').click()">' + t('dropzone_browse') + '</strong>';
-        // Modal default buttons
-        document.getElementById('modalCancelBtn').textContent = t('cancel');
-        document.getElementById('confirmCancelBtn').textContent = t('cancel');
+        if (dzText) dzText.innerHTML = t('dropzone_text') + ' <strong onclick="document.getElementById(\'fileInput\').click()">' + t('dropzone_browse') + '</strong>';
+        var modalCancel = document.getElementById('modalCancelBtn');
+        if (modalCancel) modalCancel.textContent = t('cancel');
+        var confirmCancel = document.getElementById('confirmCancelBtn');
+        if (confirmCancel) confirmCancel.textContent = t('cancel');
+        var confirmSdrLabel = document.getElementById('confirmSdrLabel');
+        if (confirmSdrLabel) confirmSdrLabel.textContent = t('also_delete_sdr');
     }
-
+    
     // ===== State =====
     var currentPath = '/';
     var currentSort = 'name';
@@ -1218,6 +1484,7 @@ html, body {
     var filterTimer = null;
     var currentEntries = [];
     var currentDetailEntry = null;
+    var _initDetailPath = null;
 
     // ===== Icons =====
     var icons = {
@@ -1256,19 +1523,17 @@ html, body {
     }
 
     // ===== Navigation =====
-    // Internal navigation: sets state and loads files WITHOUT pushing history
     function _navigateInternal(path) {
         currentPath = path || '/';
         currentFilter = '';
-        document.getElementById('searchInput').value = '';
+        var searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.value = '';
         loadFiles();
     }
 
-    // Public navigate: updates state and pushes a history entry
     window.navigate = function(path) {
         path = path || '/';
         _navigateInternal(path);
-        // Only push if the hash actually changed (decode to handle %20 etc.)
         var currentHash;
         try { currentHash = decodeURIComponent(window.location.hash); } catch(e) { currentHash = window.location.hash; }
         if (currentHash !== '#' + path) {
@@ -1417,7 +1682,6 @@ html, body {
     };
 
     // ===== File Detail View =====
-    // Internal detail show: renders the detail view WITHOUT pushing history
     function _showDetailInternal(path) {
         var entry = null;
         for (var i = 0; i < currentEntries.length; i++) {
@@ -1436,7 +1700,6 @@ html, body {
         var infoEl = document.getElementById('detailInfo');
         var actionsEl = document.getElementById('detailActions');
 
-        // Show the detail overlay and lock body scroll (iOS needs position:fixed)
         detail.classList.add('open');
         detail.style.display = 'block';
         document.body.dataset.scrollY = window.scrollY;
@@ -1446,7 +1709,6 @@ html, body {
         document.body.style.right = '0';
         document.body.style.overflow = 'hidden';
 
-        // Determine if this is an image file
         var imageExts = {jpg:1, jpeg:1, png:1, gif:1, webp:1};
         var fileExt = (entry.name.split('.').pop() || '').toLowerCase();
         var isImage = imageExts[fileExt] === 1;
@@ -1454,7 +1716,6 @@ html, body {
         var imagePreviewEl = document.getElementById('detailImagePreview');
 
         if (isImage) {
-            // Show image preview, hide book cover
             coverEl.style.display = 'none';
             imagePreviewEl.style.display = 'flex';
             imagePreviewEl.innerHTML = '<div class="cover-spinner"></div>';
@@ -1469,23 +1730,17 @@ html, body {
                 imagePreviewEl.innerHTML = buildCoverPlaceholder('image');
             };
         } else {
-            // Hide image preview, show book cover
             imagePreviewEl.style.display = 'none';
             imagePreviewEl.innerHTML = '';
             coverEl.style.display = '';
-            // Show loading spinner in cover area
             coverEl.innerHTML = '<div class="cover-spinner"></div>';
         }
 
-        // Set title from filename (without extension)
         var nameWithoutExt = entry.name.replace(/\.[^.]+$/, '') || entry.name;
         titleEl.textContent = nameWithoutExt;
-
-        // Clear author initially
         authorEl.textContent = '';
         authorEl.style.display = 'none';
 
-        // File type info
         var typeClass = entry.type || 'file';
         var ext = entry.name.split('.').pop().toUpperCase();
         var dateStr = entry.modified ? formatDate(entry.modified) : t('unknown');
@@ -1497,36 +1752,25 @@ html, body {
         infoHtml += '<div class="detail-info-row"><span class="detail-info-label">' + escapeHtml(t('modified')) + '</span><span class="detail-info-value">' + escapeHtml(dateStr) + '</span></div>';
         infoEl.innerHTML = infoHtml;
 
-        // Build action buttons
         var actHtml = '';
         actHtml += '<button class="btn btn-primary" onclick="detailDownload()">' + icons.download + '<span>' + escapeHtml(t('download')) + '</span></button>';
         actHtml += '<button class="btn btn-secondary" onclick="detailRename()">' + icons.rename + '<span>' + escapeHtml(t('rename')) + '</span></button>';
         actHtml += '<button class="btn btn-danger" onclick="detailDelete()">' + icons.trash + '<span>' + escapeHtml(t('delete_label')) + '</span></button>';
         actionsEl.innerHTML = actHtml;
 
-        // For image files, skip metadata fetch (no book metadata to show)
         if (isImage) {
             coverEl.innerHTML = '';
             coverEl.style.display = 'none';
         } else {
-            // Fetch metadata asynchronously for non-image files
             fetch('/api/metadata?path=' + encodeURIComponent(path))
                 .then(function(res) { return res.json(); })
                 .then(function(meta) {
                     if (!currentDetailEntry || currentDetailEntry.path !== path) return;
-
-                    // Update title if metadata has one
-                    if (meta.title) {
-                        titleEl.textContent = meta.title;
-                    }
-
-                    // Show author if available
+                    if (meta.title) titleEl.textContent = meta.title;
                     if (meta.author) {
                         authorEl.textContent = meta.author;
                         authorEl.style.display = 'block';
                     }
-
-                    // Handle cover image
                     if (meta.has_cover) {
                         var img = document.createElement('img');
                         img.src = '/api/cover?path=' + encodeURIComponent(path);
@@ -1547,7 +1791,6 @@ html, body {
         }
     }
 
-    // Public showFileDetail: shows detail and pushes a history entry
     window.showFileDetail = function(path) {
         _showDetailInternal(path);
         var currentHash;
@@ -1563,7 +1806,6 @@ html, body {
         return '<div class="cover-placeholder">' + icon + '</div>';
     }
 
-    // Internal hide detail: does the DOM work without touching history
     function _hideDetailInternal() {
         var detail = document.getElementById('fileDetail');
         detail.classList.remove('open');
@@ -1578,8 +1820,6 @@ html, body {
         currentDetailEntry = null;
     }
 
-    // Public hideFileDetail: called by the Back button — uses history.back()
-    // so the popstate handler will call _hideDetailInternal
     window.hideFileDetail = function() {
         history.back();
     };
@@ -1599,7 +1839,6 @@ html, body {
         var namePart = dotIndex > 0 ? fullName.substring(0, dotIndex) : fullName;
         var extPart = dotIndex > 0 ? fullName.substring(dotIndex) : '';
 
-        // Show the modal with extension suffix
         var overlay = document.getElementById('modalOverlay');
         var titleElem = document.getElementById('modalTitle');
         var inputElem = document.getElementById('modalInput');
@@ -1608,7 +1847,6 @@ html, body {
         titleElem.textContent = t('rename');
         confirmBtn.textContent = t('rename');
 
-        // Wrap input with extension suffix
         var inputParent = inputElem.parentNode;
         var hasExtWrapper = inputParent.classList.contains('modal-input-with-ext');
         if (extPart) {
@@ -1622,9 +1860,9 @@ html, body {
                 extSpan.id = 'modalExtSuffix';
                 wrapper.appendChild(extSpan);
             }
-            document.getElementById('modalExtSuffix').textContent = extPart;
+            var extSuffix = document.getElementById('modalExtSuffix');
+            if (extSuffix) extSuffix.textContent = extPart;
         } else if (hasExtWrapper) {
-            // Remove the wrapper if no extension
             var wrapper2 = inputParent;
             var grandParent = wrapper2.parentNode;
             grandParent.insertBefore(inputElem, wrapper2);
@@ -1714,7 +1952,8 @@ html, body {
     // ===== Upload =====
     window.toggleUploadZone = function() {
         uploadZoneVisible = !uploadZoneVisible;
-        document.getElementById('dropzone').classList.toggle('visible', uploadZoneVisible);
+        var dropzone = document.getElementById('dropzone');
+        if (dropzone) dropzone.classList.toggle('visible', uploadZoneVisible);
     };
 
     window.handleFileSelect = function(files) {
@@ -1722,7 +1961,8 @@ html, body {
         for (var fi = 0; fi < files.length; fi++) {
             uploadFile(files[fi]);
         }
-        document.getElementById('fileInput').value = '';
+        var fileInput = document.getElementById('fileInput');
+        if (fileInput) fileInput.value = '';
     };
 
     async function uploadFile(file) {
@@ -1798,22 +2038,22 @@ html, body {
 
     document.addEventListener('dragover', function(e) {
         e.preventDefault();
-        if (!uploadZoneVisible) {
+        if (!uploadZoneVisible && dropzone) {
             uploadZoneVisible = true;
             dropzone.classList.add('visible');
         }
-        dropzone.classList.add('active');
+        if (dropzone) dropzone.classList.add('active');
     });
 
     document.addEventListener('dragleave', function(e) {
         if (e.relatedTarget === null || !document.contains(e.relatedTarget)) {
-            dropzone.classList.remove('active');
+            if (dropzone) dropzone.classList.remove('active');
         }
     });
 
     document.addEventListener('drop', function(e) {
         e.preventDefault();
-        dropzone.classList.remove('active');
+        if (dropzone) dropzone.classList.remove('active');
         if (e.dataTransfer.files.length > 0) {
             handleFileSelect(e.dataTransfer.files);
         }
@@ -1821,7 +2061,9 @@ html, body {
 
     // ===== Sort & Filter =====
     window.onSortChange = function() {
-        var val = document.getElementById('sortSelect').value;
+        var sortSelect = document.getElementById('sortSelect');
+        if (!sortSelect) return;
+        var val = sortSelect.value;
         var parts = val.split('-');
         currentSort = parts[0];
         currentOrder = parts[1] || 'asc';
@@ -1831,7 +2073,8 @@ html, body {
     window.onFilterChange = function() {
         clearTimeout(filterTimer);
         filterTimer = setTimeout(function() {
-            currentFilter = document.getElementById('searchInput').value;
+            var searchInput = document.getElementById('searchInput');
+            currentFilter = searchInput ? searchInput.value : '';
             loadFiles();
         }, 250);
     };
@@ -1839,30 +2082,40 @@ html, body {
     // ===== Modal =====
     function showModal(title, defaultValue, confirmText, callback) {
         modalCallback = callback;
-        document.getElementById('modalTitle').textContent = title;
-        document.getElementById('modalInput').value = defaultValue;
-        document.getElementById('modalConfirm').textContent = confirmText;
-        document.getElementById('modalCancelBtn').textContent = t('cancel');
-        document.getElementById('modalOverlay').classList.add('open');
+        var modalTitle = document.getElementById('modalTitle');
+        var modalInput = document.getElementById('modalInput');
+        var modalConfirm = document.getElementById('modalConfirm');
+        var modalCancelBtn = document.getElementById('modalCancelBtn');
+        if (modalTitle) modalTitle.textContent = title;
+        if (modalInput) modalInput.value = defaultValue;
+        if (modalConfirm) modalConfirm.textContent = confirmText;
+        if (modalCancelBtn) modalCancelBtn.textContent = t('cancel');
+        var overlay = document.getElementById('modalOverlay');
+        if (overlay) overlay.classList.add('open');
         setTimeout(function() {
             var input = document.getElementById('modalInput');
-            input.focus();
-            input.select();
+            if (input) {
+                input.focus();
+                input.select();
+            }
         }, 100);
     }
 
     window.hideModal = function() {
-        document.getElementById('modalOverlay').classList.remove('open');
+        var overlay = document.getElementById('modalOverlay');
+        if (overlay) overlay.classList.remove('open');
         modalCallback = null;
         restoreModalInput();
     };
 
     window.closeModal = function(e) {
-        if (e.target === document.getElementById('modalOverlay')) hideModal();
+        var overlay = document.getElementById('modalOverlay');
+        if (e.target === overlay) hideModal();
     };
 
     window.confirmModal = function() {
-        var value = document.getElementById('modalInput').value.trim();
+        var modalInput = document.getElementById('modalInput');
+        var value = modalInput ? modalInput.value.trim() : '';
         var cb = modalCallback;
         hideModal();
         if (cb) {
@@ -1873,30 +2126,38 @@ html, body {
     // ===== Confirm Dialog =====
     function showConfirm(title, message, btnText, callback, showSdr) {
         confirmCallback = callback;
-        document.getElementById('confirmTitle').textContent = title;
-        document.getElementById('confirmMessage').textContent = message;
-        document.getElementById('confirmBtn').textContent = btnText;
-        document.getElementById('confirmCancelBtn').textContent = t('cancel');
+        var confirmTitle = document.getElementById('confirmTitle');
+        var confirmMessage = document.getElementById('confirmMessage');
+        var confirmBtn = document.getElementById('confirmBtn');
+        var confirmCancelBtn = document.getElementById('confirmCancelBtn');
+        if (confirmTitle) confirmTitle.textContent = title;
+        if (confirmMessage) confirmMessage.textContent = message;
+        if (confirmBtn) confirmBtn.textContent = btnText;
+        if (confirmCancelBtn) confirmCancelBtn.textContent = t('cancel');
         var sdrOption = document.getElementById('confirmSdrOption');
         var sdrCheckbox = document.getElementById('confirmSdrCheckbox');
-        if (showSdr) {
-            document.getElementById('confirmSdrLabel').textContent = t('also_delete_sdr');
+        if (showSdr && sdrOption && sdrCheckbox) {
+            var confirmSdrLabel = document.getElementById('confirmSdrLabel');
+            if (confirmSdrLabel) confirmSdrLabel.textContent = t('also_delete_sdr');
             sdrCheckbox.checked = true;
             sdrOption.style.display = 'flex';
-        } else {
+        } else if (sdrOption) {
             sdrOption.style.display = 'none';
-            sdrCheckbox.checked = false;
+            if (sdrCheckbox) sdrCheckbox.checked = false;
         }
-        document.getElementById('confirmOverlay').classList.add('open');
+        var overlay = document.getElementById('confirmOverlay');
+        if (overlay) overlay.classList.add('open');
     }
 
     window.hideConfirm = function() {
-        document.getElementById('confirmOverlay').classList.remove('open');
+        var overlay = document.getElementById('confirmOverlay');
+        if (overlay) overlay.classList.remove('open');
         confirmCallback = null;
     };
 
     window.closeConfirm = function(e) {
-        if (e.target === document.getElementById('confirmOverlay')) hideConfirm();
+        var overlay = document.getElementById('confirmOverlay');
+        if (e.target === overlay) hideConfirm();
     };
 
     window.doConfirm = function() {
@@ -1911,6 +2172,7 @@ html, body {
     function showToast(message, type) {
         type = type || 'info';
         var container = document.getElementById('toastContainer');
+        if (!container) return;
         var toast = document.createElement('div');
         toast.className = 'toast ' + type;
         toast.textContent = message;
@@ -1946,13 +2208,11 @@ html, body {
     }
 
     // ===== History / popstate =====
-    // Parse the current hash and return {path, detail} without modifying state
     function _parseHash() {
         var hash = window.location.hash;
         if (!hash || hash === '#' || hash === '#/') {
             return {path: '/', detail: false};
         }
-        // Strip leading '#' and decode URL-encoded characters (spaces, parens, etc.)
         var raw;
         try { raw = decodeURIComponent(hash.substring(1)); } catch(e) { raw = hash.substring(1); }
         if (raw.endsWith('!detail')) {
@@ -1964,15 +2224,13 @@ html, body {
     window.addEventListener('popstate', function() {
         var state = _parseHash();
         if (state.detail) {
-            // If navigating to a detail view and we're already showing it, skip
             if (currentDetailEntry && currentDetailEntry.path === state.path) return;
-            // We might need to navigate to the parent directory first to load entries
             var parentPath = state.path.substring(0, state.path.lastIndexOf('/')) || '/';
             if (currentPath !== parentPath) {
-                // Need to load the directory first, then show detail once loaded
                 currentPath = parentPath;
                 currentFilter = '';
-                document.getElementById('searchInput').value = '';
+                var searchInput = document.getElementById('searchInput');
+                if (searchInput) searchInput.value = '';
                 var params = new URLSearchParams({
                     path: currentPath,
                     sort: currentSort,
@@ -1984,14 +2242,12 @@ html, body {
                     renderFiles(data.entries);
                     _showDetailInternal(state.path);
                 }).catch(function() {
-                    // If loading fails, just navigate to the directory
                     _navigateInternal(parentPath);
                 });
             } else {
                 _showDetailInternal(state.path);
             }
         } else {
-            // Navigating to a directory — close detail if open
             if (currentDetailEntry) {
                 _hideDetailInternal();
             }
@@ -2000,40 +2256,43 @@ html, body {
     });
 
     // ===== Init =====
-    // Read hash to determine initial state before loading
     var initState = _parseHash();
     if (initState.detail) {
-        // For detail view, start at the parent directory
         var initParent = initState.path.substring(0, initState.path.lastIndexOf('/')) || '/';
         currentPath = initParent;
+        _initDetailPath = initState.path;
     } else {
         currentPath = initState.path;
+        _initDetailPath = null;
     }
-    // Set the initial history entry (replaceState so we don't add an extra entry)
     history.replaceState(
         initState.detail ? {path: initState.path, detail: true} : {path: currentPath},
         '',
         window.location.hash || '#/'
     );
 
-    // Fetch language setting from server, then apply translations and load files
-    var _initDetailPath = initState.detail ? initState.path : null;
     fetch('/api/lang')
         .then(function(res) { return res.json(); })
         .then(function(data) {
-            if (data && data.lang && translations[data.lang]) {
-                currentLang = data.lang;
+            if (data && data.lang) {
+                var langCode = data.lang;
+                if (langCode === 'pt_BR' || langCode === 'pt-BR') {
+                    langCode = 'pt-BR';
+                }
+                if (translations[langCode]) {
+                    currentLang = langCode;
+                } else if (langCode === 'pt') {
+                    currentLang = 'pt-BR';
+                }
             }
         })
-        .catch(function() {
-            // Keep English as default
-        })
+        .catch(function() {})
         .then(function() {
             applyStaticTranslations();
+            initTheme();
             return loadFiles();
         })
         .then(function() {
-            // After files are loaded, open detail view if hash indicated one
             if (_initDetailPath) {
                 _showDetailInternal(_initDetailPath);
             }
