@@ -1337,6 +1337,8 @@ html, body {
             new_folder_title: "New folder",
             also_delete_sdr: "Also delete reading metadata (.sdr)",
             image_preview: "Image preview",
+            paste_success: "{count} items pasted",
+            paste_failed: "Paste failed:",
             cut_placeholder: "Cut is ready. Paste will be implemented next",
             paste_placeholder: "Paste will be implemented next",
             clipboard_copy_ready: "{count} items copied",
@@ -1414,6 +1416,8 @@ html, body {
             new_folder_title: "Nueva carpeta",
             also_delete_sdr: "Tambi\u00e9n eliminar metadatos de lectura (.sdr)",
             image_preview: "Vista previa de imagen",
+            paste_success: "{count} elementos pegados",
+            paste_failed: "Error al pegar:",
             cut_placeholder: "Cortar est\u00e1 listo. Pegar se implementar\u00e1 despu\u00e9s",
             paste_placeholder: "Pegar se implementar\u00e1 despu\u00e9s",
             clipboard_copy_ready: "{count} elementos copiados",
@@ -1491,6 +1495,8 @@ html, body {
             new_folder_title: "Nova pasta",
             also_delete_sdr: "Excluir tamb\u00e9m os metadados de leitura (.sdr)",
             image_preview: "Pr\u00e9via de imagem",
+            paste_success: "{count} itens colados",
+            paste_failed: "Erro ao colar:",
             cut_placeholder: "Recortar j\u00e1 est\u00e1 pronto. Colar ser\u00e1 implementado em seguida",
             paste_placeholder: "Colar ser\u00e1 implementado em seguida",
             clipboard_copy_ready: "{count} itens copiados",
@@ -1714,9 +1720,7 @@ html, body {
             if (entry.is_dir) {
                 html += '<div class="file-actions">';
                 html += '<button class="btn-icon" onclick="event.stopPropagation(); renameItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\')" title="' + escapeHtml(t('rename')) + '">' + icons.rename + '</button>';
-                if (entry.is_empty) {
-                    html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\')" title="' + escapeHtml(t('delete_label')) + '">' + icons.trash + '</button>';
-                }
+                html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\')" title="' + escapeHtml(t('delete_label')) + '">' + icons.trash + '</button>';
                 html += '</div>';
             } else {
                 html += '<div class="file-actions">';
@@ -1814,16 +1818,18 @@ html, body {
     function confirmDeleteEntries(entries, onSuccess) {
         if (!entries || !entries.length) return;
 
-        for (var i = 0; i < entries.length; i++) {
-            if (!canDeleteEntry(entries[i])) {
-                showToast(t('delete_only_files_empty_folders'), 'error');
-                return;
+        if (entries.length > 1) {
+            for (var i = 0; i < entries.length; i++) {
+                if (!canDeleteEntry(entries[i])) {
+                    showToast(t('delete_only_files_empty_folders'), 'error');
+                    return;
+                }
             }
         }
 
         var singleEntry = entries.length === 1 ? entries[0] : null;
         var titleStr = singleEntry
-            ? (singleEntry.is_dir ? t('delete_empty_folder') : t('delete_file'))
+            ? (singleEntry.is_dir ? t('delete_folder') : t('delete_file'))
             : t('delete_selected');
         var msgStr = singleEntry
             ? t('confirm_delete') + ' "' + escapeHtml(singleEntry.name) + '"?'
@@ -1903,6 +1909,52 @@ html, body {
         updateClipboardUI();
     }
 
+    function clearClipboard() {
+        setClipboard(null, []);
+    }
+
+    function getPathName(path) {
+        if (!path) return '';
+        var normalized = path.replace(/\/+$/, '') || '/';
+        if (normalized === '/') return '';
+        var slashIndex = normalized.lastIndexOf('/');
+        return slashIndex === -1 ? normalized : normalized.substring(slashIndex + 1);
+    }
+
+    function buildChildPath(parentPath, name) {
+        return parentPath === '/' ? '/' + name : parentPath + '/' + name;
+    }
+
+    async function executeClipboardOperation(operation) {
+        var endpoint = operation.mode === 'cut' ? '/api/move' : '/api/copy';
+        var completedPaths = [];
+        var failures = [];
+
+        for (var i = 0; i < operation.paths.length; i++) {
+            var sourcePath = operation.paths[i];
+            var entryName = getPathName(sourcePath);
+            var destinationPath = buildChildPath(operation.destination, entryName);
+
+            try {
+                await api('POST', endpoint, {
+                    old_path: sourcePath,
+                    new_path: destinationPath
+                });
+                completedPaths.push(sourcePath);
+            } catch (err) {
+                failures.push({
+                    path: sourcePath,
+                    error: err.message
+                });
+            }
+        }
+
+        return {
+            completedPaths: completedPaths,
+            failures: failures
+        };
+    }
+
     function updateSelectionUI() {
         var selectBtn = document.getElementById('btnSelect');
         var selectionBar = document.getElementById('selectionBar');
@@ -1972,15 +2024,36 @@ html, body {
         window.cancelSelection();
     };
 
-    window.pasteClipboardItems = function() {
+    window.pasteClipboardItems = async function() {
         if (!hasClipboardItems()) return;
-        // Prepared for a future backend paste endpoint.
         var operation = {
             mode: clipboardState.mode,
             paths: clipboardState.paths.slice(),
             destination: currentPath
         };
-        showToast(operation.mode === 'cut' ? t('cut_placeholder') : t('paste_placeholder'), 'info');
+
+        var result = await executeClipboardOperation(operation);
+
+        if (operation.mode === 'cut') {
+            if (result.failures.length > 0) {
+                setClipboard('cut', result.failures.map(function(item) {
+                    return item.path;
+                }));
+            } else {
+                clearClipboard();
+            }
+        }
+
+        if (result.completedPaths.length > 0) {
+            await loadFiles();
+        }
+
+        if (result.failures.length > 0) {
+            showToast(t('paste_failed') + ' ' + result.failures[0].error, 'error');
+            return;
+        }
+
+        showToast(t('paste_success').replace('{count}', result.completedPaths.length), 'success');
     };
 
     function clearSelectionAndReload() {
