@@ -532,6 +532,143 @@ function FileOps:rename(old_rel_path, new_rel_path)
     return true
 end
 
+function FileOps:_validateDestinationPath(full_path)
+    local parent = full_path:match("(.+)/[^/]+$")
+    if parent then
+        local parent_attr = lfs.attributes(parent)
+        if not parent_attr or parent_attr.mode ~= "directory" then
+            return false, "Parent directory does not exist"
+        end
+    end
+
+    local name = full_path:match("([^/]+)$")
+    local valid, valid_err = self:_validateFilename(name)
+    if not valid then
+        return false, valid_err
+    end
+
+    return true
+end
+
+function FileOps:_isPathInside(parent_path, child_path)
+    return child_path:sub(1, #parent_path + 1) == parent_path .. "/"
+end
+
+--- Move a file or directory
+function FileOps:move(old_rel_path, new_rel_path)
+    local old_path, err1 = self:_resolvePath(old_rel_path)
+    if not old_path then
+        return false, err1
+    end
+
+    local new_path, err2 = self:_resolvePath(new_rel_path)
+    if not new_path then
+        return false, err2
+    end
+
+    if old_path == self._root_dir then
+        return false, "Cannot move root directory"
+    end
+
+    local src_attr = lfs.attributes(old_path)
+    if not src_attr then
+        return false, "Source does not exist"
+    end
+
+    local dest_attr = lfs.attributes(new_path)
+    if dest_attr then
+        return false, "Destination already exists"
+    end
+
+    local valid, valid_err = self:_validateDestinationPath(new_path)
+    if not valid then
+        return false, valid_err
+    end
+
+    if src_attr.mode == "directory" and self:_isPathInside(old_path, new_path) then
+        return false, "Cannot move directory inside itself"
+    end
+
+    local ok, move_err = os.rename(old_path, new_path)
+    if not ok then
+        return false, "Cannot move: " .. tostring(move_err)
+    end
+
+    logger.info("FileSync: Moved", old_path, "to", new_path)
+    return true
+end
+
+--- Copy a file in chunks without loading it entirely into memory
+function FileOps:copyFile(src_rel_path, dst_rel_path)
+    local src_path, err1 = self:_resolvePath(src_rel_path)
+    if not src_path then
+        return false, err1
+    end
+
+    local dst_path, err2 = self:_resolvePath(dst_rel_path)
+    if not dst_path then
+        return false, err2
+    end
+
+    local src_attr = lfs.attributes(src_path)
+    if not src_attr then
+        return false, "Source does not exist"
+    end
+    if src_attr.mode ~= "file" then
+        return false, "Copy only supports files"
+    end
+
+    local dest_attr = lfs.attributes(dst_path)
+    if dest_attr then
+        return false, "Destination already exists"
+    end
+
+    local valid, valid_err = self:_validateDestinationPath(dst_path)
+    if not valid then
+        return false, valid_err
+    end
+
+    local src_file, src_err = io.open(src_path, "rb")
+    if not src_file then
+        return false, "Cannot open source file: " .. tostring(src_err)
+    end
+
+    local dst_file, dst_err = io.open(dst_path, "wb")
+    if not dst_file then
+        src_file:close()
+        return false, "Cannot create destination file: " .. tostring(dst_err)
+    end
+
+    local CHUNK_SIZE = 65536
+    while true do
+        local chunk, read_err = src_file:read(CHUNK_SIZE)
+        if read_err then
+            src_file:close()
+            dst_file:close()
+            os.remove(dst_path)
+            return false, "Cannot read source file: " .. tostring(read_err)
+        end
+        if not chunk then break end
+        local write_ok, write_err = dst_file:write(chunk)
+        if not write_ok then
+            src_file:close()
+            dst_file:close()
+            os.remove(dst_path)
+            return false, "Cannot write destination file: " .. tostring(write_err)
+        end
+    end
+
+    local close_ok, close_err = dst_file:close()
+    src_file:close()
+    if close_ok == false then
+        os.remove(dst_path)
+        return false, "Cannot finalize destination file: " .. tostring(close_err)
+    end
+
+    logger.info("FileSync: Copied", src_path, "to", dst_path)
+    return true
+end
+
 --- Delete a file or directory (directory must be empty)
 --- @param rel_path string: relative path to delete
 --- @param options table|nil: optional settings
