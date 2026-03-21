@@ -1680,6 +1680,7 @@ html, body {
             selectedPaths = [];
             updateSelectionUI();
         }
+        closeUploadZone();
         currentPath = path;
         currentFilter = '';
         document.getElementById('searchInput').value = '';
@@ -2071,6 +2072,9 @@ html, body {
 
     window.toggleSelectionMode = function() {
         selectionMode = !selectionMode;
+        if (selectionMode) {
+            closeUploadZone();
+        }
         if (!selectionMode) {
             selectedPaths = [];
         }
@@ -2155,6 +2159,7 @@ html, body {
             }
         }
         if (!entry) return;
+        closeUploadZone();
         currentDetailEntry = entry;
 
         var detail = document.getElementById('fileDetail');
@@ -2440,6 +2445,12 @@ html, body {
     };
 
     // ===== Upload =====
+    function closeUploadZone() {
+        uploadZoneVisible = false;
+        document.getElementById('dropzone').classList.remove('visible');
+        document.getElementById('dropzone').classList.remove('active');
+    }
+
     window.toggleUploadZone = function() {
         uploadZoneVisible = !uploadZoneVisible;
         document.getElementById('dropzone').classList.toggle('visible', uploadZoneVisible);
@@ -2504,6 +2515,7 @@ html, body {
             if (bar) { bar.style.width = '100%'; bar.classList.add('complete'); }
             if (status) { status.textContent = t('done'); status.classList.add('success'); }
             showToast(file.name + ' ' + t('uploaded'), 'success');
+            closeUploadZone();
             loadFiles();
 
             setTimeout(function() {
