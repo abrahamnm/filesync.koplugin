@@ -16,6 +16,113 @@ local SAFE_MODE_EXTENSIONS = {
     jpg = true, jpeg = true, png = true, gif = true, webp = true,
 }
 
+local FILE_TYPE_BY_COMPOUND_EXTENSION = {
+    ["fb2.zip"] = "ebook",
+    ["epub.zip"] = "ebook",
+    ["cbz.zip"] = "comic",
+}
+
+local FILE_TYPE_BY_FILENAME = {
+    ["dockerfile"] = "code",
+    ["makefile"] = "code",
+    ["justfile"] = "code",
+    ["cmakelists.txt"] = "code",
+    [".bashrc"] = "code",
+    [".zshrc"] = "code",
+    [".profile"] = "code",
+    [".gitignore"] = "code",
+    [".gitattributes"] = "code",
+    [".gitmodules"] = "code",
+    [".editorconfig"] = "code",
+    [".env"] = "code",
+}
+
+local FILE_TYPE_BY_EXTENSION = {
+    epub = "ebook",
+    fb2 = "ebook",
+    lit = "ebook",
+    pdb = "ebook",
+    prc = "ebook",
+    mobi = "reader",
+    azw = "reader",
+    azw3 = "reader",
+    kfx = "reader",
+    pdf = "pdf",
+    djvu = "pdf",
+    cbz = "comic",
+    cbr = "comic",
+    txt = "text",
+    md = "markdown",
+    markdown = "markdown",
+    mkd = "markdown",
+    mdown = "markdown",
+    rtf = "text",
+    doc = "document",
+    docx = "document",
+    html = "code",
+    htm = "code",
+    chm = "document",
+    png = "image",
+    jpg = "image",
+    jpeg = "image",
+    gif = "image",
+    svg = "image",
+    bmp = "image",
+    webp = "image",
+    zip = "archive",
+    gz = "archive",
+    tar = "archive",
+    bz2 = "archive",
+    xz = "archive",
+    rar = "archive",
+    ["7z"] = "archive",
+    mp3 = "audio",
+    m4a = "audio",
+    aac = "audio",
+    wav = "audio",
+    ogg = "audio",
+    flac = "audio",
+    mp4 = "video",
+    mkv = "video",
+    avi = "video",
+    mov = "video",
+    webm = "video",
+    lua = "code",
+    js = "code",
+    ts = "code",
+    jsx = "code",
+    tsx = "code",
+    mjs = "code",
+    cjs = "code",
+    json = "code",
+    xml = "code",
+    yml = "code",
+    yaml = "code",
+    toml = "code",
+    ini = "code",
+    cfg = "code",
+    conf = "code",
+    log = "code",
+    sh = "code",
+    bash = "code",
+    zsh = "code",
+    py = "code",
+    rb = "code",
+    php = "code",
+    go = "code",
+    rs = "code",
+    c = "code",
+    cpp = "code",
+    h = "code",
+    hpp = "code",
+    java = "code",
+    css = "code",
+    scss = "code",
+    sass = "code",
+    less = "code",
+    sql = "code",
+}
+
 local function normalize_root_path(path)
     local normalized = tostring(path or "/")
     normalized = normalized:gsub("//+", "/"):gsub("^%s+", ""):gsub("%s+$", "")
@@ -254,19 +361,20 @@ end
 
 --- Get file type category.
 function FileOps:_getFileType(filename)
-    local ext = filename:match("%.([^%.]+)$")
-    if not ext then return "file" end
-    ext = ext:lower()
-
-    local ebook_exts = { epub = true, pdf = true, mobi = true, azw = true, azw3 = true, fb2 = true, djvu = true, cbz = true, cbr = true, kfx = true }
-    local doc_exts = { txt = true, doc = true, docx = true, rtf = true, html = true, htm = true, md = true }
-    local image_exts = { png = true, jpg = true, jpeg = true, gif = true, svg = true, bmp = true, webp = true }
-
-    if ebook_exts[ext] then return "ebook"
-    elseif doc_exts[ext] then return "document"
-    elseif image_exts[ext] then return "image"
-    else return "file"
+    if not filename then return "file" end
+    local lower_name = filename:lower()
+    if FILE_TYPE_BY_FILENAME[lower_name] then
+        return FILE_TYPE_BY_FILENAME[lower_name]
     end
+    local compound_ext = lower_name:match("%.([^/]+%.[^%.]+)$")
+    if compound_ext and FILE_TYPE_BY_COMPOUND_EXTENSION[compound_ext] then
+        return FILE_TYPE_BY_COMPOUND_EXTENSION[compound_ext]
+    end
+
+    local ext = lower_name:match("%.([^%.]+)$")
+    if not ext then return "file" end
+
+    return FILE_TYPE_BY_EXTENSION[ext] or "file"
 end
 
 --- Check if a filename has a safe mode whitelisted extension.
