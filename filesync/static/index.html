@@ -1182,6 +1182,64 @@ html, body {
             new_folder_title: "Nueva carpeta",
             also_delete_sdr: "Tambi\u00e9n eliminar metadatos de lectura (.sdr)",
             image_preview: "Vista previa de imagen"
+        },
+        zh: {
+            filesync: "FileSync",
+            upload: "上传",
+            folder: "文件夹",
+            filter_placeholder: "筛选文件...",
+            sort_name_asc: "名称 A-Z",
+            sort_name_desc: "名称 Z-A",
+            sort_newest: "最新优先",
+            sort_oldest: "最旧优先",
+            sort_largest: "最大优先",
+            sort_smallest: "最小优先",
+            sort_type: "类型",
+            dropzone_text: "拖放文件到此处，或",
+            dropzone_browse: "浏览",
+            choose_files: "选择文件",
+            loading: "加载中...",
+            failed_to_load: "加载文件失败",
+            empty_folder: "此文件夹为空",
+            empty_folder_sub: "上传文件或创建新文件夹",
+            folder_label: "文件夹",
+            file_type: "文件类型",
+            size: "大小",
+            modified: "修改时间",
+            download: "下载",
+            downloading: "下载中",
+            rename: "重命名",
+            delete_label: "删除",
+            back: "返回",
+            cancel: "取消",
+            create: "创建",
+            new_folder: "新建文件夹",
+            renamed_successfully: "重命名成功",
+            deleted_successfully: "删除成功",
+            folder_created: "文件夹已创建",
+            uploaded: "已上传",
+            rename_failed: "重命名失败：",
+            delete_failed: "删除失败：",
+            upload_failed: "上传失败：",
+            failed_create_folder: "创建文件夹失败：",
+            home: "首页",
+            done: "完成",
+            failed: "失败",
+            network_error: "网络错误",
+            delete_file: "删除文件",
+            delete_folder: "删除文件夹",
+            delete_empty_folder: "删除空文件夹",
+            confirm_delete: "确定要删除",
+            confirm_delete_contents: "这将删除所有内容。",
+            unknown: "未知",
+            just_now: "刚刚",
+            minutes_ago: "分钟前",
+            hours_ago: "小时前",
+            days_ago: "天前",
+            upload_files_title: "上传文件",
+            new_folder_title: "新建文件夹",
+            also_delete_sdr: "同时删除阅读元数据（.sdr）",
+            image_preview: "图片预览"
         }
     };
     var currentLang = "en";
@@ -2021,8 +2079,16 @@ html, body {
     fetch('/api/lang')
         .then(function(res) { return res.json(); })
         .then(function(data) {
-            if (data && data.lang && translations[data.lang]) {
-                currentLang = data.lang;
+            if (data && data.lang) {
+                // Try exact match first, then prefix match (e.g. "zh_CN" -> "zh")
+                if (translations[data.lang]) {
+                    currentLang = data.lang;
+                } else {
+                    var prefix = data.lang.split('_')[0];
+                    if (translations[prefix]) {
+                        currentLang = prefix;
+                    }
+                }
             }
         })
         .catch(function() {
