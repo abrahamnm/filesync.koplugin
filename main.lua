@@ -75,7 +75,7 @@ function FileSync:addToMainMenu(menu_items)
                 text = _("Check for updates"),
                 callback = function()
                     local Updater = require("filesync/updater")
-                    Updater:checkForUpdates(true)
+                    Updater:checkForUpdates()
                 end,
                 keep_menu_open = true,
             },

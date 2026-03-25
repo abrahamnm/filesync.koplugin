@@ -5,7 +5,6 @@ local T = require("ffi/util").template
 
 local Updater = {
     _github_api_url = "https://api.github.com/repos/abrahamnm/filesync.koplugin/releases/latest",
-    _cache_interval = 86400, -- 24 hours in seconds
 }
 
 --- Get the plugin directory path dynamically.
@@ -474,16 +473,6 @@ function Updater:_shellEscape(s)
     return "'" .. s:gsub("'", "'\\''") .. "'"
 end
 
---- Get last update check timestamp from settings.
-function Updater:_getLastCheckTime()
-    return G_reader_settings:readSetting("filesync_last_update_check", 0)
-end
-
---- Save the current time as the last update check timestamp.
-function Updater:_setLastCheckTime()
-    G_reader_settings:saveSetting("filesync_last_update_check", os.time())
-    G_reader_settings:flush()
-end
 
 --- Extract a brief changelog summary from the release body.
 function Updater:_getChangelog(release)
@@ -500,21 +489,10 @@ function Updater:_getChangelog(release)
 end
 
 --- Main entry point: check for updates and show appropriate UI.
--- If manual is false/nil, respects the cache interval.
-function Updater:checkForUpdates(manual)
+function Updater:checkForUpdates()
     local UIManager = require("ui/uimanager")
     local InfoMessage = require("ui/widget/infomessage")
     local NetworkMgr = require("ui/network/manager")
-
-    -- For manual checks, always proceed. For automatic, respect cache.
-    if not manual then
-        local last_check = self:_getLastCheckTime()
-        local now = os.time()
-        if (now - last_check) < self._cache_interval then
-            logger.dbg("FileSync Updater: Skipping check, last check was recent")
-            return
-        end
-    end
 
     -- Check network availability
     if not NetworkMgr:isWifiOn() then
@@ -557,9 +535,6 @@ function Updater:checkForUpdates(manual)
             end
             return
         end
-
-        -- Record successful check
-        self:_setLastCheckTime()
 
         local remote_version_str = release.tag_name
         if not remote_version_str then
