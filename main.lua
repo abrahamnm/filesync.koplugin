@@ -68,12 +68,22 @@ function FileSync:addToMainMenu(menu_items)
                 keep_menu_open = false,
             },
             {
+                text = _("Check for updates"),
+                callback = function()
+                    local Updater = require("filesync/updater")
+                    Updater:checkForUpdates(true)
+                end,
+                keep_menu_open = true,
+            },
+            {
                 text = _("About"),
                 callback = function()
                     local UIManager = require("ui/uimanager")
                     local InfoMessage = require("ui/widget/infomessage")
+                    local meta = require("filesync/_meta")
+                    local T = require("ffi/util").template
                     UIManager:show(InfoMessage:new{
-                        text = _("FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network.\n\nProject:\ngithub.com/abrahamnm/filesync.koplugin"),
+                        text = T(_("FileSync v%1\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network.\n\nProject:\ngithub.com/abrahamnm/filesync.koplugin"), meta.version),
                     })
                 end,
                 keep_menu_open = true,
