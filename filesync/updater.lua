@@ -23,7 +23,8 @@ end
 
 --- Get current plugin version from _meta.lua.
 function Updater:_getCurrentVersion()
-    local meta = require("filesync/_meta")
+    local plugin_dir = self:_getPluginDir()
+    local meta = dofile(plugin_dir .. "/_meta.lua")
     return meta.version or "0.0.0"
 end
 
@@ -254,6 +255,49 @@ function Updater:_getDownloadUrl(release)
     return nil
 end
 
+--- Perform an HTTPS/HTTP request, following redirects manually.
+-- LuaSec's ssl.https does not support the "redirect" option that socket.http has,
+-- so we must handle 3xx redirects ourselves.
+function Updater:_httpsRequest(url, sink)
+    local https = require("ssl.https")
+    local http = require("socket.http")
+    local ltn12 = require("ltn12")
+
+    local max_redirects = 10
+    for _ = 1, max_redirects do
+        local request_func = url:match("^https") and https.request or http.request
+        local result, status_code, headers = request_func{
+            url = url,
+            method = "GET",
+            headers = {
+                ["User-Agent"] = "filesync.koplugin",
+            },
+            sink = sink,
+            redirect = false,
+        }
+
+        if not result then
+            return nil, nil, nil
+        end
+
+        -- Follow 3xx redirects
+        if status_code >= 300 and status_code < 400 and headers then
+            local location = headers["location"] or headers["Location"]
+            if location then
+                -- Reset sink for the redirect — we need a fresh table sink
+                -- (file sinks can't be reused, caller handles this for file downloads)
+                url = location
+            else
+                return result, status_code, headers
+            end
+        else
+            return result, status_code, headers
+        end
+    end
+
+    return nil, nil, nil
+end
+
 --- Download a file from a URL (follows redirects) to a local path.
 -- Returns true on success, or nil + error message on failure.
 function Updater:_downloadFile(url, dest_path)
@@ -261,22 +305,50 @@ function Updater:_downloadFile(url, dest_path)
     local http = require("socket.http")
     local ltn12 = require("ltn12")
 
+    -- First, resolve all redirects to get the final URL (using a throwaway sink)
+    local final_url = url
+    local max_redirects = 10
+    for _ = 1, max_redirects do
+        local request_func = final_url:match("^https") and https.request or http.request
+        local result, status_code, headers = request_func{
+            url = final_url,
+            method = "HEAD",
+            headers = {
+                ["User-Agent"] = "filesync.koplugin",
+            },
+            redirect = false,
+        }
+
+        if not result then
+            return nil, _("Download failed: network error.")
+        end
+
+        if status_code >= 300 and status_code < 400 and headers then
+            local location = headers["location"] or headers["Location"]
+            if location then
+                final_url = location
+            else
+                break
+            end
+        else
+            break
+        end
+    end
+
+    -- Now download from the final URL
     local f, err = io.open(dest_path, "wb")
     if not f then
         return nil, T(_("Cannot create temporary file: %1"), tostring(err))
     end
 
-    -- Determine which module to use based on URL scheme
-    local request_func = url:match("^https") and https.request or http.request
-
-    local result, status_code, headers = request_func{
-        url = url,
+    local request_func = final_url:match("^https") and https.request or http.request
+    local result, status_code = request_func{
+        url = final_url,
         method = "GET",
         headers = {
             ["User-Agent"] = "filesync.koplugin",
         },
         sink = ltn12.sink.file(f),
-        redirect = true,
     }
 
     -- Note: ltn12.sink.file closes the file handle
