@@ -1,0 +1,90 @@
+# Chinese (Simplified) translations for FileSync KOReader plugin
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: zh_CN\n"
+
+msgid "FileSync"
+msgstr "FileSync"
+
+msgid "FileSync - Wireless File Manager"
+msgstr "FileSync - 无线文件管理器"
+
+msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
+msgstr "启动本地 HTTP Web 服务器并显示二维码。使用手机扫描二维码，通过简洁的 Web 界面无线管理设备上的书籍和文件。"
+
+msgid "Stop file server"
+msgstr "停止文件服务器"
+
+msgid "Start file server"
+msgstr "启动文件服务器"
+
+msgid "Server port"
+msgstr "服务器端口"
+
+msgid "Safe mode"
+msgstr "安全模式"
+
+msgid "Show QR code"
+msgstr "显示二维码"
+
+msgid "About"
+msgstr "关于"
+
+msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
+msgstr "FileSync v1.0.0\n\nKOReader 无线文件管理器。\n\n启动服务器，使用手机扫描二维码，即可在同一 WiFi 网络的任何浏览器中管理您的书籍。"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Port set to %1. Restart the server for changes to take effect."
+msgstr "端口已设置为 %1。请重启服务器以使更改生效。"
+
+msgid "Invalid port. Please enter a number between 1024 and 65535."
+msgstr "无效的端口。请输入 1024 到 65535 之间的数字。"
+
+msgid "FileSync server is already running."
+msgstr "FileSync 服务器已在运行。"
+
+msgid "WiFi is not enabled. Please turn on WiFi first."
+msgstr "WiFi 未启用。请先开启 WiFi。"
+
+msgid "Could not determine device IP address. Make sure WiFi is connected."
+msgstr "无法确定设备 IP 地址。请确保 WiFi 已连接。"
+
+msgid "Failed to start server: %1"
+msgstr "启动服务器失败：%1"
+
+msgid "FileSync server stopped."
+msgstr "FileSync 服务器已停止。"
+
+msgid "Low Battery"
+msgstr "电量不足"
+
+msgid "Battery level is at %1%. Running the server may drain the battery quickly."
+msgstr "电池电量为 %1%。运行服务器可能会快速消耗电池。"
+
+msgid "Start Anyway"
+msgstr "仍然启动"
+
+msgid "Server is not running."
+msgstr "服务器未运行。"
+
+msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
+msgstr "扫描二维码或在浏览器中输入 URL。\n\n两个设备必须在同一 WiFi 网络上。"
+
+msgid "Stop Server"
+msgstr "停止服务器"
+
+msgid "Stopping server..."
+msgstr "正在停止服务器..."
+
+msgid "Server running in the background. Stop the server to save battery."
+msgstr "服务器正在后台运行。停止服务器以节省电量。"
+
+msgid "Image preview"
+msgstr "图片预览"
