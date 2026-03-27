@@ -20,6 +20,9 @@ msgstr "Detener servidor de archivos"
 msgid "Start file server"
 msgstr "Iniciar servidor de archivos"
 
+msgid "Server status"
+msgstr "Estado del servidor"
+
 msgid "Server port"
 msgstr "Puerto del servidor"
 
@@ -44,8 +47,8 @@ msgstr "Guardar"
 msgid "Port set to %1. Restart the server for changes to take effect."
 msgstr "Puerto configurado a %1. Reinicia el servidor para que los cambios surtan efecto."
 
-msgid "Invalid port. Please enter a number between 1024 and 65535."
-msgstr "Puerto no válido. Introduce un número entre 1024 y 65535."
+msgid "Invalid port. Please enter a number between 1 and 65535."
+msgstr "Puerto no válido. Introduce un número entre 1 y 65535."
 
 msgid "FileSync server is already running."
 msgstr "El servidor FileSync ya está en ejecución."
@@ -88,3 +91,51 @@ msgstr "Servidor ejecutándose en segundo plano. Detén el servidor para ahorrar
 
 msgid "Image preview"
 msgstr "Vista previa de imagen"
+
+msgid "Define Root PIN"
+msgstr "Definir PIN Root"
+
+msgid "Change Root PIN"
+msgstr "Cambiar PIN Root"
+
+msgid "Reveal Root PIN"
+msgstr "Revelar PIN Root"
+
+msgid "Remove Root PIN"
+msgstr "Eliminar PIN Root"
+
+msgid "PIN cannot be empty."
+msgstr "El PIN no puede estar vacío."
+
+msgid "PIN must contain digits only."
+msgstr "El PIN debe contener solo dígitos."
+
+msgid "PIN must be between 4 and 8 digits."
+msgstr "El PIN debe tener entre 4 y 8 dígitos."
+
+msgid "Root PIN saved."
+msgstr "PIN Root guardado."
+
+msgid "Root PIN updated."
+msgstr "PIN Root actualizado."
+
+msgid "Root PIN is not set."
+msgstr "El PIN Root no está configurado."
+
+msgid "The Root PIN will appear on the Kindle screen. Continue?"
+msgstr "El PIN Root aparecerá en la pantalla del Kindle. ¿Continuar?"
+
+msgid "Reveal"
+msgstr "Revelar"
+
+msgid "Root PIN: %1"
+msgstr "PIN Root: %1"
+
+msgid "Remove the saved Root PIN from this device?"
+msgstr "¿Eliminar el PIN Root guardado de este dispositivo?"
+
+msgid "Remove"
+msgstr "Eliminar"
+
+msgid "Root PIN removed."
+msgstr "PIN Root eliminado."

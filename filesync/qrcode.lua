@@ -132,7 +132,7 @@ end
 --- which wraps the ffi/qrencode C library for reliable QR generation.
 ---
 --- If you need to use this standalone:
----   local qr = QRCode.generate("http://192.168.1.100:8080")
+---   local qr = QRCode.generate("http://192.168.1.100")
 ---   -- qr is a 2D table where true = dark module, false = light module
 
 function QRCode.generate(text)

@@ -44,8 +44,8 @@ msgstr "保存"
 msgid "Port set to %1. Restart the server for changes to take effect."
 msgstr "端口已设置为 %1。请重启服务器以使更改生效。"
 
-msgid "Invalid port. Please enter a number between 1024 and 65535."
-msgstr "无效的端口。请输入 1024 到 65535 之间的数字。"
+msgid "Invalid port. Please enter 80 or a number between 1024 and 65535."
+msgstr "无效的端口。请输入 80 或 1024 到 65535 之间的数字。"
 
 msgid "FileSync server is already running."
 msgstr "FileSync 服务器已在运行。"
@@ -58,6 +58,15 @@ msgstr "无法确定设备 IP 地址。请确保 WiFi 已连接。"
 
 msgid "Failed to start server: %1"
 msgstr "启动服务器失败：%1"
+
+msgid "FileSync could not use the default address %1 because another service is already using port %2.\n\nStop the other service, or change the Server Port setting to another free port such as 8080."
+msgstr "FileSync 无法使用默认地址 %1，因为另一个服务已占用端口 %2。\n\n请停止该服务，或将服务器端口设置改为其他空闲端口，例如 8080。"
+
+msgid "Failed to start server on port %1.\n\nAnother service is already using this port.\n\nStop the other service, or change the Server Port setting to another free port such as 8080."
+msgstr "无法在端口 %1 上启动服务器。\n\n另一个服务已在使用该端口。\n\n请停止该服务，或将服务器端口设置改为其他空闲端口，例如 8080。"
+
+msgid "Failed to start server on port %1.\n\nThis port may require root or admin privileges on this device.\n\nTry changing the Server Port setting to 8080 or higher."
+msgstr "无法在端口 %1 上启动服务器。\n\n该端口在此设备上可能需要 root 或管理员权限。\n\n请尝试将服务器端口设置改为 8080 或更高。"
 
 msgid "FileSync server stopped."
 msgstr "FileSync 服务器已停止。"
