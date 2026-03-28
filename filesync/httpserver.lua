@@ -6,8 +6,8 @@ local UIManager = require("ui/uimanager")
 -- devices (e.g. Kindle).  The original 100 ms fixed interval caused ~600
 -- UIManager schedule calls per minute even when no client was connected,
 -- creating closure churn that overwhelmed Lua's garbage collector on ARM.
-local POLL_INTERVAL_IDLE = 1.0   -- 1 s when no clients are connecting
-local POLL_INTERVAL_ACTIVE = 0.2 -- 200 ms while actively serving requests
+local POLL_INTERVAL_IDLE = 2.0   -- 2 s when no clients are connecting
+local POLL_INTERVAL_ACTIVE = 0.5 -- 500 ms while actively serving requests
 
 local HttpServer = {
     port = 8080,
@@ -77,14 +77,14 @@ end
 function HttpServer:_poll()
     if not self._running or not self._server_socket then return end
 
-    -- Process up to 4 pending connections per cycle (browser may open several at once)
+    -- Process at most 2 pending connections per cycle to avoid long UI stalls
     local had_client = false
-    for _ = 1, 4 do
+    for _ = 1, 2 do
         local client = self._server_socket:accept()
         if not client then break end
 
         had_client = true
-        client:settimeout(5)
+        client:settimeout(2)
         local ok, err = pcall(function()
             self:_handleClient(client)
         end)
@@ -99,7 +99,7 @@ function HttpServer:_poll()
         pcall(function() client:close() end)
     end
 
-    -- Adaptive polling: respond quickly while clients are active, back off when idle
+    -- Adaptive polling: fast while serving clients, slower when idle
     self:_schedulePoll(had_client and POLL_INTERVAL_ACTIVE or POLL_INTERVAL_IDLE)
 end
 
@@ -538,32 +538,19 @@ function HttpServer:_encodeJSON(value)
 end
 
 function HttpServer:_escapeJSONString(s)
-    local result = {}
-    for i = 1, #s do
-        local b = string.byte(s, i)
-        if b == 34 then         -- "
-            result[#result + 1] = '\\"'
-        elseif b == 92 then     -- \
-            result[#result + 1] = '\\\\'
-        elseif b == 47 then     -- /
-            result[#result + 1] = '\\/'
-        elseif b == 8 then      -- backspace
-            result[#result + 1] = '\\b'
-        elseif b == 12 then     -- form feed
-            result[#result + 1] = '\\f'
-        elseif b == 10 then     -- newline
-            result[#result + 1] = '\\n'
-        elseif b == 13 then     -- carriage return
-            result[#result + 1] = '\\r'
-        elseif b == 9 then      -- tab
-            result[#result + 1] = '\\t'
-        elseif b < 32 then      -- other control chars
-            result[#result + 1] = string.format("\\u%04x", b)
-        else
-            result[#result + 1] = string.char(b)
-        end
-    end
-    return table.concat(result)
+    local escape_map = {
+        ['"']  = '\\"',
+        ['\\'] = '\\\\',
+        ['/']  = '\\/',
+        ['\b'] = '\\b',
+        ['\f'] = '\\f',
+        ['\n'] = '\\n',
+        ['\r'] = '\\r',
+        ['\t'] = '\\t',
+    }
+    return s:gsub('[%z\1-\31\\"/]', function(c)
+        return escape_map[c] or string.format("\\u%04x", string.byte(c))
+    end)
 end
 
 --- Minimal JSON decoder

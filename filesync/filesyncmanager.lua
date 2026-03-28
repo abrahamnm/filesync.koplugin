@@ -35,6 +35,7 @@ local FileSyncManager = {
     _was_running_before_suspend = false,
     _standby_prevented = false,
     _qr_widget = nil,
+    _qr_auto_dismiss_fn = nil,
 }
 
 local DEFAULT_PORT = 8080
@@ -273,33 +274,23 @@ function FileSyncManager:stop(silent)
 end
 
 function FileSyncManager:preventStandby()
-    if self._standby_prevented then return end
-
-    -- 1. Prevent standby (light sleep / screen off)
-    UIManager:preventStandby()
-    logger.info("FileSync: Standby prevented")
-
-    -- 2. Pause auto-suspend via the officially supported PluginShare flag.
-    --    KOReader's autosuspend plugin checks this flag on every schedule
-    --    cycle and resets the suspend countdown while it is truthy.
-    local PluginShare = require("pluginshare")
-    PluginShare.pause_auto_suspend = true
-    logger.info("FileSync: Auto-suspend paused via PluginShare")
-
-    self._standby_prevented = true
+    -- Keep natural device suspend behavior while server runs.
+    self._standby_prevented = false
+    logger.info("FileSync: Natural suspend preserved while server is running")
+    return true
 end
 
 function FileSyncManager:allowStandby()
-    if not self._standby_prevented then return end
+    -- Best-effort cleanup for sessions started before this behavior change.
+    local ok_share, PluginShare = pcall(require, "pluginshare")
+    if ok_share and type(PluginShare) == "table" and PluginShare.pause_auto_suspend then
+        PluginShare.pause_auto_suspend = nil
+        logger.info("FileSync: Cleared legacy auto-suspend pause flag")
+    end
 
-    -- 1. Resume auto-suspend
-    local PluginShare = require("pluginshare")
-    PluginShare.pause_auto_suspend = nil
-    logger.info("FileSync: Auto-suspend resumed via PluginShare")
-
-    -- 2. Allow standby again
-    UIManager:allowStandby()
-    logger.info("FileSync: Standby allowed")
+    pcall(function()
+        UIManager:allowStandby()
+    end)
 
     self._standby_prevented = false
 end
@@ -331,6 +322,10 @@ function FileSyncManager:checkBatteryAndStart()
 end
 
 function FileSyncManager:closeQRScreen()
+    if self._qr_auto_dismiss_fn then
+        UIManager:unschedule(self._qr_auto_dismiss_fn)
+        self._qr_auto_dismiss_fn = nil
+    end
     if self._qr_widget then
         UIManager:close(self._qr_widget, "full")
         self._qr_widget = nil
@@ -537,7 +532,7 @@ function FileSyncManager:showQRCode()
                 local manager = self._manager
                 UIManager:show(ConfirmBox:new{
                     title = _("File server is running"),
-                    text = _("The server will keep running in the background and prevent the device from sleeping. What would you like to do?"),
+                    text = _("The server will keep running in the background. What would you like to do?"),
                     ok_text = _("Stop server"),
                     cancel_text = _("Keep running"),
                     ok_callback = function()
@@ -577,7 +572,7 @@ function FileSyncManager:showQRCode()
     -- appear frozen.  The server continues in the background; the user can
     -- reopen this screen from the menu at any time.
     local qr_ref = widget
-    UIManager:scheduleIn(60, function()
+    self._qr_auto_dismiss_fn = function()
         if self._qr_widget and self._qr_widget == qr_ref then
             self:closeQRScreen()
             UIManager:show(InfoMessage:new{
@@ -585,7 +580,8 @@ function FileSyncManager:showQRCode()
                 timeout = 4,
             })
         end
-    end)
+    end
+    UIManager:scheduleIn(60, self._qr_auto_dismiss_fn)
 end
 
 function FileSyncManager:openKindleFirewall(port)
