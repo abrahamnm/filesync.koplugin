@@ -50,17 +50,6 @@
     --success-light: #f0fdf4;
     --warning: #f59e0b;
     --warning-light: #fffbeb;
-    --selection-border: rgba(59, 130, 246, 0.3);
-    --selection-marker-color: #fff;
-    --selection-bar-surface: rgba(255, 255, 255, 0.88);
-    --selection-bar-border: rgba(226, 229, 233, 0.92);
-    --selection-bar-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
-    --selection-action-bg: rgba(255, 255, 255, 0.72);
-    --selection-action-hover-bg: #eff6ff;
-    --selection-action-danger-bg: #fff1f2;
-    --selection-action-danger-hover-bg: #ffe4e6;
-    --selection-close-bg: #1f2937;
-    --selection-close-color: #fff;
     --upload-cta-bg: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     --upload-cta-hover: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     --upload-cta-border: rgba(37, 99, 235, 0.18);
@@ -132,23 +121,10 @@
     --success-light: #183b2f;
     --warning: #f4c66d;
     --warning-light: #5f3c1f;
-    --selection-border: rgba(96, 165, 250, 0.35);
-    --selection-marker-color: #fff;
-    --selection-bar-surface: rgba(23, 28, 36, 0.88);
-    --selection-bar-border: rgba(82, 97, 119, 0.62);
-    --selection-bar-shadow: 0 22px 46px rgba(0, 0, 0, 0.38);
-    --selection-action-bg: rgba(45, 57, 74, 0.82);
-    --selection-action-hover-bg: rgba(34, 50, 77, 0.96);
-    --selection-action-danger-bg: rgba(89, 37, 43, 0.92);
-    --selection-action-danger-hover-bg: rgba(118, 48, 57, 0.98);
-    --selection-close-bg: #0f172a;
-    --selection-close-color: #f8fafc;
     --upload-cta-bg: #3b82f6;
     --upload-cta-hover: #2563eb;
     --upload-cta-border: rgba(96, 165, 250, 0.24);
     --upload-cta-text: #ffffff;
-    --file-table-columns: 44px minmax(0, 1fr) 90px 110px 80px 96px;
-    --file-table-columns-selection: 24px 44px minmax(0, 1fr) 90px 110px 80px 96px;
     --file-icon-dir-bg: #6a4525;
     --file-icon-dir-text: #f2ca7a;
     --file-icon-hidden-dir-bg: #1a3a31;
@@ -1363,10 +1339,6 @@ html, body {
     color: var(--upload-cta-text);
 }
 
-.dropzone-cta-file:hover {
-    color: var(--upload-cta-text);
-}
-
 .dropzone-cta-file .dropzone-cta-icon,
 .dropzone-cta-file .dropzone-cta-icon svg,
 .dropzone-cta-file .dropzone-cta-icon svg * {
@@ -2149,6 +2121,7 @@ html, body {
         </button>
         <input type="text" class="modal-input" id="modalInput" onkeydown="if(event.key==='Enter')confirmModal()">
         <div class="modal-actions">
+            <button class="btn btn-secondary" type="button" onclick="hideModal()" data-i18n="cancel">Cancel</button>
             <button class="btn btn-primary" id="modalConfirm" onclick="confirmModal()">Create</button>
         </div>
     </div>
@@ -2171,6 +2144,7 @@ html, body {
             <input type="checkbox" id="confirmSdrCheckbox" checked> <span id="confirmSdrLabel"></span>
         </label>
         <div class="modal-actions">
+            <button class="btn btn-secondary" type="button" onclick="hideConfirm()" data-i18n="cancel">Cancel</button>
             <button class="btn btn-danger" id="confirmBtn" onclick="doConfirm()">Delete</button>
         </div>
     </div>
