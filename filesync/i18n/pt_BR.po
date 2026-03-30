@@ -32,8 +32,8 @@ msgstr "Mostrar código QR"
 msgid "About"
 msgstr "Sobre"
 
-msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
-msgstr "FileSync v1.0.0\n\nGerenciador de arquivos sem fio para KOReader.\n\nInicie o servidor, escaneie o código QR com seu celular e gerencie seus arquivos de qualquer navegador (devem estar na mesma rede WiFi)."
+msgid "FileSync v%1\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network.\n\nProject:\ngithub.com/abrahamnm/filesync.koplugin"
+msgstr "FileSync v%1\n\nGerenciador de arquivos sem fio para KOReader.\n\nInicie o servidor, escaneie o código QR com seu celular e gerencie seus arquivos de qualquer navegador (devem estar na mesma rede WiFi).\n\nProjeto:\ngithub.com/abrahamnm/filesync.koplugin"
 
 msgid "Cancel"
 msgstr "Cancelar"
