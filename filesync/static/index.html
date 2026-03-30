@@ -1025,6 +1025,7 @@ html, body {
         <div class="modal-handle"></div>
         <div class="modal-title" id="confirmTitle"></div>
         <p id="confirmMessage" style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;"></p>
+        <p id="confirmWarning" style="display:none;font-size:13px;color:var(--danger);margin-bottom:16px;font-weight:500;"></p>
         <label id="confirmSdrOption" style="display:none;font-size:14px;color:var(--text-secondary);margin-bottom:16px;cursor:pointer;align-items:center;gap:8px;">
             <input type="checkbox" id="confirmSdrCheckbox" checked> <span id="confirmSdrLabel"></span>
         </label>
@@ -1115,6 +1116,7 @@ html, body {
             delete_empty_folder: "Delete empty folder",
             confirm_delete: "Are you sure you want to delete",
             confirm_delete_contents: "This will delete all contents inside.",
+            dir_contains_n_files: "This directory contains {n} files. All files will be permanently deleted.",
             unknown: "Unknown",
             just_now: "Just now",
             minutes_ago: "m ago",
@@ -1173,6 +1175,7 @@ html, body {
             delete_empty_folder: "Eliminar carpeta vac\u00eda",
             confirm_delete: "\u00bfEst\u00e1s seguro de que quieres eliminar",
             confirm_delete_contents: "Esto eliminar\u00e1 todo el contenido.",
+            dir_contains_n_files: "Este directorio contiene {n} archivos. Todos los archivos ser\u00e1n eliminados permanentemente.",
             unknown: "Desconocido",
             just_now: "Ahora",
             minutes_ago: "min",
@@ -1231,6 +1234,7 @@ html, body {
             delete_empty_folder: "删除空文件夹",
             confirm_delete: "确定要删除",
             confirm_delete_contents: "这将删除所有内容。",
+            dir_contains_n_files: "此目录包含 {n} 个文件。所有文件将被永久删除。",
             unknown: "未知",
             just_now: "刚刚",
             minutes_ago: "分钟前",
@@ -1404,9 +1408,7 @@ html, body {
             if (entry.is_dir) {
                 html += '<div class="file-actions">';
                 html += '<button class="btn-icon" onclick="event.stopPropagation(); renameItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\')" title="' + escapeHtml(t('rename')) + '">' + icons.rename + '</button>';
-                if (entry.is_empty) {
-                    html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\', true)" title="' + escapeHtml(t('delete_label')) + '">' + icons.trash + '</button>';
-                }
+                html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\', true, false, ' + (entry.is_empty ? 'true' : 'false') + ')" title="' + escapeHtml(t('delete_label')) + '">' + icons.trash + '</button>';
                 html += '</div>';
             } else {
                 html += '<div class="file-actions"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--text-tertiary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>';
@@ -1449,10 +1451,19 @@ html, body {
         });
     };
 
-    window.deleteItem = function(path, name, isDir, hasSdr) {
-        var titleStr = isDir ? t('delete_empty_folder') : t('delete_file');
+    window.deleteItem = async function(path, name, isDir, hasSdr, isDirEmpty) {
+        var titleStr = isDir ? (isDirEmpty ? t('delete_empty_folder') : t('delete_folder')) : t('delete_file');
         var msgStr = t('confirm_delete') + ' "' + escapeHtml(name) + '"?';
         var showSdrCheckbox = !isDir && hasSdr;
+        var warningStr = '';
+        if (isDir && !isDirEmpty) {
+            try {
+                var info = await api('GET', '/api/dirinfo?path=' + encodeURIComponent(path));
+                warningStr = t('dir_contains_n_files').replace('{n}', info.file_count);
+            } catch (err) {
+                warningStr = t('confirm_delete_contents');
+            }
+        }
         showConfirm(
             titleStr,
             msgStr,
@@ -1470,7 +1481,8 @@ html, body {
                     showToast(t('delete_failed') + ' ' + err.message, 'error');
                 }
             },
-            showSdrCheckbox
+            showSdrCheckbox,
+            warningStr
         );
     };
 
@@ -1929,12 +1941,20 @@ html, body {
     };
 
     // ===== Confirm Dialog =====
-    function showConfirm(title, message, btnText, callback, showSdr) {
+    function showConfirm(title, message, btnText, callback, showSdr, warningMsg) {
         confirmCallback = callback;
         document.getElementById('confirmTitle').textContent = title;
         document.getElementById('confirmMessage').textContent = message;
         document.getElementById('confirmBtn').textContent = btnText;
         document.getElementById('confirmCancelBtn').textContent = t('cancel');
+        var warningEl = document.getElementById('confirmWarning');
+        if (warningMsg) {
+            warningEl.textContent = warningMsg;
+            warningEl.style.display = 'block';
+        } else {
+            warningEl.textContent = '';
+            warningEl.style.display = 'none';
+        }
         var sdrOption = document.getElementById('confirmSdrOption');
         var sdrCheckbox = document.getElementById('confirmSdrCheckbox');
         if (showSdr) {

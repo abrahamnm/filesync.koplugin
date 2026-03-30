@@ -217,7 +217,20 @@ function HttpServer:_route(client, method, path, query, headers, body)
             return
         end
 
-        if method == "GET" and path == "/api/metadata" then
+        if method == "GET" and path == "/api/dirinfo" then
+            local dir_path = query.path
+            if not dir_path then
+                self:_sendJSON(client, 400, {error = "Missing path parameter"})
+                return
+            end
+            local file_count, err_msg = FileOps:getDirInfo(dir_path)
+            if file_count then
+                self:_sendJSON(client, 200, {file_count = file_count})
+            else
+                self:_sendJSON(client, 400, {error = err_msg or "Cannot get directory info"})
+            end
+
+        elseif method == "GET" and path == "/api/metadata" then
             local file_path = query.path
             if not file_path then
                 self:_sendJSON(client, 400, {error = "Missing path parameter"})

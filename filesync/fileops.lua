@@ -322,6 +322,22 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
     }
 end
 
+--- Get recursive file count for a directory
+function FileOps:getDirInfo(rel_path)
+    local full_path, err = self:_resolvePath(rel_path)
+    if not full_path then
+        return nil, err
+    end
+
+    local attr = lfs.attributes(full_path)
+    if not attr or attr.mode ~= "directory" then
+        return nil, "Not a directory"
+    end
+
+    local file_count = self:_countFilesRecursive(full_path)
+    return file_count
+end
+
 --- Download a file, sending it directly to the client socket
 --- When inline is true, serve with Content-Disposition: inline (for image previews)
 function FileOps:downloadFile(client, rel_path, server, inline)
@@ -532,7 +548,7 @@ function FileOps:rename(old_rel_path, new_rel_path)
     return true
 end
 
---- Delete a file or directory (directory must be empty)
+--- Delete a file or directory (directories are deleted recursively)
 --- @param rel_path string: relative path to delete
 --- @param options table|nil: optional settings
 ---   - safe_mode (bool): when true, auto-delete associated .sdr directory for book files
@@ -556,18 +572,7 @@ function FileOps:delete(rel_path, options)
     local is_file = attr.mode ~= "directory"
 
     if attr.mode == "directory" then
-        -- Only allow deletion of empty directories (safety measure)
-        local child_count = 0
-        for child_name in lfs.dir(full_path) do
-            if child_name ~= "." and child_name ~= ".." then
-                child_count = child_count + 1
-                break
-            end
-        end
-        if child_count > 0 then
-            return false, "Cannot delete non-empty directory"
-        end
-        local ok, del_err = lfs.rmdir(full_path)
+        local ok, del_err = self:_deleteRecursive(full_path)
         if not ok then
             return false, "Cannot delete directory: " .. tostring(del_err)
         end
@@ -606,6 +611,30 @@ function FileOps:delete(rel_path, options)
     end
 
     return true
+end
+
+--- Recursively count all files (not directories) inside a directory tree
+function FileOps:_countFilesRecursive(path)
+    local count = 0
+    local ok, iter_err = pcall(function()
+        for name in lfs.dir(path) do
+            if name ~= "." and name ~= ".." then
+                local entry_path = path .. "/" .. name
+                local entry_attr = lfs.attributes(entry_path)
+                if entry_attr then
+                    if entry_attr.mode == "directory" then
+                        count = count + self:_countFilesRecursive(entry_path)
+                    else
+                        count = count + 1
+                    end
+                end
+            end
+        end
+    end)
+    if not ok then
+        logger.warn("FileSync: Error counting files in", path, iter_err)
+    end
+    return count
 end
 
 --- Recursively delete a directory and its contents
