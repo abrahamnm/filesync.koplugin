@@ -88,3 +88,169 @@ msgstr "Servidor ejecutándose en segundo plano. Detén el servidor para ahorrar
 
 msgid "Image preview"
 msgstr "Vista previa de imagen"
+
+# ==============================
+# Web UI translations
+# ==============================
+
+msgid "Upload"
+msgstr "Subir"
+
+msgid "Folder"
+msgstr "Carpeta"
+
+msgid "Filter files..."
+msgstr "Filtrar archivos..."
+
+msgid "Name A-Z"
+msgstr "Nombre A-Z"
+
+msgid "Name Z-A"
+msgstr "Nombre Z-A"
+
+msgid "Newest first"
+msgstr "M\u00e1s recientes"
+
+msgid "Oldest first"
+msgstr "M\u00e1s antiguos"
+
+msgid "Largest first"
+msgstr "M\u00e1s grandes"
+
+msgid "Smallest first"
+msgstr "M\u00e1s peque\u00f1os"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Drag and drop files here, or"
+msgstr "Arrastra archivos aqu\u00ed, o"
+
+msgid "browse"
+msgstr "busca"
+
+msgid "Choose Files"
+msgstr "Elegir archivos"
+
+msgid "Loading..."
+msgstr "Cargando..."
+
+msgid "Failed to load files"
+msgstr "Error al cargar archivos"
+
+msgid "This folder is empty"
+msgstr "Esta carpeta est\u00e1 vac\u00eda"
+
+msgid "Upload files or create a new folder"
+msgstr "Sube archivos o crea una nueva carpeta"
+
+msgid "Folder label"
+msgstr "Carpeta"
+
+msgid "File type"
+msgstr "Tipo de archivo"
+
+msgid "Size"
+msgstr "Tama\u00f1o"
+
+msgid "Modified"
+msgstr "Modificado"
+
+msgid "Download"
+msgstr "Descargar"
+
+msgid "Downloading"
+msgstr "Descargando"
+
+msgid "Rename"
+msgstr "Renombrar"
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "Back"
+msgstr "Volver"
+
+msgid "Create"
+msgstr "Crear"
+
+msgid "New Folder"
+msgstr "Nueva carpeta"
+
+msgid "Renamed successfully"
+msgstr "Renombrado exitosamente"
+
+msgid "Deleted successfully"
+msgstr "Eliminado exitosamente"
+
+msgid "Folder created"
+msgstr "Carpeta creada"
+
+msgid "uploaded"
+msgstr "subido"
+
+msgid "Rename failed:"
+msgstr "Error al renombrar:"
+
+msgid "Delete failed:"
+msgstr "Error al eliminar:"
+
+msgid "Upload failed:"
+msgstr "Error al subir:"
+
+msgid "Failed to create folder:"
+msgstr "Error al crear carpeta:"
+
+msgid "Home"
+msgstr "Inicio"
+
+msgid "Done"
+msgstr "Listo"
+
+msgid "Failed"
+msgstr "Error"
+
+msgid "Network error"
+msgstr "Error de red"
+
+msgid "Delete file"
+msgstr "Eliminar archivo"
+
+msgid "Delete folder"
+msgstr "Eliminar carpeta"
+
+msgid "Delete empty folder"
+msgstr "Eliminar carpeta vac\u00eda"
+
+msgid "Are you sure you want to delete"
+msgstr "\u00bfEst\u00e1s seguro de que quieres eliminar"
+
+msgid "This will delete all contents inside."
+msgstr "Esto eliminar\u00e1 todo el contenido."
+
+msgid "This directory contains {n} files. All files will be permanently deleted."
+msgstr "Este directorio contiene {n} archivos. Todos los archivos ser\u00e1n eliminados permanentemente."
+
+msgid "Unknown"
+msgstr "Desconocido"
+
+msgid "Just now"
+msgstr "Ahora"
+
+msgid "m ago"
+msgstr "min"
+
+msgid "h ago"
+msgstr "h"
+
+msgid "d ago"
+msgstr "d"
+
+msgid "Upload files"
+msgstr "Subir archivos"
+
+msgid "New folder"
+msgstr "Nueva carpeta"
+
+msgid "Also delete reading metadata (.sdr)"
+msgstr "Tambi\u00e9n eliminar metadatos de lectura (.sdr)"

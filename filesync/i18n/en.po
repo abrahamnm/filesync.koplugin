@@ -86,3 +86,169 @@ msgstr ""
 
 msgid "Image preview"
 msgstr ""
+
+# ==============================
+# Web UI translations
+# ==============================
+
+msgid "Upload"
+msgstr ""
+
+msgid "Folder"
+msgstr ""
+
+msgid "Filter files..."
+msgstr ""
+
+msgid "Name A-Z"
+msgstr ""
+
+msgid "Name Z-A"
+msgstr ""
+
+msgid "Newest first"
+msgstr ""
+
+msgid "Oldest first"
+msgstr ""
+
+msgid "Largest first"
+msgstr ""
+
+msgid "Smallest first"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Drag and drop files here, or"
+msgstr ""
+
+msgid "browse"
+msgstr ""
+
+msgid "Choose Files"
+msgstr ""
+
+msgid "Loading..."
+msgstr ""
+
+msgid "Failed to load files"
+msgstr ""
+
+msgid "This folder is empty"
+msgstr ""
+
+msgid "Upload files or create a new folder"
+msgstr ""
+
+msgid "Folder label"
+msgstr "Folder"
+
+msgid "File type"
+msgstr ""
+
+msgid "Size"
+msgstr ""
+
+msgid "Modified"
+msgstr ""
+
+msgid "Download"
+msgstr ""
+
+msgid "Downloading"
+msgstr ""
+
+msgid "Rename"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Back"
+msgstr ""
+
+msgid "Create"
+msgstr ""
+
+msgid "New Folder"
+msgstr ""
+
+msgid "Renamed successfully"
+msgstr ""
+
+msgid "Deleted successfully"
+msgstr ""
+
+msgid "Folder created"
+msgstr ""
+
+msgid "uploaded"
+msgstr ""
+
+msgid "Rename failed:"
+msgstr ""
+
+msgid "Delete failed:"
+msgstr ""
+
+msgid "Upload failed:"
+msgstr ""
+
+msgid "Failed to create folder:"
+msgstr ""
+
+msgid "Home"
+msgstr ""
+
+msgid "Done"
+msgstr ""
+
+msgid "Failed"
+msgstr ""
+
+msgid "Network error"
+msgstr ""
+
+msgid "Delete file"
+msgstr ""
+
+msgid "Delete folder"
+msgstr ""
+
+msgid "Delete empty folder"
+msgstr ""
+
+msgid "Are you sure you want to delete"
+msgstr ""
+
+msgid "This will delete all contents inside."
+msgstr ""
+
+msgid "This directory contains {n} files. All files will be permanently deleted."
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+msgid "Just now"
+msgstr ""
+
+msgid "m ago"
+msgstr ""
+
+msgid "h ago"
+msgstr ""
+
+msgid "d ago"
+msgstr ""
+
+msgid "Upload files"
+msgstr ""
+
+msgid "New folder"
+msgstr ""
+
+msgid "Also delete reading metadata (.sdr)"
+msgstr ""

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="color-scheme" content="light dark">
+<title data-i18n="FileSync">FileSync</title>
+<script>
+(function() {
+    try {
+        var storedTheme = localStorage.getItem("filesync_theme");
+        var initialTheme = storedTheme === "light" || storedTheme === "dark"
+            ? storedTheme
+            : "light";
+        document.documentElement.setAttribute("data-theme", initialTheme);
+    } catch (e) {}
+})();
+</script>
+<style>
+/* BUILD:CSS */
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <div class="header-inner">
+        <a class="header-brand" href="#" onclick="navigate('/'); return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/>
+                <polyline points="13 2 13 9 20 9"/>
+                <path d="M9 15l2 2 4-4"/>
+            </svg>
+            <span data-i18n="FileSync">FileSync</span>
+        </a>
+        <div class="header-controls">
+            <div class="header-actions">
+                <button class="btn btn-secondary btn-sm" onclick="toggleUploadZone()" id="btnUpload" title="Upload files">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <span data-i18n="Upload">Upload</span>
+                </button>
+                <button class="btn btn-secondary btn-sm" onclick="showNewFolderModal()" id="btnFolder" title="New folder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                        <line x1="12" y1="11" x2="12" y2="17"/>
+                        <line x1="9" y1="14" x2="15" y2="14"/>
+                    </svg>
+                    <span data-i18n="Folder">Folder</span>
+                </button>
+                <button class="btn btn-secondary btn-sm theme-toggle" id="themeToggle" type="button" data-theme-state="light" title="Light mode. Switch to dark mode." aria-label="Light mode. Switch to dark mode.">
+                    <svg class="theme-icon theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79"></path>
+                    </svg>
+                    <svg class="theme-icon theme-icon-light" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2"></path>
+                        <path d="M12 20v2"></path>
+                        <path d="M4.93 4.93l1.41 1.41"></path>
+                        <path d="M17.66 17.66l1.41 1.41"></path>
+                        <path d="M2 12h2"></path>
+                        <path d="M20 12h2"></path>
+                        <path d="M4.93 19.07l1.41-1.41"></path>
+                        <path d="M17.66 6.34l1.41-1.41"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Breadcrumbs -->
+<div class="breadcrumbs-wrap">
+    <button class="btn btn-secondary btn-sm breadcrumb-back hidden" id="btnParentNav" type="button" onclick="navigateUp()" aria-label="Go up" title="Go up">&larr;</button>
+    <nav class="breadcrumbs" id="breadcrumbs"></nav>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+    <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Filter files..." oninput="onFilterChange()">
+    </div>
+    <div class="nav-context">
+        <button class="btn btn-secondary btn-sm nav-view-toggle" id="btnViewMode" onclick="toggleViewMode()" type="button" aria-label="List view. Switch to grid view." title="List view. Switch to grid view."></button>
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="onSortChange()">
+        <option value="name-asc" data-i18n="Name A-Z">Name A-Z</option>
+        <option value="name-desc" data-i18n="Name Z-A">Name Z-A</option>
+        <option value="date-desc" data-i18n="Newest first">Newest first</option>
+        <option value="date-asc" data-i18n="Oldest first">Oldest first</option>
+        <option value="size-desc" data-i18n="Largest first">Largest first</option>
+        <option value="size-asc" data-i18n="Smallest first">Smallest first</option>
+        <option value="type-asc" data-i18n="Type">Type</option>
+    </select>
+</div>
+
+<!-- Upload Drop Zone -->
+<div class="dropzone" id="dropzoneContainer">
+    <div class="dropzone-area" id="dropzone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <div class="dropzone-text" id="dropzoneText">
+            Drag and drop files here, or <strong onclick="document.getElementById('fileInput').click()">browse</strong>
+        </div>
+        <input type="file" id="fileInput" multiple style="display:none" onchange="handleFileSelect(this.files)">
+        <div class="dropzone-actions">
+            <button class="dropzone-cta dropzone-cta-file" id="btnUploadFilesCta" type="button" onclick="document.getElementById('fileInput').click()">
+                <span class="dropzone-cta-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <path d="M12 18v-6"/>
+                        <path d="M9.5 14.5L12 12l2.5 2.5"/>
+                    </svg>
+                </span>
+                <span class="dropzone-cta-label" data-i18n="Choose Files">Choose Files</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Progress -->
+<div class="upload-progress" id="uploadProgress"></div>
+
+<!-- File List Header -->
+<div class="file-list-header" id="fileListHeader">
+    <div class="file-list-header-cell name">
+        <button class="file-list-header-button" type="button" tabindex="-1">Name</button>
+    </div>
+    <div class="file-list-header-cell size">
+        <button class="file-list-header-button" type="button" tabindex="-1" data-i18n="Size">Size</button>
+    </div>
+    <div class="file-list-header-cell modified">
+        <button class="file-list-header-button" type="button" tabindex="-1" data-i18n="Modified">Modified</button>
+    </div>
+    <div class="file-list-header-cell type">
+        <button class="file-list-header-button" type="button" tabindex="-1" data-i18n="Type">Type</button>
+    </div>
+</div>
+
+<!-- File List -->
+<div class="file-list" id="fileList"></div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div class="modal-title" id="modalTitle"></div>
+        <button class="modal-close-btn" id="modalCloseBtn" type="button" onclick="closeModalButton(event)" aria-label="Cancel" title="Cancel">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+            </svg>
+        </button>
+        <input type="text" class="modal-input" id="modalInput" onkeydown="if(event.key==='Enter')confirmModal()">
+        <div class="modal-actions">
+            <button class="btn btn-secondary" type="button" onclick="hideModal()" data-i18n="Cancel">Cancel</button>
+            <button class="btn btn-primary" id="modalConfirm" onclick="confirmModal()">Create</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Modal Overlay -->
+<div class="modal-overlay" id="confirmOverlay" onclick="closeConfirm(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-handle"></div>
+        <div class="modal-title" id="confirmTitle"></div>
+        <button class="modal-close-btn" id="confirmCloseBtn" type="button" onclick="closeConfirmButton(event)" aria-label="Cancel" title="Cancel">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+            </svg>
+        </button>
+        <p class="modal-message" id="confirmMessage"></p>
+        <p id="confirmWarning" style="display:none;font-size:13px;color:var(--danger);margin-bottom:16px;font-weight:500;"></p>
+        <label id="confirmSdrOption" style="display:none;font-size:14px;color:var(--text-secondary);margin-bottom:16px;cursor:pointer;align-items:center;gap:8px;">
+            <input type="checkbox" id="confirmSdrCheckbox" checked> <span id="confirmSdrLabel"></span>
+        </label>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" type="button" onclick="hideConfirm()" data-i18n="Cancel">Cancel</button>
+            <button class="btn btn-danger" id="confirmBtn" onclick="doConfirm()">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- File Detail View -->
+<div class="file-detail" id="fileDetail">
+    <div class="detail-header">
+        <div class="detail-header-inner">
+            <button class="btn btn-secondary btn-sm" onclick="hideFileDetail()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"/>
+                    <polyline points="12 19 5 12 12 5"/>
+                </svg>
+                <span data-i18n="Back">Back</span>
+            </button>
+        </div>
+    </div>
+    <div class="detail-content">
+        <div class="detail-image-preview" id="detailImagePreview" style="display:none;"></div>
+        <div class="detail-cover" id="detailCover"></div>
+        <div class="detail-title" id="detailTitle"></div>
+        <div class="detail-author" id="detailAuthor"></div>
+        <div class="detail-info" id="detailInfo"></div>
+        <div class="detail-actions" id="detailActions"></div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- BUILD:I18N -->
+<script>
+(function() {
+    'use strict';
+
+/* BUILD:JS */
+
+})();
+</script>
+</body>
+</html>

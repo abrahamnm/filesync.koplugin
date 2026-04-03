@@ -48,11 +48,15 @@ jobs:
           git commit -m "release: v${{ inputs.version }}"
           git push
 
+      - name: Build web UI
+        run: bash filesync/build.sh
+
       - name: Build release zip
         run: |
           mkdir -p filesync.koplugin
           cp _meta.lua main.lua filesync.koplugin/
           cp -r filesync filesync.koplugin/
+          rm -rf filesync.koplugin/filesync/src filesync.koplugin/filesync/build.sh
           zip -r filesync.koplugin.zip filesync.koplugin
 
       - name: Create tag and GitHub Release

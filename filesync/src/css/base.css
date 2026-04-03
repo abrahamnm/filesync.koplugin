@@ -1,0 +1,95 @@
+/* ===== Reset & Variables ===== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --surface-hover: #f0f2f5;
+    --surface-raised: #ffffff;
+    --surface-raised-hover: #f7f9fc;
+    --border: #e2e5e9;
+    --border-light: #eef0f3;
+    --card-border: #e2e5e9;
+    --text: #1a1d23;
+    --text-secondary: #6b7280;
+    --text-tertiary: #9ca3af;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-light: #eff6ff;
+    --on-primary: #ffffff;
+    --on-primary-muted: rgba(255, 255, 255, 0.16);
+    --focus-ring: rgba(59, 130, 246, 0.12);
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --danger-light: #fef2f2;
+    --success: #22c55e;
+    --success-light: #f0fdf4;
+    --warning: #f59e0b;
+    --warning-light: #fffbeb;
+    --upload-cta-bg: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    --upload-cta-hover: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    --upload-cta-border: rgba(37, 99, 235, 0.18);
+    --upload-cta-text: #ffffff;
+    --layout-max-width: 920px;
+    --file-table-columns: 44px minmax(0, 1fr) 90px 110px 80px 96px;
+    --file-table-columns-selection: 24px 44px minmax(0, 1fr) 90px 110px 80px 96px;
+    --file-icon-dir-bg: #fef3c7;
+    --file-icon-dir-text: #d97706;
+    --file-icon-hidden-dir-bg: #edf7ee;
+    --file-icon-hidden-dir-text: #4b6b46;
+    --file-hidden-name: #3f4f3d;
+    --file-hidden-meta: #7b8a78;
+    --file-icon-pdf-bg: #dbe8ff;
+    --file-icon-pdf-text: #3159a6;
+    --file-icon-reader-bg: #eef2ff;
+    --file-icon-reader-text: #5b21b6;
+    --file-icon-comic-bg: #fff7ed;
+    --file-icon-comic-text: #ea580c;
+    --file-icon-document-bg: #f0fdf4;
+    --file-icon-document-text: #16a34a;
+    --file-icon-text-bg: #ecfeff;
+    --file-icon-text-text: #0f766e;
+    --file-icon-markdown-bg: #d7fae8;
+    --file-icon-markdown-text: #0b8b61;
+    --file-icon-image-bg: #fdf2f8;
+    --file-icon-image-text: #db2777;
+    --file-icon-archive-bg: #f5f3ff;
+    --file-icon-archive-text: #7c3aed;
+    --file-icon-audio-bg: #eff6ff;
+    --file-icon-audio-text: #2563eb;
+    --file-icon-video-bg: #fff1f2;
+    --file-icon-video-text: #e11d48;
+    --file-icon-code-bg: #ede9fe;
+    --file-icon-code-text: #6d28d9;
+    --file-icon-file-bg: #f1f5f9;
+    --file-icon-file-text: #64748b;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-xs: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+    --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html, body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    transition: background-color var(--transition), color var(--transition);
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }

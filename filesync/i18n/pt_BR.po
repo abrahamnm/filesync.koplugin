@@ -88,3 +88,169 @@ msgstr "Servidor em execução no segundo plano. Pare o servidor para economizar
 
 msgid "Image preview"
 msgstr "Prévia de imagem"
+
+# ==============================
+# Web UI translations
+# ==============================
+
+msgid "Upload"
+msgstr "Enviar"
+
+msgid "Folder"
+msgstr "Pasta"
+
+msgid "Filter files..."
+msgstr "Filtrar arquivos..."
+
+msgid "Name A-Z"
+msgstr "Nome A-Z"
+
+msgid "Name Z-A"
+msgstr "Nome Z-A"
+
+msgid "Newest first"
+msgstr "Mais recentes"
+
+msgid "Oldest first"
+msgstr "Mais antigos"
+
+msgid "Largest first"
+msgstr "Maiores primeiro"
+
+msgid "Smallest first"
+msgstr "Menores primeiro"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Drag and drop files here, or"
+msgstr "Arraste arquivos aqui, ou"
+
+msgid "browse"
+msgstr "procure"
+
+msgid "Choose Files"
+msgstr "Escolher arquivos"
+
+msgid "Loading..."
+msgstr "Carregando..."
+
+msgid "Failed to load files"
+msgstr "Erro ao carregar arquivos"
+
+msgid "This folder is empty"
+msgstr "Esta pasta est\u00e1 vazia"
+
+msgid "Upload files or create a new folder"
+msgstr "Envie arquivos ou crie uma nova pasta"
+
+msgid "Folder label"
+msgstr "Pasta"
+
+msgid "File type"
+msgstr "Tipo de arquivo"
+
+msgid "Size"
+msgstr "Tamanho"
+
+msgid "Modified"
+msgstr "Modificado"
+
+msgid "Download"
+msgstr "Baixar"
+
+msgid "Downloading"
+msgstr "Baixando"
+
+msgid "Rename"
+msgstr "Renomear"
+
+msgid "Delete"
+msgstr "Excluir"
+
+msgid "Back"
+msgstr "Voltar"
+
+msgid "Create"
+msgstr "Criar"
+
+msgid "New Folder"
+msgstr "Nova pasta"
+
+msgid "Renamed successfully"
+msgstr "Renomeado com sucesso"
+
+msgid "Deleted successfully"
+msgstr "Exclu\u00eddo com sucesso"
+
+msgid "Folder created"
+msgstr "Pasta criada"
+
+msgid "uploaded"
+msgstr "enviado"
+
+msgid "Rename failed:"
+msgstr "Erro ao renomear:"
+
+msgid "Delete failed:"
+msgstr "Erro ao excluir:"
+
+msgid "Upload failed:"
+msgstr "Erro ao enviar:"
+
+msgid "Failed to create folder:"
+msgstr "Erro ao criar pasta:"
+
+msgid "Home"
+msgstr "In\u00edcio"
+
+msgid "Done"
+msgstr "Conclu\u00eddo"
+
+msgid "Failed"
+msgstr "Erro"
+
+msgid "Network error"
+msgstr "Erro de rede"
+
+msgid "Delete file"
+msgstr "Excluir arquivo"
+
+msgid "Delete folder"
+msgstr "Excluir pasta"
+
+msgid "Delete empty folder"
+msgstr "Excluir pasta vazia"
+
+msgid "Are you sure you want to delete"
+msgstr "Tem certeza que deseja excluir"
+
+msgid "This will delete all contents inside."
+msgstr "Isso excluir\u00e1 todo o conte\u00fado."
+
+msgid "This directory contains {n} files. All files will be permanently deleted."
+msgstr "Este diret\u00f3rio cont\u00e9m {n} arquivos. Todos os arquivos ser\u00e3o exclu\u00eddos permanentemente."
+
+msgid "Unknown"
+msgstr "Desconhecido"
+
+msgid "Just now"
+msgstr "Agora"
+
+msgid "m ago"
+msgstr "min"
+
+msgid "h ago"
+msgstr "h"
+
+msgid "d ago"
+msgstr "d"
+
+msgid "Upload files"
+msgstr "Enviar arquivos"
+
+msgid "New folder"
+msgstr "Nova pasta"
+
+msgid "Also delete reading metadata (.sdr)"
+msgstr "Tamb\u00e9m excluir metadados de leitura (.sdr)"

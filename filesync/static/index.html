@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="color-scheme" content="light dark">
-<title data-i18n="filesync">FileSync</title>
+<title data-i18n="FileSync">FileSync</title>
 <script>
 (function() {
     try {
@@ -19,6 +19,8 @@
 })();
 </script>
 <style>
+
+/* ===== Reset & Variables ===== */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
@@ -96,6 +98,24 @@
     --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+html, body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    transition: background-color var(--transition), color var(--transition);
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+/* ===== Dark Theme ===== */
 [data-theme="dark"] {
     --bg: #0d1118;
     --surface: #171c24;
@@ -159,20 +179,6 @@
     --shadow-md: 0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2);
     --shadow-lg: 0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3);
 }
-
-html, body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -webkit-tap-highlight-color: transparent;
-    overflow-x: hidden;
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    transition: background-color var(--transition), color var(--transition);
-}
-
 /* ===== Header ===== */
 .header {
     background: var(--surface);
@@ -571,6 +577,18 @@ html, body {
     }
 }
 
+/* ===== Responsive tweaks ===== */
+@media (max-width: 400px) {
+    .header { padding: 10px 12px; }
+    .breadcrumbs-wrap { padding: 10px 12px 2px; }
+    .toolbar { padding: 6px 12px; }
+    .file-list { padding: 4px 12px 100px; }
+    .dropzone { padding: 0 12px; }
+    .upload-progress { padding: 0 12px; }
+    .btn span { display: none; }
+    .btn svg + span { display: none; }
+    .file-item { padding: 10px; gap: 10px; }
+}
 /* ===== Buttons ===== */
 .btn {
     display: inline-flex;
@@ -663,555 +681,6 @@ html, body {
 .btn-sm svg {
     width: 14px;
     height: 14px;
-}
-
-/* ===== File List ===== */
-.file-list {
-    max-width: var(--layout-max-width);
-    margin: 0 auto;
-    padding: 4px 16px 100px;
-}
-
-.file-list-header {
-    display: none;
-}
-
-.file-list-header button {
-    font: inherit;
-}
-
-.file-list.view-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-    gap: 10px;
-}
-
-.file-list.view-grid-large {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 12px;
-}
-
-.file-list.view-grid .loading,
-.file-list.view-grid .empty-state,
-.file-list.view-grid-large .loading,
-.file-list.view-grid-large .empty-state {
-    grid-column: 1 / -1;
-}
-
-.file-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: var(--surface-raised);
-    border: 1px solid var(--card-border);
-    border-radius: var(--radius);
-    margin-bottom: 6px;
-    cursor: pointer;
-    transition: all var(--transition);
-}
-
-.file-main {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
-.file-item:hover {
-    background: var(--surface-raised-hover);
-    border-color: var(--border);
-    box-shadow: var(--shadow);
-    transform: translateY(-1px);
-}
-
-.file-item:active {
-    transform: translateY(0);
-}
-
-.file-list.view-grid .file-item {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) 36px;
-    grid-template-areas:
-        "main"
-        "actions";
-    align-items: start;
-    gap: 10px;
-    min-height: 132px;
-    height: 132px;
-    margin-bottom: 0;
-    position: relative;
-}
-
-.file-list.view-grid .file-item.is-file {
-    grid-template-rows: minmax(0, 1fr);
-    grid-template-areas: "main";
-}
-
-.file-list.view-grid .file-main {
-    grid-area: main;
-    display: grid;
-    grid-template-columns: 42px minmax(0, 1fr);
-    gap: 12px;
-    align-items: start;
-}
-
-.file-list.view-grid .file-icon {
-    width: 42px;
-    height: 42px;
-}
-
-.file-list.view-grid .file-info {
-    padding-top: 2px;
-}
-
-.file-list.view-grid .file-item.is-file .file-info {
-    padding-right: 18px;
-}
-
-.file-list.view-grid .file-name {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: normal;
-    overflow-wrap: break-word;
-    line-height: 1.35;
-}
-
-.file-list.view-grid .file-meta {
-    margin-top: 6px;
-    gap: 2px;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.file-list.view-grid .file-actions {
-    grid-area: actions;
-    width: 100%;
-    height: 36px;
-    min-height: 36px;
-    justify-content: center;
-    align-items: center;
-    align-self: end;
-}
-
-.file-list.view-grid .file-actions.file-actions-chevron {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    width: 20px;
-    height: 20px;
-    min-height: 0;
-    padding: 0;
-    transform: translateY(-50%);
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.file-list.view-grid-large .file-item {
-    display: grid;
-    grid-template-rows: minmax(0, 1fr) 36px;
-    grid-template-areas:
-        "main"
-        "actions";
-    align-items: start;
-    min-height: 176px;
-    height: 176px;
-    padding: 18px 14px 14px;
-    margin-bottom: 0;
-    text-align: center;
-    position: relative;
-}
-
-.file-list.view-grid-large .file-item.is-file {
-    grid-template-rows: minmax(0, 1fr);
-    grid-template-areas: "main";
-}
-
-.file-list.view-grid-large .file-main {
-    grid-area: main;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    min-height: 0;
-    overflow: hidden;
-    gap: 14px;
-}
-
-.file-list.view-grid-large .file-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 18px;
-}
-
-.file-list.view-grid-large .file-icon svg {
-    width: 32px;
-    height: 32px;
-}
-
-.file-list.view-grid-large .file-info {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    min-height: 0;
-    overflow: hidden;
-}
-
-.file-list.view-grid-large .file-name {
-    white-space: normal;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    text-align: center;
-    overflow-wrap: break-word;
-    line-height: 1.35;
-}
-
-.file-list.view-grid-large .file-meta {
-    margin-top: 0;
-    gap: 4px;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.file-list.view-grid-large .file-actions {
-    grid-area: actions;
-    width: 100%;
-    height: 36px;
-    min-height: 36px;
-    justify-content: center;
-    align-items: center;
-    align-self: end;
-}
-
-.file-list.view-grid-large .file-actions.file-actions-chevron {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    width: 20px;
-    height: 20px;
-    min-height: 0;
-    padding: 0;
-    transform: translateY(-50%);
-    justify-content: center;
-    align-items: center;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.file-list.view-grid .file-item:hover,
-.file-list.view-grid-large .file-item:hover {
-    transform: none;
-}
-
-.file-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.file-icon svg {
-    width: 22px;
-    height: 22px;
-}
-
-.file-icon.dir {
-    background: var(--file-icon-dir-bg);
-    color: var(--file-icon-dir-text);
-}
-
-.file-item.is-hidden .file-icon.dir {
-    background: var(--file-icon-hidden-dir-bg);
-    color: var(--file-icon-hidden-dir-text);
-}
-
-.file-item.is-hidden .file-name {
-    color: var(--file-hidden-name);
-}
-
-.file-item.is-hidden .file-meta {
-    color: var(--file-hidden-meta);
-}
-
-.file-icon.ebook {
-    background: var(--primary-light);
-    color: var(--primary);
-}
-
-.file-icon.pdf {
-    background: var(--file-icon-pdf-bg);
-    color: var(--file-icon-pdf-text);
-}
-
-.file-icon.reader {
-    background: var(--file-icon-reader-bg);
-    color: var(--file-icon-reader-text);
-}
-
-.file-icon.comic {
-    background: var(--file-icon-comic-bg);
-    color: var(--file-icon-comic-text);
-}
-
-.file-icon.document {
-    background: var(--file-icon-document-bg);
-    color: var(--file-icon-document-text);
-}
-
-.file-icon.text {
-    background: var(--file-icon-text-bg);
-    color: var(--file-icon-text-text);
-}
-
-.file-icon.markdown {
-    background: var(--file-icon-markdown-bg);
-    color: var(--file-icon-markdown-text);
-}
-
-.file-icon.image {
-    background: var(--file-icon-image-bg);
-    color: var(--file-icon-image-text);
-}
-
-.file-icon.archive {
-    background: var(--file-icon-archive-bg);
-    color: var(--file-icon-archive-text);
-}
-
-.file-icon.audio {
-    background: var(--file-icon-audio-bg);
-    color: var(--file-icon-audio-text);
-}
-
-.file-icon.video {
-    background: var(--file-icon-video-bg);
-    color: var(--file-icon-video-text);
-}
-
-.file-icon.code {
-    background: var(--file-icon-code-bg);
-    color: var(--file-icon-code-text);
-}
-
-.file-icon.file {
-    background: var(--file-icon-file-bg);
-    color: var(--file-icon-file-text);
-}
-
-.file-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.file-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.file-meta {
-    font-size: 12px;
-    color: var(--text-tertiary);
-    margin-top: 2px;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.file-table-cell {
-    display: none;
-}
-
-.file-actions {
-    display: flex;
-    gap: 4px;
-    flex-shrink: 0;
-    margin-left: auto;
-}
-
-.file-actions .btn-icon {
-    padding: 6px;
-    border-radius: var(--radius-xs);
-    opacity: 0;
-    transition: all var(--transition);
-}
-
-.file-chevron {
-    display: flex;
-    align-items: center;
-    color: var(--text-tertiary);
-}
-
-.file-item:hover .file-actions .btn-icon {
-    opacity: 1;
-}
-
-@media (min-width: 920px) {
-    .file-list-header.visible {
-        max-width: var(--layout-max-width);
-        margin: 0 auto 8px;
-        padding: 0 16px 10px;
-        display: grid;
-        grid-template-columns: var(--file-table-columns);
-        gap: 12px;
-        align-items: center;
-        border-bottom: 1px solid var(--border-light);
-    }
-
-    .file-list-header-cell {
-        min-width: 0;
-    }
-
-    .file-list-header-cell.name {
-        grid-column: 2;
-    }
-
-    .file-list-header-cell.size {
-        grid-column: 3;
-        text-align: center;
-    }
-
-    .file-list-header-cell.modified {
-        grid-column: 4;
-        text-align: center;
-    }
-
-    .file-list-header-cell.type {
-        grid-column: 5;
-        text-align: center;
-    }
-
-    .file-list-header-button {
-        display: inline-flex;
-        width: 100%;
-        min-width: 0;
-        align-items: center;
-        gap: 4px;
-        border: 0;
-        padding: 2px 12px 2px 0;
-        background: transparent;
-        color: var(--text);
-        opacity: 0.98;
-        font-size: 12px;
-        font-weight: 900;
-        letter-spacing: 0.035em;
-        text-transform: uppercase;
-        white-space: nowrap;
-    }
-
-    .file-list-header-cell.size .file-list-header-button,
-    .file-list-header-cell.modified .file-list-header-button,
-    .file-list-header-cell.type .file-list-header-button {
-        justify-content: center;
-    }
-
-    .file-list:not(.view-grid):not(.view-grid-large) .file-item {
-        display: grid;
-        grid-template-columns: var(--file-table-columns);
-        align-items: center;
-        gap: 12px;
-        padding: 10px 16px;
-        margin-bottom: 6px;
-        position: relative;
-    }
-
-    .file-list:not(.view-grid):not(.view-grid-large) .file-main {
-        display: contents;
-    }
-
-    .file-list:not(.view-grid):not(.view-grid-large) .file-icon {
-        grid-column: 1;
-        justify-self: start;
-        width: 42px;
-        height: 42px;
-        flex-shrink: 0;
-    }
-
-    .file-list:not(.view-grid):not(.view-grid-large) .file-info {
-        grid-column: 2;
-        align-self: center;
-        min-width: 0;
-        padding-right: 8px;
-    }
-
-    .file-list:not(.view-grid):not(.view-grid-large) .file-name {
-        font-size: 15px;
-        font-weight: 600;
-        white-space: normal;
-        overflow: hidden;
-        text-overflow: clip;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        line-height: 1.35;
-    }
-
-    .file-list:not(.view-grid):not(.view-grid-large) .file-meta {
-        display: none;
-    }
-
-    .file-list:not(.view-grid):not(.view-grid-large) .file-table-cell {
-        display: block;
-        min-width: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 12px;
-        color: var(--text-secondary);
-    }
-
-    .file-list:not(.view-grid):not(.view-grid-large) .file-table-size {
-        grid-column: 3;
-        text-align: center;
-    }
-
-    .file-list:not(.view-grid):not(.view-grid-large) .file-table-date {
-        grid-column: 4;
-        text-align: center;
-    }
-
-    .file-list:not(.view-grid):not(.view-grid-large) .file-table-type {
-        grid-column: 5;
-        text-align: center;
-        font-weight: 600;
-        color: var(--text);
-    }
-
-    .file-list:not(.view-grid):not(.view-grid-large) .file-actions {
-        grid-column: 6;
-        justify-content: flex-end;
-        min-width: 68px;
-    }
-
-    .file-list:not(.view-grid):not(.view-grid-large) .file-actions .file-chevron {
-        display: none;
-    }
-}
-
-/* Always show actions on touch devices */
-@media (hover: none) {
-    .file-actions .btn-icon {
-        opacity: 1;
-    }
 }
 
 /* ===== Drop Zone ===== */
@@ -1514,6 +983,656 @@ html, body {
     background: var(--danger);
 }
 
+/* ===== Toast Notifications ===== */
+.toast-container {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: calc(100vw - 32px);
+    pointer-events: none;
+}
+
+.toast {
+    background: var(--text);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: toast-in 0.3s ease;
+    pointer-events: auto;
+    max-width: 360px;
+}
+
+.toast.success { background: #059669; }
+.toast.error { background: var(--danger); }
+.toast.info { background: var(--primary); }
+
+.toast.hiding {
+    animation: toast-out 0.3s ease forwards;
+}
+
+@keyframes toast-in {
+    from { opacity: 0; transform: translateY(-12px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toast-out {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(-12px) scale(0.95); }
+}
+
+/* ===== Empty State ===== */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-tertiary);
+}
+
+.empty-state svg {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 12px;
+    color: var(--border);
+}
+
+.empty-state-text {
+    font-size: 15px;
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+}
+
+.empty-state-sub {
+    font-size: 13px;
+}
+
+/* ===== Loading ===== */
+.loading {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 13px;
+    color: var(--text-tertiary);
+}
+/* ===== File List ===== */
+.file-list {
+    max-width: var(--layout-max-width);
+    margin: 0 auto;
+    padding: 4px 16px 100px;
+}
+
+.file-list-header {
+    display: none;
+}
+
+.file-list-header button {
+    font: inherit;
+}
+
+.file-list.view-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 10px;
+}
+
+.file-list.view-grid-large {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.file-list.view-grid .loading,
+.file-list.view-grid .empty-state,
+.file-list.view-grid-large .loading,
+.file-list.view-grid-large .empty-state {
+    grid-column: 1 / -1;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--surface-raised);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.file-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.file-item:hover {
+    background: var(--surface-raised-hover);
+    border-color: var(--border);
+    box-shadow: var(--shadow);
+    transform: translateY(-1px);
+}
+
+.file-item:active {
+    transform: translateY(0);
+}
+
+/* Grid view */
+.file-list.view-grid .file-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 36px;
+    grid-template-areas:
+        "main"
+        "actions";
+    align-items: start;
+    gap: 10px;
+    min-height: 132px;
+    height: 132px;
+    margin-bottom: 0;
+    position: relative;
+}
+
+.file-list.view-grid .file-item.is-file {
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: "main";
+}
+
+.file-list.view-grid .file-main {
+    grid-area: main;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+}
+
+.file-list.view-grid .file-icon {
+    width: 42px;
+    height: 42px;
+}
+
+.file-list.view-grid .file-info {
+    padding-top: 2px;
+}
+
+.file-list.view-grid .file-item.is-file .file-info {
+    padding-right: 18px;
+}
+
+.file-list.view-grid .file-name {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: break-word;
+    line-height: 1.35;
+}
+
+.file-list.view-grid .file-meta {
+    margin-top: 6px;
+    gap: 2px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.file-list.view-grid .file-actions {
+    grid-area: actions;
+    width: 100%;
+    height: 36px;
+    min-height: 36px;
+    justify-content: center;
+    align-items: center;
+    align-self: end;
+}
+
+.file-list.view-grid .file-actions.file-actions-chevron {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    min-height: 0;
+    padding: 0;
+    transform: translateY(-50%);
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Grid large view */
+.file-list.view-grid-large .file-item {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) 36px;
+    grid-template-areas:
+        "main"
+        "actions";
+    align-items: start;
+    min-height: 176px;
+    height: 176px;
+    padding: 18px 14px 14px;
+    margin-bottom: 0;
+    text-align: center;
+    position: relative;
+}
+
+.file-list.view-grid-large .file-item.is-file {
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: "main";
+}
+
+.file-list.view-grid-large .file-main {
+    grid-area: main;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 0;
+    overflow: hidden;
+    gap: 14px;
+}
+
+.file-list.view-grid-large .file-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+}
+
+.file-list.view-grid-large .file-icon svg {
+    width: 32px;
+    height: 32px;
+}
+
+.file-list.view-grid-large .file-info {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.file-list.view-grid-large .file-name {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    text-align: center;
+    overflow-wrap: break-word;
+    line-height: 1.35;
+}
+
+.file-list.view-grid-large .file-meta {
+    margin-top: 0;
+    gap: 4px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-list.view-grid-large .file-actions {
+    grid-area: actions;
+    width: 100%;
+    height: 36px;
+    min-height: 36px;
+    justify-content: center;
+    align-items: center;
+    align-self: end;
+}
+
+.file-list.view-grid-large .file-actions.file-actions-chevron {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    min-height: 0;
+    padding: 0;
+    transform: translateY(-50%);
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.file-list.view-grid .file-item:hover,
+.file-list.view-grid-large .file-item:hover {
+    transform: none;
+}
+
+/* File icon base */
+.file-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.file-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.file-icon.dir {
+    background: var(--file-icon-dir-bg);
+    color: var(--file-icon-dir-text);
+}
+
+.file-item.is-hidden .file-icon.dir {
+    background: var(--file-icon-hidden-dir-bg);
+    color: var(--file-icon-hidden-dir-text);
+}
+
+.file-item.is-hidden .file-name {
+    color: var(--file-hidden-name);
+}
+
+.file-item.is-hidden .file-meta {
+    color: var(--file-hidden-meta);
+}
+
+.file-icon.ebook {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.file-icon.pdf {
+    background: var(--file-icon-pdf-bg);
+    color: var(--file-icon-pdf-text);
+}
+
+.file-icon.reader {
+    background: var(--file-icon-reader-bg);
+    color: var(--file-icon-reader-text);
+}
+
+.file-icon.comic {
+    background: var(--file-icon-comic-bg);
+    color: var(--file-icon-comic-text);
+}
+
+.file-icon.document {
+    background: var(--file-icon-document-bg);
+    color: var(--file-icon-document-text);
+}
+
+.file-icon.text {
+    background: var(--file-icon-text-bg);
+    color: var(--file-icon-text-text);
+}
+
+.file-icon.markdown {
+    background: var(--file-icon-markdown-bg);
+    color: var(--file-icon-markdown-text);
+}
+
+.file-icon.image {
+    background: var(--file-icon-image-bg);
+    color: var(--file-icon-image-text);
+}
+
+.file-icon.archive {
+    background: var(--file-icon-archive-bg);
+    color: var(--file-icon-archive-text);
+}
+
+.file-icon.audio {
+    background: var(--file-icon-audio-bg);
+    color: var(--file-icon-audio-text);
+}
+
+.file-icon.video {
+    background: var(--file-icon-video-bg);
+    color: var(--file-icon-video-text);
+}
+
+.file-icon.code {
+    background: var(--file-icon-code-bg);
+    color: var(--file-icon-code-text);
+}
+
+.file-icon.file {
+    background: var(--file-icon-file-bg);
+    color: var(--file-icon-file-text);
+}
+
+/* File info */
+.file-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.file-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-meta {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.file-table-cell {
+    display: none;
+}
+
+/* File actions */
+.file-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.file-actions .btn-icon {
+    padding: 6px;
+    border-radius: var(--radius-xs);
+    opacity: 0;
+    transition: all var(--transition);
+}
+
+.file-chevron {
+    display: flex;
+    align-items: center;
+    color: var(--text-tertiary);
+}
+
+.file-item:hover .file-actions .btn-icon {
+    opacity: 1;
+}
+
+/* Table layout (desktop) */
+@media (min-width: 920px) {
+    .file-list-header.visible {
+        max-width: var(--layout-max-width);
+        margin: 0 auto 8px;
+        padding: 0 16px 10px;
+        display: grid;
+        grid-template-columns: var(--file-table-columns);
+        gap: 12px;
+        align-items: center;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .file-list-header-cell {
+        min-width: 0;
+    }
+
+    .file-list-header-cell.name {
+        grid-column: 2;
+    }
+
+    .file-list-header-cell.size {
+        grid-column: 3;
+        text-align: center;
+    }
+
+    .file-list-header-cell.modified {
+        grid-column: 4;
+        text-align: center;
+    }
+
+    .file-list-header-cell.type {
+        grid-column: 5;
+        text-align: center;
+    }
+
+    .file-list-header-button {
+        display: inline-flex;
+        width: 100%;
+        min-width: 0;
+        align-items: center;
+        gap: 4px;
+        border: 0;
+        padding: 2px 12px 2px 0;
+        background: transparent;
+        color: var(--text);
+        opacity: 0.98;
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.035em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .file-list-header-cell.size .file-list-header-button,
+    .file-list-header-cell.modified .file-list-header-button,
+    .file-list-header-cell.type .file-list-header-button {
+        justify-content: center;
+    }
+
+    .file-list:not(.view-grid):not(.view-grid-large) .file-item {
+        display: grid;
+        grid-template-columns: var(--file-table-columns);
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        margin-bottom: 6px;
+        position: relative;
+    }
+
+    .file-list:not(.view-grid):not(.view-grid-large) .file-main {
+        display: contents;
+    }
+
+    .file-list:not(.view-grid):not(.view-grid-large) .file-icon {
+        grid-column: 1;
+        justify-self: start;
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+    }
+
+    .file-list:not(.view-grid):not(.view-grid-large) .file-info {
+        grid-column: 2;
+        align-self: center;
+        min-width: 0;
+        padding-right: 8px;
+    }
+
+    .file-list:not(.view-grid):not(.view-grid-large) .file-name {
+        font-size: 15px;
+        font-weight: 600;
+        white-space: normal;
+        overflow: hidden;
+        text-overflow: clip;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-height: 1.35;
+    }
+
+    .file-list:not(.view-grid):not(.view-grid-large) .file-meta {
+        display: none;
+    }
+
+    .file-list:not(.view-grid):not(.view-grid-large) .file-table-cell {
+        display: block;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+
+    .file-list:not(.view-grid):not(.view-grid-large) .file-table-size {
+        grid-column: 3;
+        text-align: center;
+    }
+
+    .file-list:not(.view-grid):not(.view-grid-large) .file-table-date {
+        grid-column: 4;
+        text-align: center;
+    }
+
+    .file-list:not(.view-grid):not(.view-grid-large) .file-table-type {
+        grid-column: 5;
+        text-align: center;
+        font-weight: 600;
+        color: var(--text);
+    }
+
+    .file-list:not(.view-grid):not(.view-grid-large) .file-actions {
+        grid-column: 6;
+        justify-content: flex-end;
+        min-width: 68px;
+    }
+
+    .file-list:not(.view-grid):not(.view-grid-large) .file-actions .file-chevron {
+        display: none;
+    }
+}
+
+/* Always show actions on touch devices */
+@media (hover: none) {
+    .file-actions .btn-icon {
+        opacity: 1;
+    }
+}
 /* ===== Modal ===== */
 .modal-overlay {
     position: fixed;
@@ -1669,121 +1788,6 @@ html, body {
     margin-bottom: 16px;
     line-height: 1.5;
 }
-
-/* ===== Toast Notifications ===== */
-.toast-container {
-    position: fixed;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 300;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-width: calc(100vw - 32px);
-    pointer-events: none;
-}
-
-.toast {
-    background: var(--text);
-    color: #fff;
-    padding: 10px 16px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 500;
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    animation: toast-in 0.3s ease;
-    pointer-events: auto;
-    max-width: 360px;
-}
-
-.toast.success { background: #059669; }
-.toast.error { background: var(--danger); }
-.toast.info { background: var(--primary); }
-
-.toast.hiding {
-    animation: toast-out 0.3s ease forwards;
-}
-
-@keyframes toast-in {
-    from { opacity: 0; transform: translateY(-12px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes toast-out {
-    from { opacity: 1; transform: translateY(0) scale(1); }
-    to { opacity: 0; transform: translateY(-12px) scale(0.95); }
-}
-
-/* ===== Empty State ===== */
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-tertiary);
-}
-
-.empty-state svg {
-    width: 56px;
-    height: 56px;
-    margin-bottom: 12px;
-    color: var(--border);
-}
-
-.empty-state-text {
-    font-size: 15px;
-    margin-bottom: 4px;
-    color: var(--text-secondary);
-}
-
-.empty-state-sub {
-    font-size: 13px;
-}
-
-/* ===== Loading ===== */
-.loading {
-    text-align: center;
-    padding: 40px 20px;
-}
-
-.spinner {
-    width: 28px;
-    height: 28px;
-    border: 3px solid var(--border);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin: 0 auto 10px;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.loading-text {
-    font-size: 13px;
-    color: var(--text-tertiary);
-}
-
-/* ===== Responsive tweaks ===== */
-@media (max-width: 400px) {
-    .header { padding: 10px 12px; }
-    .breadcrumbs-wrap { padding: 10px 12px 2px; }
-    .toolbar { padding: 6px 12px; }
-    .file-list { padding: 4px 12px 100px; }
-    .dropzone { padding: 0 12px; }
-    .upload-progress { padding: 0 12px; }
-    .btn span { display: none; }
-    .btn svg + span { display: none; }
-    .file-item { padding: 10px; gap: 10px; }
-}
-
-/* ===== Scrollbar ===== */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
 /* ===== File Detail View ===== */
 .file-detail {
@@ -1988,7 +1992,7 @@ html, body {
                 <polyline points="13 2 13 9 20 9"/>
                 <path d="M9 15l2 2 4-4"/>
             </svg>
-            <span data-i18n="filesync">FileSync</span>
+            <span data-i18n="FileSync">FileSync</span>
         </a>
         <div class="header-controls">
             <div class="header-actions">
@@ -1998,7 +2002,7 @@ html, body {
                         <polyline points="17 8 12 3 7 8"/>
                         <line x1="12" y1="3" x2="12" y2="15"/>
                     </svg>
-                    <span data-i18n="upload">Upload</span>
+                    <span data-i18n="Upload">Upload</span>
                 </button>
                 <button class="btn btn-secondary btn-sm" onclick="showNewFolderModal()" id="btnFolder" title="New folder">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2006,7 +2010,7 @@ html, body {
                         <line x1="12" y1="11" x2="12" y2="17"/>
                         <line x1="9" y1="14" x2="15" y2="14"/>
                     </svg>
-                    <span data-i18n="folder">Folder</span>
+                    <span data-i18n="Folder">Folder</span>
                 </button>
                 <button class="btn btn-secondary btn-sm theme-toggle" id="themeToggle" type="button" data-theme-state="light" title="Light mode. Switch to dark mode." aria-label="Light mode. Switch to dark mode.">
                     <svg class="theme-icon theme-icon-dark" viewBox="0 0 24 24" aria-hidden="true">
@@ -2048,13 +2052,13 @@ html, body {
         <button class="btn btn-secondary btn-sm nav-view-toggle" id="btnViewMode" onclick="toggleViewMode()" type="button" aria-label="List view. Switch to grid view." title="List view. Switch to grid view."></button>
     </div>
     <select class="sort-select" id="sortSelect" onchange="onSortChange()">
-        <option value="name-asc" data-i18n="sort_name_asc">Name A-Z</option>
-        <option value="name-desc" data-i18n="sort_name_desc">Name Z-A</option>
-        <option value="date-desc" data-i18n="sort_newest">Newest first</option>
-        <option value="date-asc" data-i18n="sort_oldest">Oldest first</option>
-        <option value="size-desc" data-i18n="sort_largest">Largest first</option>
-        <option value="size-asc" data-i18n="sort_smallest">Smallest first</option>
-        <option value="type-asc" data-i18n="sort_type">Type</option>
+        <option value="name-asc" data-i18n="Name A-Z">Name A-Z</option>
+        <option value="name-desc" data-i18n="Name Z-A">Name Z-A</option>
+        <option value="date-desc" data-i18n="Newest first">Newest first</option>
+        <option value="date-asc" data-i18n="Oldest first">Oldest first</option>
+        <option value="size-desc" data-i18n="Largest first">Largest first</option>
+        <option value="size-asc" data-i18n="Smallest first">Smallest first</option>
+        <option value="type-asc" data-i18n="Type">Type</option>
     </select>
 </div>
 
@@ -2080,7 +2084,7 @@ html, body {
                         <path d="M9.5 14.5L12 12l2.5 2.5"/>
                     </svg>
                 </span>
-                <span class="dropzone-cta-label" data-i18n="choose_files">Choose Files</span>
+                <span class="dropzone-cta-label" data-i18n="Choose Files">Choose Files</span>
             </button>
         </div>
     </div>
@@ -2095,13 +2099,13 @@ html, body {
         <button class="file-list-header-button" type="button" tabindex="-1">Name</button>
     </div>
     <div class="file-list-header-cell size">
-        <button class="file-list-header-button" type="button" tabindex="-1" data-i18n="size">Size</button>
+        <button class="file-list-header-button" type="button" tabindex="-1" data-i18n="Size">Size</button>
     </div>
     <div class="file-list-header-cell modified">
-        <button class="file-list-header-button" type="button" tabindex="-1" data-i18n="modified">Modified</button>
+        <button class="file-list-header-button" type="button" tabindex="-1" data-i18n="Modified">Modified</button>
     </div>
     <div class="file-list-header-cell type">
-        <button class="file-list-header-button" type="button" tabindex="-1" data-i18n="sort_type">Type</button>
+        <button class="file-list-header-button" type="button" tabindex="-1" data-i18n="Type">Type</button>
     </div>
 </div>
 
@@ -2121,7 +2125,7 @@ html, body {
         </button>
         <input type="text" class="modal-input" id="modalInput" onkeydown="if(event.key==='Enter')confirmModal()">
         <div class="modal-actions">
-            <button class="btn btn-secondary" type="button" onclick="hideModal()" data-i18n="cancel">Cancel</button>
+            <button class="btn btn-secondary" type="button" onclick="hideModal()" data-i18n="Cancel">Cancel</button>
             <button class="btn btn-primary" id="modalConfirm" onclick="confirmModal()">Create</button>
         </div>
     </div>
@@ -2144,7 +2148,7 @@ html, body {
             <input type="checkbox" id="confirmSdrCheckbox" checked> <span id="confirmSdrLabel"></span>
         </label>
         <div class="modal-actions">
-            <button class="btn btn-secondary" type="button" onclick="hideConfirm()" data-i18n="cancel">Cancel</button>
+            <button class="btn btn-secondary" type="button" onclick="hideConfirm()" data-i18n="Cancel">Cancel</button>
             <button class="btn btn-danger" id="confirmBtn" onclick="doConfirm()">Delete</button>
         </div>
     </div>
@@ -2159,7 +2163,7 @@ html, body {
                     <line x1="19" y1="12" x2="5" y2="12"/>
                     <polyline points="12 19 5 12 12 5"/>
                 </svg>
-                <span data-i18n="back">Back</span>
+                <span data-i18n="Back">Back</span>
             </button>
         </div>
     </div>
@@ -2176,366 +2180,67 @@ html, body {
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
+<script>var TRANSLATIONS = {"en":{"Folder label":"Folder"},"es":{"FileSync":"FileSync","FileSync - Wireless File Manager":"FileSync - Gestor de archivos inalámbrico","Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface.":"Inicia un servidor web HTTP local y muestra un código QR. Escanéalo con tu teléfono para gestionar libros y archivos en tu dispositivo de forma inalámbrica a través de una interfaz web.","Stop file server":"Detener servidor de archivos","Start file server":"Iniciar servidor de archivos","Server port":"Puerto del servidor","Safe mode":"Modo seguro","Show QR code":"Mostrar código QR","About":"Acerca de","FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network.":"FileSync v1.0.0\n\nGestor de archivos inalámbrico para KOReader.\n\nInicia el servidor, escanea el código QR con tu teléfono y gestiona tus libros desde cualquier navegador en la misma red WiFi.","Cancel":"Cancelar","Save":"Guardar","Port set to %1. Restart the server for changes to take effect.":"Puerto configurado a %1. Reinicia el servidor para que los cambios surtan efecto.","Invalid port. Please enter a number between 1024 and 65535.":"Puerto no válido. Introduce un número entre 1024 y 65535.","FileSync server is already running.":"El servidor FileSync ya está en ejecución.","WiFi is not enabled. Please turn on WiFi first.":"El WiFi no está activado. Activa el WiFi primero.","Could not determine device IP address. Make sure WiFi is connected.":"No se pudo determinar la dirección IP del dispositivo. Asegúrate de que el WiFi esté conectado.","Failed to start server: %1":"Error al iniciar el servidor: %1","FileSync server stopped.":"Servidor FileSync detenido.","Low Battery":"Batería baja","Battery level is at %1%. Running the server may drain the battery quickly.":"El nivel de batería es del %1%. Ejecutar el servidor puede agotar la batería rápidamente.","Start Anyway":"Iniciar de todos modos","Server is not running.":"El servidor no está en ejecución.","Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network.":"Escanea el código QR o ingresa la URL\nen tu navegador.\n\nAmbos dispositivos deben estar en la misma red WiFi.","Stop Server":"Detener servidor","Stopping server...":"Deteniendo servidor...","Server running in the background. Stop the server to save battery.":"Servidor ejecutándose en segundo plano. Detén el servidor para ahorrar batería.","Image preview":"Vista previa de imagen","Upload":"Subir","Folder":"Carpeta","Filter files...":"Filtrar archivos...","Name A-Z":"Nombre A-Z","Name Z-A":"Nombre Z-A","Newest first":"M\u00e1s recientes","Oldest first":"M\u00e1s antiguos","Largest first":"M\u00e1s grandes","Smallest first":"M\u00e1s peque\u00f1os","Type":"Tipo","Drag and drop files here, or":"Arrastra archivos aqu\u00ed, o","browse":"busca","Choose Files":"Elegir archivos","Loading...":"Cargando...","Failed to load files":"Error al cargar archivos","This folder is empty":"Esta carpeta est\u00e1 vac\u00eda","Upload files or create a new folder":"Sube archivos o crea una nueva carpeta","Folder label":"Carpeta","File type":"Tipo de archivo","Size":"Tama\u00f1o","Modified":"Modificado","Download":"Descargar","Downloading":"Descargando","Rename":"Renombrar","Delete":"Eliminar","Back":"Volver","Create":"Crear","New Folder":"Nueva carpeta","Renamed successfully":"Renombrado exitosamente","Deleted successfully":"Eliminado exitosamente","Folder created":"Carpeta creada","uploaded":"subido","Rename failed:":"Error al renombrar:","Delete failed:":"Error al eliminar:","Upload failed:":"Error al subir:","Failed to create folder:":"Error al crear carpeta:","Home":"Inicio","Done":"Listo","Failed":"Error","Network error":"Error de red","Delete file":"Eliminar archivo","Delete folder":"Eliminar carpeta","Delete empty folder":"Eliminar carpeta vac\u00eda","Are you sure you want to delete":"\u00bfEst\u00e1s seguro de que quieres eliminar","This will delete all contents inside.":"Esto eliminar\u00e1 todo el contenido.","This directory contains {n} files. All files will be permanently deleted.":"Este directorio contiene {n} archivos. Todos los archivos ser\u00e1n eliminados permanentemente.","Unknown":"Desconocido","Just now":"Ahora","m ago":"min","h ago":"h","d ago":"d","Upload files":"Subir archivos","New folder":"Nueva carpeta","Also delete reading metadata (.sdr)":"Tambi\u00e9n eliminar metadatos de lectura (.sdr)"},"pt_BR":{"FileSync":"FileSync","FileSync - Wireless File Manager":"FileSync - Gerenciador de Arquivos Sem Fio","Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface.":"Inicie um servidor web HTTP local e exiba um código QR. Escaneie com seu telefone para gerenciar livros e arquivos no seu dispositivo sem fio por meio de interface web.","Stop file server":"Parar servidor de arquivos","Start file server":"Iniciar servidor de arquivos","Server port":"Porta do servidor","Safe mode":"Modo seguro","Show QR code":"Mostrar código QR","About":"Sobre","FileSync v%1\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network.\n\nProject:\ngithub.com/abrahamnm/filesync.koplugin":"FileSync v%1\n\nGerenciador de arquivos sem fio para KOReader.\n\nInicie o servidor, escaneie o código QR com seu celular e gerencie seus arquivos de qualquer navegador (devem estar na mesma rede WiFi).\n\nProjeto:\ngithub.com/abrahamnm/filesync.koplugin","Cancel":"Cancelar","Save":"Salvar","Port set to %1. Restart the server for changes to take effect.":"Porta configurada em %1. Reinicie o servidor para realizar as mudanças.","Invalid port. Please enter a number between 1024 and 65535.":"Porta inválida. Insira un número entre 1024 e 65535 (Porta padrão 8080).","FileSync server is already running.":"O servidor FileSync está em execução.","WiFi is not enabled. Please turn on WiFi first.":"WiFi está desativado. Ative o WiFi primeiro.","Could not determine device IP address. Make sure WiFi is connected.":"Endereço IP não identificado. Certifique-se que o WiFi está conectado.","Failed to start server: %1":"Erro ao iniciar o servidor: %1","FileSync server stopped.":"Servidor FileSync parado.","Low Battery":"Bateria baixa","Battery level is at %1%. Running the server may drain the battery quickly.":"O nível de bateria está em %1%. Executar o servidor irá drenar a bateria rapidamente.","Start Anyway":"Forçar inicialização","Server is not running.":"O servidor não está execução.","Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network.":"Escaneie o código QR ou digite a URL\nem seu navegador.\n\nAmbos os dispositivos devem estar na mesma rede WiFi.","Stop Server":"Parar o servidor","Stopping server...":"Parando o servidor...","Server running in the background. Stop the server to save battery.":"Servidor em execução no segundo plano. Pare o servidor para economizar bateria.","Image preview":"Prévia de imagem","Upload":"Enviar","Folder":"Pasta","Filter files...":"Filtrar arquivos...","Name A-Z":"Nome A-Z","Name Z-A":"Nome Z-A","Newest first":"Mais recentes","Oldest first":"Mais antigos","Largest first":"Maiores primeiro","Smallest first":"Menores primeiro","Type":"Tipo","Drag and drop files here, or":"Arraste arquivos aqui, ou","browse":"procure","Choose Files":"Escolher arquivos","Loading...":"Carregando...","Failed to load files":"Erro ao carregar arquivos","This folder is empty":"Esta pasta est\u00e1 vazia","Upload files or create a new folder":"Envie arquivos ou crie uma nova pasta","Folder label":"Pasta","File type":"Tipo de arquivo","Size":"Tamanho","Modified":"Modificado","Download":"Baixar","Downloading":"Baixando","Rename":"Renomear","Delete":"Excluir","Back":"Voltar","Create":"Criar","New Folder":"Nova pasta","Renamed successfully":"Renomeado com sucesso","Deleted successfully":"Exclu\u00eddo com sucesso","Folder created":"Pasta criada","uploaded":"enviado","Rename failed:":"Erro ao renomear:","Delete failed:":"Erro ao excluir:","Upload failed:":"Erro ao enviar:","Failed to create folder:":"Erro ao criar pasta:","Home":"In\u00edcio","Done":"Conclu\u00eddo","Failed":"Erro","Network error":"Erro de rede","Delete file":"Excluir arquivo","Delete folder":"Excluir pasta","Delete empty folder":"Excluir pasta vazia","Are you sure you want to delete":"Tem certeza que deseja excluir","This will delete all contents inside.":"Isso excluir\u00e1 todo o conte\u00fado.","This directory contains {n} files. All files will be permanently deleted.":"Este diret\u00f3rio cont\u00e9m {n} arquivos. Todos os arquivos ser\u00e3o exclu\u00eddos permanentemente.","Unknown":"Desconhecido","Just now":"Agora","m ago":"min","h ago":"h","d ago":"d","Upload files":"Enviar arquivos","New folder":"Nova pasta","Also delete reading metadata (.sdr)":"Tamb\u00e9m excluir metadados de leitura (.sdr)"},"zh_CN":{"FileSync":"FileSync","FileSync - Wireless File Manager":"FileSync - 无线文件管理器","Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface.":"启动本地 HTTP Web 服务器并显示二维码。使用手机扫描二维码，通过简洁的 Web 界面无线管理设备上的书籍和文件。","Stop file server":"停止文件服务器","Start file server":"启动文件服务器","Server port":"服务器端口","Safe mode":"安全模式","Show QR code":"显示二维码","About":"关于","FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network.":"FileSync v1.0.0\n\nKOReader 无线文件管理器。\n\n启动服务器，使用手机扫描二维码，即可在同一 WiFi 网络的任何浏览器中管理您的书籍。","Cancel":"取消","Save":"保存","Port set to %1. Restart the server for changes to take effect.":"端口已设置为 %1。请重启服务器以使更改生效。","Invalid port. Please enter a number between 1024 and 65535.":"无效的端口。请输入 1024 到 65535 之间的数字。","FileSync server is already running.":"FileSync 服务器已在运行。","WiFi is not enabled. Please turn on WiFi first.":"WiFi 未启用。请先开启 WiFi。","Could not determine device IP address. Make sure WiFi is connected.":"无法确定设备 IP 地址。请确保 WiFi 已连接。","Failed to start server: %1":"启动服务器失败：%1","FileSync server stopped.":"FileSync 服务器已停止。","Low Battery":"电量不足","Battery level is at %1%. Running the server may drain the battery quickly.":"电池电量为 %1%。运行服务器可能会快速消耗电池。","Start Anyway":"仍然启动","Server is not running.":"服务器未运行。","Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network.":"扫描二维码或在浏览器中输入 URL。\n\n两个设备必须在同一 WiFi 网络上。","Stop Server":"停止服务器","Stopping server...":"正在停止服务器...","Server running in the background. Stop the server to save battery.":"服务器正在后台运行。停止服务器以节省电量。","Image preview":"图片预览","Upload":"上传","Folder":"文件夹","Filter files...":"筛选文件...","Name A-Z":"名称 A-Z","Name Z-A":"名称 Z-A","Newest first":"最新优先","Oldest first":"最旧优先","Largest first":"最大优先","Smallest first":"最小优先","Type":"类型","Drag and drop files here, or":"拖放文件到此处，或","browse":"浏览","Choose Files":"选择文件","Loading...":"加载中...","Failed to load files":"加载文件失败","This folder is empty":"此文件夹为空","Upload files or create a new folder":"上传文件或创建新文件夹","Folder label":"文件夹","File type":"文件类型","Size":"大小","Modified":"修改时间","Download":"下载","Downloading":"下载中","Rename":"重命名","Delete":"删除","Back":"返回","Create":"创建","New Folder":"新建文件夹","Renamed successfully":"重命名成功","Deleted successfully":"删除成功","Folder created":"文件夹已创建","uploaded":"已上传","Rename failed:":"重命名失败：","Delete failed:":"删除失败：","Upload failed:":"上传失败：","Failed to create folder:":"创建文件夹失败：","Home":"首页","Done":"完成","Failed":"失败","Network error":"网络错误","Delete file":"删除文件","Delete folder":"删除文件夹","Delete empty folder":"删除空文件夹","Are you sure you want to delete":"确定要删除","This will delete all contents inside.":"这将删除所有内容。","This directory contains {n} files. All files will be permanently deleted.":"此目录包含 {n} 个文件。所有文件将被永久删除。","Unknown":"未知","Just now":"刚刚","m ago":"分钟前","h ago":"小时前","d ago":"天前","Upload files":"上传文件","New folder":"新建文件夹","Also delete reading metadata (.sdr)":"同时删除阅读元数据（.sdr）"}};</script>
 <script>
 (function() {
     'use strict';
 
+
     // ===== i18n =====
-    var translations = {
-        en: {
-            filesync: "FileSync",
-            upload: "Upload",
-            folder: "Folder",
-            filter_placeholder: "Filter files...",
-            sort_name_asc: "Name A-Z",
-            sort_name_desc: "Name Z-A",
-            sort_newest: "Newest first",
-            sort_oldest: "Oldest first",
-            sort_largest: "Largest first",
-            sort_smallest: "Smallest first",
-            sort_type: "Type",
-            dropzone_text: "Drag and drop files here, or",
-            dropzone_browse: "browse",
-            choose_files: "Choose Files",
-            loading: "Loading...",
-            failed_to_load: "Failed to load files",
-            empty_folder: "This folder is empty",
-            empty_folder_sub: "Upload files or create a new folder",
-            folder_label: "Folder",
-            file_type: "File type",
-            size: "Size",
-            modified: "Modified",
-            download: "Download",
-            downloading: "Downloading",
-            rename: "Rename",
-            delete_label: "Delete",
-            back: "Back",
-            cancel: "Cancel",
-            create: "Create",
-            new_folder: "New Folder",
-            renamed_successfully: "Renamed successfully",
-            deleted_successfully: "Deleted successfully",
-            folder_created: "Folder created",
-            uploaded: "uploaded",
-            rename_failed: "Rename failed:",
-            delete_failed: "Delete failed:",
-            upload_failed: "Upload failed:",
-            failed_create_folder: "Failed to create folder:",
-            home: "Home",
-            done: "Done",
-            failed: "Failed",
-            network_error: "Network error",
-            delete_file: "Delete file",
-            delete_folder: "Delete folder",
-            delete_empty_folder: "Delete empty folder",
-            confirm_delete: "Are you sure you want to delete",
-            confirm_delete_contents: "This will delete all contents inside.",
-            dir_contains_n_files: "This directory contains {n} files. All files will be permanently deleted.",
-            unknown: "Unknown",
-            just_now: "Just now",
-            minutes_ago: "m ago",
-            hours_ago: "h ago",
-            days_ago: "d ago",
-            upload_files_title: "Upload files",
-            new_folder_title: "New folder",
-            also_delete_sdr: "Also delete reading metadata (.sdr)",
-            image_preview: "Image preview"
-        },
-        es: {
-            filesync: "FileSync",
-            upload: "Subir",
-            folder: "Carpeta",
-            filter_placeholder: "Filtrar archivos...",
-            sort_name_asc: "Nombre A-Z",
-            sort_name_desc: "Nombre Z-A",
-            sort_newest: "M\u00e1s recientes",
-            sort_oldest: "M\u00e1s antiguos",
-            sort_largest: "M\u00e1s grandes",
-            sort_smallest: "M\u00e1s peque\u00f1os",
-            sort_type: "Tipo",
-            dropzone_text: "Arrastra archivos aqu\u00ed, o",
-            dropzone_browse: "busca",
-            choose_files: "Elegir archivos",
-            loading: "Cargando...",
-            failed_to_load: "Error al cargar archivos",
-            empty_folder: "Esta carpeta est\u00e1 vac\u00eda",
-            empty_folder_sub: "Sube archivos o crea una nueva carpeta",
-            folder_label: "Carpeta",
-            file_type: "Tipo de archivo",
-            size: "Tama\u00f1o",
-            modified: "Modificado",
-            download: "Descargar",
-            downloading: "Descargando",
-            rename: "Renombrar",
-            delete_label: "Eliminar",
-            back: "Volver",
-            cancel: "Cancelar",
-            create: "Crear",
-            new_folder: "Nueva carpeta",
-            renamed_successfully: "Renombrado exitosamente",
-            deleted_successfully: "Eliminado exitosamente",
-            folder_created: "Carpeta creada",
-            uploaded: "subido",
-            rename_failed: "Error al renombrar:",
-            delete_failed: "Error al eliminar:",
-            upload_failed: "Error al subir:",
-            failed_create_folder: "Error al crear carpeta:",
-            home: "Inicio",
-            done: "Listo",
-            failed: "Error",
-            network_error: "Error de red",
-            delete_file: "Eliminar archivo",
-            delete_folder: "Eliminar carpeta",
-            delete_empty_folder: "Eliminar carpeta vac\u00eda",
-            confirm_delete: "\u00bfEst\u00e1s seguro de que quieres eliminar",
-            confirm_delete_contents: "Esto eliminar\u00e1 todo el contenido.",
-            dir_contains_n_files: "Este directorio contiene {n} archivos. Todos los archivos ser\u00e1n eliminados permanentemente.",
-            unknown: "Desconocido",
-            just_now: "Ahora",
-            minutes_ago: "min",
-            hours_ago: "h",
-            days_ago: "d",
-            upload_files_title: "Subir archivos",
-            new_folder_title: "Nueva carpeta",
-            also_delete_sdr: "Tambi\u00e9n eliminar metadatos de lectura (.sdr)",
-            image_preview: "Vista previa de imagen"
-        },
-        zh: {
-            filesync: "FileSync",
-            upload: "上传",
-            folder: "文件夹",
-            filter_placeholder: "筛选文件...",
-            sort_name_asc: "名称 A-Z",
-            sort_name_desc: "名称 Z-A",
-            sort_newest: "最新优先",
-            sort_oldest: "最旧优先",
-            sort_largest: "最大优先",
-            sort_smallest: "最小优先",
-            sort_type: "类型",
-            dropzone_text: "拖放文件到此处，或",
-            dropzone_browse: "浏览",
-            choose_files: "选择文件",
-            loading: "加载中...",
-            failed_to_load: "加载文件失败",
-            empty_folder: "此文件夹为空",
-            empty_folder_sub: "上传文件或创建新文件夹",
-            folder_label: "文件夹",
-            file_type: "文件类型",
-            size: "大小",
-            modified: "修改时间",
-            download: "下载",
-            downloading: "下载中",
-            rename: "重命名",
-            delete_label: "删除",
-            back: "返回",
-            cancel: "取消",
-            create: "创建",
-            new_folder: "新建文件夹",
-            renamed_successfully: "重命名成功",
-            deleted_successfully: "删除成功",
-            folder_created: "文件夹已创建",
-            uploaded: "已上传",
-            rename_failed: "重命名失败：",
-            delete_failed: "删除失败：",
-            upload_failed: "上传失败：",
-            failed_create_folder: "创建文件夹失败：",
-            home: "首页",
-            done: "完成",
-            failed: "失败",
-            network_error: "网络错误",
-            delete_file: "删除文件",
-            delete_folder: "删除文件夹",
-            delete_empty_folder: "删除空文件夹",
-            confirm_delete: "确定要删除",
-            confirm_delete_contents: "这将删除所有内容。",
-            dir_contains_n_files: "此目录包含 {n} 个文件。所有文件将被永久删除。",
-            unknown: "未知",
-            just_now: "刚刚",
-            minutes_ago: "分钟前",
-            hours_ago: "小时前",
-            days_ago: "天前",
-            upload_files_title: "上传文件",
-            new_folder_title: "新建文件夹",
-            also_delete_sdr: "同时删除阅读元数据（.sdr）",
-            image_preview: "图片预览"
-        }
-    };
+    // TRANSLATIONS is injected at build time from .po files via po2json.sh
+    // Keys are English msgid strings (gettext convention).
+    // The t() function returns the translation for the current language,
+    // falling back to: exact locale -> base language -> English -> raw key.
     var currentLang = "en";
 
     function t(key) {
-        return (translations[currentLang] && translations[currentLang][key]) || translations.en[key] || key;
-    }
-
-    var THEME_STORAGE_KEY = "filesync_theme";
-    var VIEW_MODE_STORAGE_KEY = "filesync_view_mode";
-    var currentThemePreference = "light";
-
-    function normalizeThemePreference(theme) {
-        return theme === "dark" || theme === "light" ? theme : null;
-    }
-
-    function getStoredThemePreference() {
-        try {
-            return normalizeThemePreference(localStorage.getItem(THEME_STORAGE_KEY));
-        } catch (e) {
-            return null;
+        var lang = currentLang;
+        // Try exact locale (e.g. "zh_CN")
+        if (typeof TRANSLATIONS !== "undefined" && TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) {
+            return TRANSLATIONS[lang][key];
         }
-    }
-
-    function setStoredThemePreference(theme) {
-        var normalized = normalizeThemePreference(theme);
-        if (!normalized) return;
-        try {
-            localStorage.setItem(THEME_STORAGE_KEY, normalized);
-        } catch (e) {}
-    }
-
-    function getInitialThemePreference() {
-        var storedTheme = getStoredThemePreference();
-        if (storedTheme) return storedTheme;
-        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-            return "dark";
+        // Try base language (e.g. "zh")
+        var base = lang.split("_")[0];
+        if (base !== lang && typeof TRANSLATIONS !== "undefined" && TRANSLATIONS[base] && TRANSLATIONS[base][key]) {
+            return TRANSLATIONS[base][key];
         }
-        return "light";
-    }
-
-    function getNextThemePreference(theme) {
-        return theme === "dark" ? "light" : "dark";
-    }
-
-    function getThemeModeLabel(theme) {
-        return theme === "dark" ? "Dark mode" : "Light mode";
-    }
-
-    function updateThemeToggleUI() {
-        var button = document.getElementById("themeToggle");
-        if (!button) return;
-
-        var nextTheme = getNextThemePreference(currentThemePreference);
-        var title = getThemeModeLabel(currentThemePreference) + ". Switch to " + getThemeModeLabel(nextTheme).toLowerCase() + ".";
-
-        button.setAttribute("data-theme-state", currentThemePreference);
-        button.title = title;
-        button.setAttribute("aria-label", title);
-    }
-
-    function applyThemePreference(theme) {
-        currentThemePreference = normalizeThemePreference(theme) || "light";
-        document.documentElement.setAttribute("data-theme", currentThemePreference);
-        updateThemeToggleUI();
-    }
-
-    function toggleThemePreference() {
-        var nextTheme = getNextThemePreference(currentThemePreference);
-        applyThemePreference(nextTheme);
-        setStoredThemePreference(nextTheme);
-    }
-
-    function syncThemeWithSystemPreference(event) {
-        if (getStoredThemePreference()) {
-            return;
+        // Fallback to English — for English, the key IS the English text,
+        // so if there's no explicit en.po translation, the raw key is correct.
+        if (typeof TRANSLATIONS !== "undefined" && TRANSLATIONS.en && TRANSLATIONS.en[key]) {
+            return TRANSLATIONS.en[key];
         }
-
-        var prefersDark = !!(event && event.matches);
-        if (!event && window.matchMedia) {
-            prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        }
-        applyThemePreference(prefersDark ? "dark" : "light");
+        // Return raw key (which is the English text by convention)
+        return key;
     }
-
-    function initTheme() {
-        applyThemePreference(getInitialThemePreference());
-
-        var button = document.getElementById("themeToggle");
-        if (button && !button._filesyncThemeBound) {
-            button.addEventListener("click", toggleThemePreference);
-            button._filesyncThemeBound = true;
-        }
-
-        if (window.matchMedia && !window._filesyncThemeMediaQueryBound) {
-            var mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-            if (mediaQuery.addEventListener) {
-                mediaQuery.addEventListener("change", syncThemeWithSystemPreference);
-                window._filesyncThemeMediaQueryBound = true;
-            }
-        }
-    }
-
-    function getViewModeLabel(mode) {
-        if (mode === "grid-large") return "Large grid view";
-        if (mode === "grid") return "Grid view";
-        return "List view";
-    }
-
-    function getViewModeIcon(mode) {
-        if (mode === "grid-large") return icons.viewGridLarge;
-        if (mode === "grid") return icons.viewGrid;
-        return icons.viewList;
-    }
-
-    function getNextViewMode() {
-        if (viewMode === "list") return "grid";
-        if (viewMode === "grid") return "grid-large";
-        return "list";
-    }
-
-    function setFileListViewMode() {
-        var list = document.getElementById("fileList");
-        if (!list) return;
-        list.classList.toggle("view-grid", viewMode === "grid");
-        list.classList.toggle("view-grid-large", viewMode === "grid-large");
-    }
-
-    function updateViewModeUI() {
-        var button = document.getElementById("btnViewMode");
-        var header = document.getElementById("fileListHeader");
-        if (!button) return;
-
-        var nextMode = getNextViewMode();
-        var title = getViewModeLabel(viewMode) + ". Switch to " + getViewModeLabel(nextMode).toLowerCase() + ".";
-        button.innerHTML = getViewModeIcon(viewMode);
-        button.title = title;
-        button.setAttribute("aria-label", title);
-        setFileListViewMode();
-        if (header) {
-            header.classList.toggle("visible", viewMode === "list" && !!(currentEntries && currentEntries.length));
-        }
-    }
-
-    window.toggleViewMode = function() {
-        viewMode = getNextViewMode();
-        try {
-            localStorage.setItem(VIEW_MODE_STORAGE_KEY, viewMode);
-        } catch (e) {}
-        updateViewModeUI();
-        renderFiles(currentEntries);
-    };
 
     function applyStaticTranslations() {
         document.querySelectorAll('[data-i18n]').forEach(function(el) {
             el.textContent = t(el.dataset.i18n);
         });
         // Placeholder
-        document.getElementById('searchInput').placeholder = t('filter_placeholder');
+        document.getElementById('searchInput').placeholder = t('Filter files...');
         // Button titles
-        document.getElementById('btnUpload').title = t('upload_files_title');
-        document.getElementById('btnUpload').setAttribute('aria-label', t('upload_files_title'));
-        document.getElementById('btnFolder').title = t('new_folder_title');
-        document.getElementById('btnFolder').setAttribute('aria-label', t('new_folder_title'));
-        document.getElementById('btnUploadFilesCta').title = t('choose_files');
-        document.getElementById('btnUploadFilesCta').setAttribute('aria-label', t('choose_files'));
+        document.getElementById('btnUpload').title = t('Upload files');
+        document.getElementById('btnUpload').setAttribute('aria-label', t('Upload files'));
+        document.getElementById('btnFolder').title = t('New folder');
+        document.getElementById('btnFolder').setAttribute('aria-label', t('New folder'));
+        document.getElementById('btnUploadFilesCta').title = t('Choose Files');
+        document.getElementById('btnUploadFilesCta').setAttribute('aria-label', t('Choose Files'));
         // Dropzone text
         var dzText = document.getElementById('dropzoneText');
-        dzText.innerHTML = t('dropzone_text') + ' <strong onclick="document.getElementById(\'fileInput\').click()">' + t('dropzone_browse') + '</strong>';
-        document.getElementById('modalCloseBtn').title = t('cancel');
-        document.getElementById('modalCloseBtn').setAttribute('aria-label', t('cancel'));
-        document.getElementById('confirmCloseBtn').title = t('cancel');
-        document.getElementById('confirmCloseBtn').setAttribute('aria-label', t('cancel'));
+        dzText.innerHTML = t('Drag and drop files here, or') + ' <strong onclick="document.getElementById(\'fileInput\').click()">' + t('browse') + '</strong>';
+        document.getElementById('modalCloseBtn').title = t('Cancel');
+        document.getElementById('modalCloseBtn').setAttribute('aria-label', t('Cancel'));
+        document.getElementById('confirmCloseBtn').title = t('Cancel');
+        document.getElementById('confirmCloseBtn').setAttribute('aria-label', t('Cancel'));
         updateThemeToggleUI();
         updateViewModeUI();
     }
-
     // ===== State =====
+    var THEME_STORAGE_KEY = "filesync_theme";
+    var VIEW_MODE_STORAGE_KEY = "filesync_view_mode";
+    var currentThemePreference = "light";
+
     var currentPath = '/';
     var currentSort = 'name';
     var currentOrder = 'asc';
@@ -2567,7 +2272,7 @@ html, body {
         comic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v16"/><path d="M13 4v16"/><path d="M3 10h18"/></svg>',
         document: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
         text: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="3" fill="currentColor" fill-opacity="0.13" stroke="currentColor"/><path d="M7 8.2h10"/><text x="4.25" y="16.1" font-family="system-ui,sans-serif" font-size="6.1" font-weight="800" fill="currentColor" stroke="none" letter-spacing="0.25">TXT</text></svg>',
-        markdown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="3" fill="currentColor" fill-opacity="0.13" stroke="currentColor"/><text x="4.4" y="15.8" font-family="system-ui,sans-serif" font-size="7.4" font-weight="800" fill="currentColor" stroke="none">M↓</text></svg>',
+        markdown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="3" fill="currentColor" fill-opacity="0.13" stroke="currentColor"/><text x="4.4" y="15.8" font-family="system-ui,sans-serif" font-size="7.4" font-weight="800" fill="currentColor" stroke="none">M&#x2193;</text></svg>',
         image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
         archive: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v11a2 2 0 01-2 2H5a2 2 0 01-2-2V8"/><path d="M1 8h22"/><path d="M10 12h4"/><path d="M10 16h4"/><path d="M9 3h6v5H9z"/></svg>',
         audio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>',
@@ -2580,6 +2285,7 @@ html, body {
         empty: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>'
     };
 
+    // ===== File Type Maps =====
     var FILE_TYPE_BY_COMPOUND_EXTENSION = {
         'fb2.zip': 'ebook',
         'epub.zip': 'ebook',
@@ -2686,6 +2392,51 @@ html, body {
         less: 'code',
         sql: 'code'
     };
+    // ===== API =====
+    async function api(method, url, body) {
+        var opts = { method: method };
+        if (body instanceof FormData) {
+            opts.body = body;
+        } else if (body) {
+            opts.headers = { 'Content-Type': 'application/json' };
+            opts.body = JSON.stringify(body);
+        }
+        var res = await fetch(url, opts);
+        var text = await res.text();
+        var data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            throw new Error(res.ok ? 'Invalid server response' : 'Server error (' + res.status + ')');
+        }
+        if (!res.ok || data.error) {
+            throw new Error(data.error || 'Request failed (' + res.status + ')');
+        }
+        return data;
+    }
+    // ===== Helpers =====
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function escapeAttr(str) {
+        if (!str) return '';
+        return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    function formatDate(timestamp) {
+        if (!timestamp) return '';
+        var d = new Date(timestamp * 1000);
+        var now = new Date();
+        var diff = now - d;
+        if (diff < 60000) return t('Just now');
+        if (diff < 3600000) return Math.floor(diff / 60000) + t('m ago');
+        if (diff < 86400000) return Math.floor(diff / 3600000) + t('h ago');
+        if (diff < 604800000) return Math.floor(diff / 86400000) + t('d ago');
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return months[d.getMonth()] + ' ' + d.getDate() + (d.getFullYear() !== now.getFullYear() ? ', ' + d.getFullYear() : '');
+    }
 
     function getTypeClassFromFilename(name) {
         var lowerName = String(name || '').toLowerCase();
@@ -2734,29 +2485,259 @@ html, body {
         return getTypeClassFromFilename(entry.name) || entry.type || 'file';
     }
 
-    // ===== API =====
-    async function api(method, url, body) {
-        var opts = { method: method };
-        if (body instanceof FormData) {
-            opts.body = body;
-        } else if (body) {
-            opts.headers = { 'Content-Type': 'application/json' };
-            opts.body = JSON.stringify(body);
-        }
-        var res = await fetch(url, opts);
-        var text = await res.text();
-        var data;
-        try {
-            data = JSON.parse(text);
-        } catch (e) {
-            throw new Error(res.ok ? 'Invalid server response' : 'Server error (' + res.status + ')');
-        }
-        if (!res.ok || data.error) {
-            throw new Error(data.error || 'Request failed (' + res.status + ')');
-        }
-        return data;
+    // ===== Theme =====
+    function normalizeThemePreference(theme) {
+        return theme === "dark" || theme === "light" ? theme : null;
     }
 
+    function getStoredThemePreference() {
+        try {
+            return normalizeThemePreference(localStorage.getItem(THEME_STORAGE_KEY));
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function setStoredThemePreference(theme) {
+        var normalized = normalizeThemePreference(theme);
+        if (!normalized) return;
+        try {
+            localStorage.setItem(THEME_STORAGE_KEY, normalized);
+        } catch (e) {}
+    }
+
+    function getInitialThemePreference() {
+        var storedTheme = getStoredThemePreference();
+        if (storedTheme) return storedTheme;
+        if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            return "dark";
+        }
+        return "light";
+    }
+
+    function getNextThemePreference(theme) {
+        return theme === "dark" ? "light" : "dark";
+    }
+
+    function getThemeModeLabel(theme) {
+        return theme === "dark" ? "Dark mode" : "Light mode";
+    }
+
+    function updateThemeToggleUI() {
+        var button = document.getElementById("themeToggle");
+        if (!button) return;
+
+        var nextTheme = getNextThemePreference(currentThemePreference);
+        var title = getThemeModeLabel(currentThemePreference) + ". Switch to " + getThemeModeLabel(nextTheme).toLowerCase() + ".";
+
+        button.setAttribute("data-theme-state", currentThemePreference);
+        button.title = title;
+        button.setAttribute("aria-label", title);
+    }
+
+    function applyThemePreference(theme) {
+        currentThemePreference = normalizeThemePreference(theme) || "light";
+        document.documentElement.setAttribute("data-theme", currentThemePreference);
+        updateThemeToggleUI();
+    }
+
+    function toggleThemePreference() {
+        var nextTheme = getNextThemePreference(currentThemePreference);
+        applyThemePreference(nextTheme);
+        setStoredThemePreference(nextTheme);
+    }
+
+    function syncThemeWithSystemPreference(event) {
+        if (getStoredThemePreference()) {
+            return;
+        }
+
+        var prefersDark = !!(event && event.matches);
+        if (!event && window.matchMedia) {
+            prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        }
+        applyThemePreference(prefersDark ? "dark" : "light");
+    }
+
+    function initTheme() {
+        applyThemePreference(getInitialThemePreference());
+
+        var button = document.getElementById("themeToggle");
+        if (button && !button._filesyncThemeBound) {
+            button.addEventListener("click", toggleThemePreference);
+            button._filesyncThemeBound = true;
+        }
+
+        if (window.matchMedia && !window._filesyncThemeMediaQueryBound) {
+            var mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+            if (mediaQuery.addEventListener) {
+                mediaQuery.addEventListener("change", syncThemeWithSystemPreference);
+                window._filesyncThemeMediaQueryBound = true;
+            }
+        }
+    }
+
+    // ===== View Mode =====
+    function getViewModeLabel(mode) {
+        if (mode === "grid-large") return "Large grid view";
+        if (mode === "grid") return "Grid view";
+        return "List view";
+    }
+
+    function getViewModeIcon(mode) {
+        if (mode === "grid-large") return icons.viewGridLarge;
+        if (mode === "grid") return icons.viewGrid;
+        return icons.viewList;
+    }
+
+    function getNextViewMode() {
+        if (viewMode === "list") return "grid";
+        if (viewMode === "grid") return "grid-large";
+        return "list";
+    }
+
+    function setFileListViewMode() {
+        var list = document.getElementById("fileList");
+        if (!list) return;
+        list.classList.toggle("view-grid", viewMode === "grid");
+        list.classList.toggle("view-grid-large", viewMode === "grid-large");
+    }
+
+    function updateViewModeUI() {
+        var button = document.getElementById("btnViewMode");
+        var header = document.getElementById("fileListHeader");
+        if (!button) return;
+
+        var nextMode = getNextViewMode();
+        var title = getViewModeLabel(viewMode) + ". Switch to " + getViewModeLabel(nextMode).toLowerCase() + ".";
+        button.innerHTML = getViewModeIcon(viewMode);
+        button.title = title;
+        button.setAttribute("aria-label", title);
+        setFileListViewMode();
+        if (header) {
+            header.classList.toggle("visible", viewMode === "list" && !!(currentEntries && currentEntries.length));
+        }
+    }
+
+    window.toggleViewMode = function() {
+        viewMode = getNextViewMode();
+        try {
+            localStorage.setItem(VIEW_MODE_STORAGE_KEY, viewMode);
+        } catch (e) {}
+        updateViewModeUI();
+        renderFiles(currentEntries);
+    };
+
+    // ===== Toast =====
+    function showToast(message, type) {
+        type = type || 'info';
+        var container = document.getElementById('toastContainer');
+        var toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(function() {
+            toast.classList.add('hiding');
+            setTimeout(function() { toast.remove(); }, 300);
+        }, 3000);
+    }
+
+    // ===== Modal =====
+    function showModal(title, defaultValue, confirmText, callback) {
+        modalCallback = callback;
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalInput').value = defaultValue;
+        document.getElementById('modalConfirm').textContent = confirmText;
+        document.getElementById('modalOverlay').classList.add('open');
+        setTimeout(function() {
+            var input = document.getElementById('modalInput');
+            input.focus();
+            input.select();
+        }, 100);
+    }
+
+    window.hideModal = function() {
+        document.getElementById('modalOverlay').classList.remove('open');
+        modalCallback = null;
+        restoreModalInput();
+    };
+
+    window.closeModal = function(e) {
+        if (e.target === document.getElementById('modalOverlay')) hideModal();
+    };
+
+    window.closeModalButton = function(event) {
+        if (event) event.stopPropagation();
+        hideModal();
+    };
+
+    window.confirmModal = function() {
+        var value = document.getElementById('modalInput').value.trim();
+        var cb = modalCallback;
+        hideModal();
+        if (cb) {
+            cb(value);
+        }
+    };
+
+    function restoreModalInput() {
+        var inputElem = document.getElementById('modalInput');
+        var inputParent = inputElem.parentNode;
+        if (inputParent.classList.contains('modal-input-with-ext')) {
+            var grandParent = inputParent.parentNode;
+            grandParent.insertBefore(inputElem, inputParent);
+            inputParent.remove();
+        }
+    }
+
+    // ===== Confirm Dialog =====
+    function showConfirm(title, message, btnText, callback, showSdr, warningMsg) {
+        confirmCallback = callback;
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmMessage').textContent = message;
+        document.getElementById('confirmBtn').textContent = btnText;
+        var warningEl = document.getElementById('confirmWarning');
+        if (warningMsg) {
+            warningEl.textContent = warningMsg;
+            warningEl.style.display = 'block';
+        } else {
+            warningEl.textContent = '';
+            warningEl.style.display = 'none';
+        }
+        var sdrOption = document.getElementById('confirmSdrOption');
+        var sdrCheckbox = document.getElementById('confirmSdrCheckbox');
+        if (showSdr) {
+            document.getElementById('confirmSdrLabel').textContent = t('Also delete reading metadata (.sdr)');
+            sdrCheckbox.checked = true;
+            sdrOption.style.display = 'flex';
+        } else {
+            sdrOption.style.display = 'none';
+            sdrCheckbox.checked = false;
+        }
+        document.getElementById('confirmOverlay').classList.add('open');
+    }
+
+    window.hideConfirm = function() {
+        document.getElementById('confirmOverlay').classList.remove('open');
+        confirmCallback = null;
+    };
+
+    window.closeConfirm = function(e) {
+        if (e.target === document.getElementById('confirmOverlay')) hideConfirm();
+    };
+
+    window.closeConfirmButton = function(event) {
+        if (event) event.stopPropagation();
+        hideConfirm();
+    };
+
+    window.doConfirm = function() {
+        var cb = confirmCallback;
+        hideConfirm();
+        if (cb) {
+            cb();
+        }
+    };
     // ===== Navigation =====
     // Internal navigation: sets state and loads files WITHOUT pushing history
     function _navigateInternal(path) {
@@ -2802,7 +2783,7 @@ html, body {
 
     async function loadFiles() {
         var list = document.getElementById('fileList');
-        list.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">' + escapeHtml(t('loading')) + '</div></div>';
+        list.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">' + escapeHtml(t('Loading...')) + '</div></div>';
 
         try {
             var params = new URLSearchParams({
@@ -2818,7 +2799,7 @@ html, body {
         } catch (err) {
             currentEntries = [];
             list.innerHTML = '<div class="empty-state">' + icons.empty +
-                '<div class="empty-state-text">' + escapeHtml(t('failed_to_load')) + '</div>' +
+                '<div class="empty-state-text">' + escapeHtml(t('Failed to load files')) + '</div>' +
                 '<div class="empty-state-sub">' + escapeHtml(err.message) + '</div></div>';
             updateViewModeUI();
             updateParentNav();
@@ -2837,8 +2818,8 @@ html, body {
             var classes = 'breadcrumb-item' + (isLast ? ' active' : '');
             var attrs = isLast ? '' : ' onclick="navigate(\'' + escapeAttr(crumbs[i].path) + '\')"';
             if (displayName === "Home") {
-                html += '<span class="' + classes + ' breadcrumb-home"' + attrs + ' title="' + escapeHtml(t('home')) + '" aria-label="' + escapeHtml(t('home')) + '">' +
-                    icons.home + '<span class="breadcrumb-home-label">' + escapeHtml(t('home')) + '</span></span>';
+                html += '<span class="' + classes + ' breadcrumb-home"' + attrs + ' title="' + escapeHtml(t('Home')) + '" aria-label="' + escapeHtml(t('Home')) + '">' +
+                    icons.home + '<span class="breadcrumb-home-label">' + escapeHtml(t('Home')) + '</span></span>';
                 continue;
             }
             html += '<span class="' + classes + '"' + attrs + '>' + escapeHtml(displayName) + '</span>';
@@ -2851,8 +2832,8 @@ html, body {
         var list = document.getElementById('fileList');
         if (!entries || entries.length === 0) {
             list.innerHTML = '<div class="empty-state">' + icons.empty +
-                '<div class="empty-state-text">' + escapeHtml(t('empty_folder')) + '</div>' +
-                '<div class="empty-state-sub">' + escapeHtml(t('empty_folder_sub')) + '</div></div>';
+                '<div class="empty-state-text">' + escapeHtml(t('This folder is empty')) + '</div>' +
+                '<div class="empty-state-sub">' + escapeHtml(t('Upload files or create a new folder')) + '</div></div>';
             updateViewModeUI();
             return;
         }
@@ -2868,8 +2849,8 @@ html, body {
             var tableSize = entry.is_dir ? '' : size;
             var tableDate = date || '';
             var displayParts = entry.is_dir ? { baseName: entry.name, extensionLabel: '' } : getFileDisplayParts(entry.name);
-            var typeLabel = entry.is_dir ? t('folder_label') : (displayParts.extensionLabel || t('unknown'));
-            var tableTypeLabel = entry.is_dir ? t('folder_label') : (displayParts.extensionLabel || t('unknown'));
+            var typeLabel = entry.is_dir ? t('Folder label') : (displayParts.extensionLabel || t('Unknown'));
+            var tableTypeLabel = entry.is_dir ? t('Folder label') : (displayParts.extensionLabel || t('Unknown'));
             var itemClass = 'file-item ' + (entry.is_dir ? 'is-dir' : 'is-file');
             if (entry.name && entry.name.charAt(0) === '.') itemClass += ' is-hidden';
 
@@ -2888,8 +2869,8 @@ html, body {
             html += '<div class="file-table-cell file-table-type">' + escapeHtml(tableTypeLabel) + '</div>';
             if (entry.is_dir) {
                 html += '<div class="file-actions">';
-                html += '<button class="btn-icon" onclick="event.stopPropagation(); renameItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\')" title="' + escapeHtml(t('rename')) + '">' + icons.rename + '</button>';
-                html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\', true, false, ' + (entry.is_empty ? 'true' : 'false') + ')" title="' + escapeHtml(t('delete_label')) + '">' + icons.trash + '</button>';
+                html += '<button class="btn-icon" onclick="event.stopPropagation(); renameItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\')" title="' + escapeHtml(t('Rename')) + '">' + icons.rename + '</button>';
+                html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\', true, false, ' + (entry.is_empty ? 'true' : 'false') + ')" title="' + escapeHtml(t('Delete')) + '">' + icons.trash + '</button>';
                 html += '</div>';
             } else {
                 html += '<div class="file-actions file-actions-chevron"><span class="file-chevron"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></div>';
@@ -2908,6 +2889,22 @@ html, body {
         }
     };
 
+    // ===== Sort & Filter =====
+    window.onSortChange = function() {
+        var val = document.getElementById('sortSelect').value;
+        var parts = val.split('-');
+        currentSort = parts[0];
+        currentOrder = parts[1] || 'asc';
+        loadFiles();
+    };
+
+    window.onFilterChange = function() {
+        clearTimeout(filterTimer);
+        filterTimer = setTimeout(function() {
+            currentFilter = document.getElementById('searchInput').value;
+            loadFiles();
+        }, 250);
+    };
     // ===== File Operations =====
     window.downloadFile = function(path) {
         var a = document.createElement('a');
@@ -2919,37 +2916,37 @@ html, body {
     };
 
     window.renameItem = function(path, oldName) {
-        showModal(t('rename'), oldName, t('rename'), async function(newName) {
+        showModal(t('Rename'), oldName, t('Rename'), async function(newName) {
             if (!newName || newName === oldName) return;
             try {
                 var parentPath = path.substring(0, path.lastIndexOf('/')) || '/';
                 var newPath = parentPath + '/' + newName;
                 await api('POST', '/api/rename', { old_path: path, new_path: newPath });
-                showToast(t('renamed_successfully'), 'success');
+                showToast(t('Renamed successfully'), 'success');
                 loadFiles();
             } catch (err) {
-                showToast(t('rename_failed') + ' ' + err.message, 'error');
+                showToast(t('Rename failed:') + ' ' + err.message, 'error');
             }
         });
     };
 
     window.deleteItem = async function(path, name, isDir, hasSdr, isDirEmpty) {
-        var titleStr = isDir ? (isDirEmpty ? t('delete_empty_folder') : t('delete_folder')) : t('delete_file');
-        var msgStr = t('confirm_delete') + ' "' + escapeHtml(name) + '"?';
+        var titleStr = isDir ? (isDirEmpty ? t('Delete empty folder') : t('Delete folder')) : t('Delete file');
+        var msgStr = t('Are you sure you want to delete') + ' "' + escapeHtml(name) + '"?';
         var showSdrCheckbox = !isDir && hasSdr;
         var warningStr = '';
         if (isDir && !isDirEmpty) {
             try {
                 var info = await api('GET', '/api/dirinfo?path=' + encodeURIComponent(path));
-                warningStr = t('dir_contains_n_files').replace('{n}', info.file_count);
+                warningStr = t('This directory contains {n} files. All files will be permanently deleted.').replace('{n}', info.file_count);
             } catch (err) {
-                warningStr = t('confirm_delete_contents');
+                warningStr = t('This will delete all contents inside.');
             }
         }
         showConfirm(
             titleStr,
             msgStr,
-            t('delete_label'),
+            t('Delete'),
             async function() {
                 try {
                     var body = { path: path };
@@ -2957,15 +2954,29 @@ html, body {
                         body.delete_sdr = document.getElementById('confirmSdrCheckbox').checked;
                     }
                     await api('POST', '/api/delete', body);
-                    showToast(t('deleted_successfully'), 'success');
+                    showToast(t('Deleted successfully'), 'success');
                     loadFiles();
                 } catch (err) {
-                    showToast(t('delete_failed') + ' ' + err.message, 'error');
+                    showToast(t('Delete failed:') + ' ' + err.message, 'error');
                 }
             },
             showSdrCheckbox,
             warningStr
         );
+    };
+
+    window.showNewFolderModal = function() {
+        showModal(t('New Folder'), '', t('Create'), async function(name) {
+            if (!name) return;
+            try {
+                var newPath = (currentPath === '/' ? '' : currentPath) + '/' + name;
+                await api('POST', '/api/mkdir', { path: newPath });
+                showToast(t('Folder created'), 'success');
+                loadFiles();
+            } catch (err) {
+                showToast(t('Failed to create folder:') + ' ' + err.message, 'error');
+            }
+        });
     };
 
     // ===== File Detail View =====
@@ -3012,7 +3023,7 @@ html, body {
             imagePreviewEl.innerHTML = '<div class="cover-spinner"></div>';
             var previewImg = document.createElement('img');
             previewImg.src = '/api/download?path=' + encodeURIComponent(path) + '&preview=1';
-            previewImg.alt = t('image_preview');
+            previewImg.alt = t('Image preview');
             previewImg.onload = function() {
                 imagePreviewEl.innerHTML = '';
                 imagePreviewEl.appendChild(previewImg);
@@ -3040,20 +3051,20 @@ html, body {
         // File type info
         var typeClass = entry.type || 'file';
         var ext = entry.name.split('.').pop().toUpperCase();
-        var dateStr = entry.modified ? formatDate(entry.modified) : t('unknown');
+        var dateStr = entry.modified ? formatDate(entry.modified) : t('Unknown');
         var sizeStr = entry.size_formatted || '0 B';
 
         var infoHtml = '';
-        infoHtml += '<div class="detail-info-row"><span class="detail-info-label">' + escapeHtml(t('file_type')) + '</span><span class="detail-info-value">' + escapeHtml(ext) + '</span></div>';
-        infoHtml += '<div class="detail-info-row"><span class="detail-info-label">' + escapeHtml(t('size')) + '</span><span class="detail-info-value">' + escapeHtml(sizeStr) + '</span></div>';
-        infoHtml += '<div class="detail-info-row"><span class="detail-info-label">' + escapeHtml(t('modified')) + '</span><span class="detail-info-value">' + escapeHtml(dateStr) + '</span></div>';
+        infoHtml += '<div class="detail-info-row"><span class="detail-info-label">' + escapeHtml(t('File type')) + '</span><span class="detail-info-value">' + escapeHtml(ext) + '</span></div>';
+        infoHtml += '<div class="detail-info-row"><span class="detail-info-label">' + escapeHtml(t('Size')) + '</span><span class="detail-info-value">' + escapeHtml(sizeStr) + '</span></div>';
+        infoHtml += '<div class="detail-info-row"><span class="detail-info-label">' + escapeHtml(t('Modified')) + '</span><span class="detail-info-value">' + escapeHtml(dateStr) + '</span></div>';
         infoEl.innerHTML = infoHtml;
 
         // Build action buttons
         var actHtml = '';
-        actHtml += '<button class="btn btn-primary" onclick="detailDownload()">' + icons.download + '<span>' + escapeHtml(t('download')) + '</span></button>';
-        actHtml += '<button class="btn btn-secondary" onclick="detailRename()">' + icons.rename + '<span>' + escapeHtml(t('rename')) + '</span></button>';
-        actHtml += '<button class="btn btn-danger" onclick="detailDelete()">' + icons.trash + '<span>' + escapeHtml(t('delete_label')) + '</span></button>';
+        actHtml += '<button class="btn btn-primary" onclick="detailDownload()">' + icons.download + '<span>' + escapeHtml(t('Download')) + '</span></button>';
+        actHtml += '<button class="btn btn-secondary" onclick="detailRename()">' + icons.rename + '<span>' + escapeHtml(t('Rename')) + '</span></button>';
+        actHtml += '<button class="btn btn-danger" onclick="detailDelete()">' + icons.trash + '<span>' + escapeHtml(t('Delete')) + '</span></button>';
         actionsEl.innerHTML = actHtml;
 
         // For image files, skip metadata fetch (no book metadata to show)
@@ -3138,7 +3149,7 @@ html, body {
 
     window.detailDownload = function() {
         if (currentDetailEntry) {
-            showToast(t('downloading') + ' ' + currentDetailEntry.name, 'info');
+            showToast(t('Downloading') + ' ' + currentDetailEntry.name, 'info');
             downloadFile(currentDetailEntry.path);
         }
     };
@@ -3157,8 +3168,8 @@ html, body {
         var inputElem = document.getElementById('modalInput');
         var confirmBtn = document.getElementById('modalConfirm');
 
-        titleElem.textContent = t('rename');
-        confirmBtn.textContent = t('rename');
+        titleElem.textContent = t('Rename');
+        confirmBtn.textContent = t('Rename');
 
         // Wrap input with extension suffix
         var inputParent = inputElem.parentNode;
@@ -3200,36 +3211,26 @@ html, body {
                 var parentPath = entry.path.substring(0, entry.path.lastIndexOf('/')) || '/';
                 var newPath = parentPath + '/' + finalName;
                 await api('POST', '/api/rename', { old_path: entry.path, new_path: newPath });
-                showToast(t('renamed_successfully'), 'success');
+                showToast(t('Renamed successfully'), 'success');
                 restoreModalInput();
                 _hideDetailInternal();
                 history.replaceState({path: currentPath}, '', '#' + encodeURI(currentPath));
                 loadFiles();
             } catch (err) {
-                showToast(t('rename_failed') + ' ' + err.message, 'error');
+                showToast(t('Rename failed:') + ' ' + err.message, 'error');
                 restoreModalInput();
             }
         };
     };
-
-    function restoreModalInput() {
-        var inputElem = document.getElementById('modalInput');
-        var inputParent = inputElem.parentNode;
-        if (inputParent.classList.contains('modal-input-with-ext')) {
-            var grandParent = inputParent.parentNode;
-            grandParent.insertBefore(inputElem, inputParent);
-            inputParent.remove();
-        }
-    }
 
     window.detailDelete = function() {
         if (!currentDetailEntry) return;
         var entry = currentDetailEntry;
         var showSdrCheckbox = !entry.is_dir && entry.has_sdr;
         showConfirm(
-            t('delete_file'),
-            t('confirm_delete') + ' "' + escapeHtml(entry.name) + '"?',
-            t('delete_label'),
+            t('Delete file'),
+            t('Are you sure you want to delete') + ' "' + escapeHtml(entry.name) + '"?',
+            t('Delete'),
             async function() {
                 try {
                     var body = { path: entry.path };
@@ -3237,32 +3238,17 @@ html, body {
                         body.delete_sdr = document.getElementById('confirmSdrCheckbox').checked;
                     }
                     await api('POST', '/api/delete', body);
-                    showToast(t('deleted_successfully'), 'success');
+                    showToast(t('Deleted successfully'), 'success');
                     _hideDetailInternal();
                     history.replaceState({path: currentPath}, '', '#' + encodeURI(currentPath));
                     loadFiles();
                 } catch (err) {
-                    showToast(t('delete_failed') + ' ' + err.message, 'error');
+                    showToast(t('Delete failed:') + ' ' + err.message, 'error');
                 }
             },
             showSdrCheckbox
         );
     };
-
-    window.showNewFolderModal = function() {
-        showModal(t('new_folder'), '', t('create'), async function(name) {
-            if (!name) return;
-            try {
-                var newPath = (currentPath === '/' ? '' : currentPath) + '/' + name;
-                await api('POST', '/api/mkdir', { path: newPath });
-                showToast(t('folder_created'), 'success');
-                loadFiles();
-            } catch (err) {
-                showToast(t('failed_create_folder') + ' ' + err.message, 'error');
-            }
-        });
-    };
-
     // ===== Upload =====
     window.toggleUploadZone = function() {
         uploadZoneVisible = !uploadZoneVisible;
@@ -3318,20 +3304,20 @@ html, body {
                     } else {
                         try {
                             var d = JSON.parse(xhr.responseText);
-                            reject(new Error(d.error || t('upload_failed')));
+                            reject(new Error(d.error || t('Upload failed:')));
                         } catch(e) {
-                            reject(new Error(t('upload_failed')));
+                            reject(new Error(t('Upload failed:')));
                         }
                     }
                 };
-                xhr.onerror = function() { reject(new Error(t('network_error'))); };
+                xhr.onerror = function() { reject(new Error(t('Network error'))); };
                 xhr.send(formData);
             });
 
             var bar = document.getElementById(id + '-bar');
             var status = document.getElementById(id + '-status');
             if (bar) { bar.style.width = '100%'; bar.classList.add('complete'); }
-            if (status) { status.textContent = t('done'); status.classList.add('success'); }
+            if (status) { status.textContent = t('Done'); status.classList.add('success'); }
             showToast(file.name + ' ' + t('uploaded'), 'success');
             loadFiles();
 
@@ -3344,8 +3330,8 @@ html, body {
             var bar2 = document.getElementById(id + '-bar');
             var status2 = document.getElementById(id + '-status');
             if (bar2) { bar2.style.width = '100%'; bar2.classList.add('error'); }
-            if (status2) { status2.textContent = t('failed'); status2.classList.add('error'); }
-            showToast(t('upload_failed') + ' ' + err.message, 'error');
+            if (status2) { status2.textContent = t('Failed'); status2.classList.add('error'); }
+            showToast(t('Upload failed:') + ' ' + err.message, 'error');
         }
     }
 
@@ -3375,149 +3361,6 @@ html, body {
             handleFileSelect(e.dataTransfer.files);
         }
     });
-
-    // ===== Sort & Filter =====
-    window.onSortChange = function() {
-        var val = document.getElementById('sortSelect').value;
-        var parts = val.split('-');
-        currentSort = parts[0];
-        currentOrder = parts[1] || 'asc';
-        loadFiles();
-    };
-
-    window.onFilterChange = function() {
-        clearTimeout(filterTimer);
-        filterTimer = setTimeout(function() {
-            currentFilter = document.getElementById('searchInput').value;
-            loadFiles();
-        }, 250);
-    };
-
-    // ===== Modal =====
-    function showModal(title, defaultValue, confirmText, callback) {
-        modalCallback = callback;
-        document.getElementById('modalTitle').textContent = title;
-        document.getElementById('modalInput').value = defaultValue;
-        document.getElementById('modalConfirm').textContent = confirmText;
-        document.getElementById('modalOverlay').classList.add('open');
-        setTimeout(function() {
-            var input = document.getElementById('modalInput');
-            input.focus();
-            input.select();
-        }, 100);
-    }
-
-    window.hideModal = function() {
-        document.getElementById('modalOverlay').classList.remove('open');
-        modalCallback = null;
-        restoreModalInput();
-    };
-
-    window.closeModal = function(e) {
-        if (e.target === document.getElementById('modalOverlay')) hideModal();
-    };
-
-    window.closeModalButton = function(event) {
-        if (event) event.stopPropagation();
-        hideModal();
-    };
-
-    window.confirmModal = function() {
-        var value = document.getElementById('modalInput').value.trim();
-        var cb = modalCallback;
-        hideModal();
-        if (cb) {
-            cb(value);
-        }
-    };
-
-    // ===== Confirm Dialog =====
-    function showConfirm(title, message, btnText, callback, showSdr, warningMsg) {
-        confirmCallback = callback;
-        document.getElementById('confirmTitle').textContent = title;
-        document.getElementById('confirmMessage').textContent = message;
-        document.getElementById('confirmBtn').textContent = btnText;
-        var warningEl = document.getElementById('confirmWarning');
-        if (warningMsg) {
-            warningEl.textContent = warningMsg;
-            warningEl.style.display = 'block';
-        } else {
-            warningEl.textContent = '';
-            warningEl.style.display = 'none';
-        }
-        var sdrOption = document.getElementById('confirmSdrOption');
-        var sdrCheckbox = document.getElementById('confirmSdrCheckbox');
-        if (showSdr) {
-            document.getElementById('confirmSdrLabel').textContent = t('also_delete_sdr');
-            sdrCheckbox.checked = true;
-            sdrOption.style.display = 'flex';
-        } else {
-            sdrOption.style.display = 'none';
-            sdrCheckbox.checked = false;
-        }
-        document.getElementById('confirmOverlay').classList.add('open');
-    }
-
-    window.hideConfirm = function() {
-        document.getElementById('confirmOverlay').classList.remove('open');
-        confirmCallback = null;
-    };
-
-    window.closeConfirm = function(e) {
-        if (e.target === document.getElementById('confirmOverlay')) hideConfirm();
-    };
-
-    window.closeConfirmButton = function(event) {
-        if (event) event.stopPropagation();
-        hideConfirm();
-    };
-
-    window.doConfirm = function() {
-        var cb = confirmCallback;
-        hideConfirm();
-        if (cb) {
-            cb();
-        }
-    };
-
-    // ===== Toast =====
-    function showToast(message, type) {
-        type = type || 'info';
-        var container = document.getElementById('toastContainer');
-        var toast = document.createElement('div');
-        toast.className = 'toast ' + type;
-        toast.textContent = message;
-        container.appendChild(toast);
-        setTimeout(function() {
-            toast.classList.add('hiding');
-            setTimeout(function() { toast.remove(); }, 300);
-        }, 3000);
-    }
-
-    // ===== Helpers =====
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    function escapeAttr(str) {
-        if (!str) return '';
-        return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-    }
-
-    function formatDate(timestamp) {
-        if (!timestamp) return '';
-        var d = new Date(timestamp * 1000);
-        var now = new Date();
-        var diff = now - d;
-        if (diff < 60000) return t('just_now');
-        if (diff < 3600000) return Math.floor(diff / 60000) + t('minutes_ago');
-        if (diff < 86400000) return Math.floor(diff / 3600000) + t('hours_ago');
-        if (diff < 604800000) return Math.floor(diff / 86400000) + t('days_ago');
-        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        return months[d.getMonth()] + ' ' + d.getDate() + (d.getFullYear() !== now.getFullYear() ? ', ' + d.getFullYear() : '');
-    }
-
     // ===== History / popstate =====
     // Parse the current hash and return {path, detail} without modifying state
     function _parseHash() {
@@ -3596,11 +3439,11 @@ html, body {
         .then(function(data) {
             if (data && data.lang) {
                 // Try exact match first, then prefix match (e.g. "zh_CN" -> "zh")
-                if (translations[data.lang]) {
+                if (typeof TRANSLATIONS !== "undefined" && TRANSLATIONS[data.lang]) {
                     currentLang = data.lang;
                 } else {
                     var prefix = data.lang.split('_')[0];
-                    if (translations[prefix]) {
+                    if (typeof TRANSLATIONS !== "undefined" && TRANSLATIONS[prefix]) {
                         currentLang = prefix;
                     }
                 }
@@ -3620,6 +3463,7 @@ html, body {
                 _showDetailInternal(_initDetailPath);
             }
         });
+
 })();
 </script>
 </body>
