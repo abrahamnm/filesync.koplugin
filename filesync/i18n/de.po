@@ -1,0 +1,253 @@
+# German translations for FileSync KOReader plugin
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: de\n"
+
+msgid "FileSync"
+msgstr "FileSync"
+
+msgid "FileSync - Wireless File Manager"
+msgstr "FileSync - Drahtloser Dateimanager"
+
+msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
+msgstr "Startet einen lokalen HTTP-Webserver und zeigt einen QR-Code an. Scannen Sie ihn mit Ihrem Smartphone, um Bücher und Dateien auf Ihrem Gerät drahtlos über eine übersichtliche Weboberfläche zu verwalten."
+
+msgid "Stop file server"
+msgstr "Dateiserver stoppen"
+
+msgid "Start file server"
+msgstr "Dateiserver starten"
+
+msgid "Server port"
+msgstr "Server-Port"
+
+msgid "Safe mode"
+msgstr "Sicherer Modus"
+
+msgid "Show QR code"
+msgstr "QR-Code anzeigen"
+
+msgid "About"
+msgstr "Über"
+
+msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
+msgstr "FileSync v1.0.0\n\nDrahtloser Dateimanager für KOReader.\n\nStarten Sie den Server, scannen Sie den QR-Code mit Ihrem Smartphone und verwalten Sie Ihre Bücher über einen beliebigen Browser im selben WLAN."
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Port set to %1. Restart the server for changes to take effect."
+msgstr "Port auf %1 gesetzt. Starten Sie den Server neu, damit die Änderungen wirksam werden."
+
+msgid "Invalid port. Please enter a number between 1024 and 65535."
+msgstr "Ungültiger Port. Bitte geben Sie eine Zahl zwischen 1024 und 65535 ein."
+
+msgid "FileSync server is already running."
+msgstr "Der FileSync-Server läuft bereits."
+
+msgid "WiFi is not enabled. Please turn on WiFi first."
+msgstr "WiFi ist nicht aktiviert. Bitte schalten Sie zuerst WiFi ein."
+
+msgid "Could not determine device IP address. Make sure WiFi is connected."
+msgstr "Die IP-Adresse des Geräts konnte nicht ermittelt werden. Stellen Sie sicher, dass WiFi verbunden ist."
+
+msgid "Failed to start server: %1"
+msgstr "Server konnte nicht gestartet werden: %1"
+
+msgid "FileSync server stopped."
+msgstr "FileSync-Server gestoppt."
+
+msgid "Low Battery"
+msgstr "Niedriger Akkustand"
+
+msgid "Battery level is at %1%. Running the server may drain the battery quickly."
+msgstr "Der Akkustand beträgt %1%. Der Betrieb des Servers kann den Akku schnell entladen."
+
+msgid "Start Anyway"
+msgstr "Trotzdem starten"
+
+msgid "Server is not running."
+msgstr "Der Server läuft nicht."
+
+msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
+msgstr "Scannen Sie den QR-Code oder geben Sie die URL\nin Ihrem Browser ein.\n\nBeide Geräte müssen sich im selben WLAN befinden."
+
+msgid "Stop Server"
+msgstr "Server stoppen"
+
+msgid "Server running in the background. Stop the server to save battery."
+msgstr "Server läuft im Hintergrund. Stoppen Sie den Server, um Akku zu sparen."
+
+msgid "Image preview"
+msgstr "Bildvorschau"
+
+# ==============================
+# Web UI translations
+# ==============================
+
+msgid "Upload"
+msgstr "Hochladen"
+
+msgid "Folder"
+msgstr "Ordner"
+
+msgid "Filter files..."
+msgstr "Dateien filtern..."
+
+msgid "Name A-Z"
+msgstr "Name A-Z"
+
+msgid "Name Z-A"
+msgstr "Name Z-A"
+
+msgid "Newest first"
+msgstr "Neueste zuerst"
+
+msgid "Oldest first"
+msgstr "Älteste zuerst"
+
+msgid "Largest first"
+msgstr "Größte zuerst"
+
+msgid "Smallest first"
+msgstr "Kleinste zuerst"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "Drag and drop files here, or"
+msgstr "Dateien hierher ziehen oder"
+
+msgid "browse"
+msgstr "durchsuchen"
+
+msgid "Choose Files"
+msgstr "Dateien auswählen"
+
+msgid "Loading..."
+msgstr "Laden..."
+
+msgid "Failed to load files"
+msgstr "Dateien konnten nicht geladen werden"
+
+msgid "This folder is empty"
+msgstr "Dieser Ordner ist leer"
+
+msgid "Upload files or create a new folder"
+msgstr "Laden Sie Dateien hoch oder erstellen Sie einen neuen Ordner"
+
+msgid "Folder label"
+msgstr "Ordner"
+
+msgid "File type"
+msgstr "Dateityp"
+
+msgid "Size"
+msgstr "Größe"
+
+msgid "Modified"
+msgstr "Geändert"
+
+msgid "Download"
+msgstr "Herunterladen"
+
+msgid "Downloading"
+msgstr "Wird heruntergeladen"
+
+msgid "Rename"
+msgstr "Umbenennen"
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Back"
+msgstr "Zurück"
+
+msgid "Create"
+msgstr "Erstellen"
+
+msgid "New Folder"
+msgstr "Neuer Ordner"
+
+msgid "Renamed successfully"
+msgstr "Erfolgreich umbenannt"
+
+msgid "Deleted successfully"
+msgstr "Erfolgreich gelöscht"
+
+msgid "Folder created"
+msgstr "Ordner erstellt"
+
+msgid "uploaded"
+msgstr "hochgeladen"
+
+msgid "Rename failed:"
+msgstr "Umbenennen fehlgeschlagen:"
+
+msgid "Delete failed:"
+msgstr "Löschen fehlgeschlagen:"
+
+msgid "Upload failed:"
+msgstr "Hochladen fehlgeschlagen:"
+
+msgid "Failed to create folder:"
+msgstr "Ordner konnte nicht erstellt werden:"
+
+msgid "Home"
+msgstr "Startseite"
+
+msgid "Done"
+msgstr "Fertig"
+
+msgid "Failed"
+msgstr "Fehlgeschlagen"
+
+msgid "Network error"
+msgstr "Netzwerkfehler"
+
+msgid "Delete file"
+msgstr "Datei löschen"
+
+msgid "Delete folder"
+msgstr "Ordner löschen"
+
+msgid "Delete empty folder"
+msgstr "Leeren Ordner löschen"
+
+msgid "Are you sure you want to delete"
+msgstr "Möchten Sie wirklich löschen"
+
+msgid "This will delete all contents inside."
+msgstr "Dadurch wird der gesamte Inhalt gelöscht."
+
+msgid "This directory contains {n} files. All files will be permanently deleted."
+msgstr "Dieses Verzeichnis enthält {n} Dateien. Alle Dateien werden unwiderruflich gelöscht."
+
+msgid "Unknown"
+msgstr "Unbekannt"
+
+msgid "Just now"
+msgstr "Gerade eben"
+
+msgid "m ago"
+msgstr "Min."
+
+msgid "h ago"
+msgstr "Std."
+
+msgid "d ago"
+msgstr "T."
+
+msgid "Upload files"
+msgstr "Dateien hochladen"
+
+msgid "New folder"
+msgstr "Neuer Ordner"
+
+msgid "Also delete reading metadata (.sdr)"
+msgstr "Auch Lesemetadaten (.sdr) löschen"

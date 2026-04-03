@@ -1,0 +1,253 @@
+# Arabic translations for FileSync KOReader plugin
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ar\n"
+
+msgid "FileSync"
+msgstr "FileSync"
+
+msgid "FileSync - Wireless File Manager"
+msgstr "FileSync - مدير الملفات اللاسلكي"
+
+msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
+msgstr "يُشغّل خادم HTTP محلي ويعرض رمز QR. امسحه بهاتفك لإدارة الكتب والملفات على جهازك لاسلكيًا من خلال واجهة ويب بسيطة."
+
+msgid "Stop file server"
+msgstr "إيقاف خادم الملفات"
+
+msgid "Start file server"
+msgstr "تشغيل خادم الملفات"
+
+msgid "Server port"
+msgstr "منفذ الخادم"
+
+msgid "Safe mode"
+msgstr "الوضع الآمن"
+
+msgid "Show QR code"
+msgstr "عرض رمز QR"
+
+msgid "About"
+msgstr "حول"
+
+msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
+msgstr "FileSync v1.0.0\n\nمدير ملفات لاسلكي لـ KOReader.\n\nشغّل الخادم، وامسح رمز QR بهاتفك، وأدِر كتبك من أي متصفح على نفس شبكة WiFi."
+
+msgid "Cancel"
+msgstr "إلغاء"
+
+msgid "Save"
+msgstr "حفظ"
+
+msgid "Port set to %1. Restart the server for changes to take effect."
+msgstr "تم تعيين المنفذ إلى %1. أعد تشغيل الخادم لتطبيق التغييرات."
+
+msgid "Invalid port. Please enter a number between 1024 and 65535."
+msgstr "منفذ غير صالح. يرجى إدخال رقم بين 1024 و65535."
+
+msgid "FileSync server is already running."
+msgstr "خادم FileSync يعمل بالفعل."
+
+msgid "WiFi is not enabled. Please turn on WiFi first."
+msgstr "WiFi غير مفعّل. يرجى تشغيل WiFi أولًا."
+
+msgid "Could not determine device IP address. Make sure WiFi is connected."
+msgstr "تعذّر تحديد عنوان IP الخاص بالجهاز. تأكد من أن WiFi متصل."
+
+msgid "Failed to start server: %1"
+msgstr "فشل تشغيل الخادم: %1"
+
+msgid "FileSync server stopped."
+msgstr "تم إيقاف خادم FileSync."
+
+msgid "Low Battery"
+msgstr "بطارية منخفضة"
+
+msgid "Battery level is at %1%. Running the server may drain the battery quickly."
+msgstr "مستوى البطارية %1%. قد يؤدي تشغيل الخادم إلى استنزاف البطارية بسرعة."
+
+msgid "Start Anyway"
+msgstr "تشغيل على أي حال"
+
+msgid "Server is not running."
+msgstr "الخادم لا يعمل."
+
+msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
+msgstr "امسح رمز QR أو أدخل عنوان URL\nفي متصفحك.\n\nيجب أن يكون كلا الجهازين على نفس شبكة WiFi."
+
+msgid "Stop Server"
+msgstr "إيقاف الخادم"
+
+msgid "Server running in the background. Stop the server to save battery."
+msgstr "الخادم يعمل في الخلفية. أوقف الخادم للحفاظ على البطارية."
+
+msgid "Image preview"
+msgstr "معاينة الصورة"
+
+# ==============================
+# Web UI translations
+# ==============================
+
+msgid "Upload"
+msgstr "رفع"
+
+msgid "Folder"
+msgstr "مجلد"
+
+msgid "Filter files..."
+msgstr "تصفية الملفات..."
+
+msgid "Name A-Z"
+msgstr "الاسم أ-ي"
+
+msgid "Name Z-A"
+msgstr "الاسم ي-أ"
+
+msgid "Newest first"
+msgstr "الأحدث أولًا"
+
+msgid "Oldest first"
+msgstr "الأقدم أولًا"
+
+msgid "Largest first"
+msgstr "الأكبر أولًا"
+
+msgid "Smallest first"
+msgstr "الأصغر أولًا"
+
+msgid "Type"
+msgstr "النوع"
+
+msgid "Drag and drop files here, or"
+msgstr "اسحب الملفات وأفلتها هنا، أو"
+
+msgid "browse"
+msgstr "تصفّح"
+
+msgid "Choose Files"
+msgstr "اختيار الملفات"
+
+msgid "Loading..."
+msgstr "جارٍ التحميل..."
+
+msgid "Failed to load files"
+msgstr "فشل تحميل الملفات"
+
+msgid "This folder is empty"
+msgstr "هذا المجلد فارغ"
+
+msgid "Upload files or create a new folder"
+msgstr "ارفع ملفات أو أنشئ مجلدًا جديدًا"
+
+msgid "Folder label"
+msgstr "مجلد"
+
+msgid "File type"
+msgstr "نوع الملف"
+
+msgid "Size"
+msgstr "الحجم"
+
+msgid "Modified"
+msgstr "تاريخ التعديل"
+
+msgid "Download"
+msgstr "تنزيل"
+
+msgid "Downloading"
+msgstr "جارٍ التنزيل"
+
+msgid "Rename"
+msgstr "إعادة تسمية"
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "Back"
+msgstr "رجوع"
+
+msgid "Create"
+msgstr "إنشاء"
+
+msgid "New Folder"
+msgstr "مجلد جديد"
+
+msgid "Renamed successfully"
+msgstr "تمت إعادة التسمية بنجاح"
+
+msgid "Deleted successfully"
+msgstr "تم الحذف بنجاح"
+
+msgid "Folder created"
+msgstr "تم إنشاء المجلد"
+
+msgid "uploaded"
+msgstr "تم الرفع"
+
+msgid "Rename failed:"
+msgstr "فشلت إعادة التسمية:"
+
+msgid "Delete failed:"
+msgstr "فشل الحذف:"
+
+msgid "Upload failed:"
+msgstr "فشل الرفع:"
+
+msgid "Failed to create folder:"
+msgstr "فشل إنشاء المجلد:"
+
+msgid "Home"
+msgstr "الرئيسية"
+
+msgid "Done"
+msgstr "تم"
+
+msgid "Failed"
+msgstr "فشل"
+
+msgid "Network error"
+msgstr "خطأ في الشبكة"
+
+msgid "Delete file"
+msgstr "حذف الملف"
+
+msgid "Delete folder"
+msgstr "حذف المجلد"
+
+msgid "Delete empty folder"
+msgstr "حذف المجلد الفارغ"
+
+msgid "Are you sure you want to delete"
+msgstr "هل أنت متأكد أنك تريد حذف"
+
+msgid "This will delete all contents inside."
+msgstr "سيتم حذف جميع المحتويات بداخله."
+
+msgid "This directory contains {n} files. All files will be permanently deleted."
+msgstr "يحتوي هذا المجلد على {n} ملفات. سيتم حذف جميع الملفات نهائيًا."
+
+msgid "Unknown"
+msgstr "غير معروف"
+
+msgid "Just now"
+msgstr "الآن"
+
+msgid "m ago"
+msgstr "د"
+
+msgid "h ago"
+msgstr "س"
+
+msgid "d ago"
+msgstr "ي"
+
+msgid "Upload files"
+msgstr "رفع الملفات"
+
+msgid "New folder"
+msgstr "مجلد جديد"
+
+msgid "Also delete reading metadata (.sdr)"
+msgstr "حذف بيانات القراءة أيضًا (.sdr)"

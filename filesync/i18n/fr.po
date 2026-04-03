@@ -1,0 +1,253 @@
+# French translations for FileSync KOReader plugin
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: fr\n"
+
+msgid "FileSync"
+msgstr "FileSync"
+
+msgid "FileSync - Wireless File Manager"
+msgstr "FileSync - Gestionnaire de fichiers sans fil"
+
+msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
+msgstr "Lance un serveur web HTTP local et affiche un code QR. Scannez-le avec votre téléphone pour gérer vos livres et fichiers sur votre appareil sans fil via une interface web épurée."
+
+msgid "Stop file server"
+msgstr "Arrêter le serveur de fichiers"
+
+msgid "Start file server"
+msgstr "Démarrer le serveur de fichiers"
+
+msgid "Server port"
+msgstr "Port du serveur"
+
+msgid "Safe mode"
+msgstr "Mode sécurisé"
+
+msgid "Show QR code"
+msgstr "Afficher le code QR"
+
+msgid "About"
+msgstr "À propos"
+
+msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
+msgstr "FileSync v1.0.0\n\nGestionnaire de fichiers sans fil pour KOReader.\n\nDémarrez le serveur, scannez le code QR avec votre téléphone et gérez vos livres depuis n'importe quel navigateur sur le même réseau WiFi."
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Save"
+msgstr "Enregistrer"
+
+msgid "Port set to %1. Restart the server for changes to take effect."
+msgstr "Port défini sur %1. Redémarrez le serveur pour appliquer les modifications."
+
+msgid "Invalid port. Please enter a number between 1024 and 65535."
+msgstr "Port non valide. Veuillez entrer un nombre entre 1024 et 65535."
+
+msgid "FileSync server is already running."
+msgstr "Le serveur FileSync est déjà en cours d'exécution."
+
+msgid "WiFi is not enabled. Please turn on WiFi first."
+msgstr "Le WiFi n'est pas activé. Veuillez d'abord activer le WiFi."
+
+msgid "Could not determine device IP address. Make sure WiFi is connected."
+msgstr "Impossible de déterminer l'adresse IP de l'appareil. Vérifiez que le WiFi est connecté."
+
+msgid "Failed to start server: %1"
+msgstr "Échec du démarrage du serveur : %1"
+
+msgid "FileSync server stopped."
+msgstr "Serveur FileSync arrêté."
+
+msgid "Low Battery"
+msgstr "Batterie faible"
+
+msgid "Battery level is at %1%. Running the server may drain the battery quickly."
+msgstr "Le niveau de batterie est à %1%. L'exécution du serveur peut vider la batterie rapidement."
+
+msgid "Start Anyway"
+msgstr "Démarrer quand même"
+
+msgid "Server is not running."
+msgstr "Le serveur n'est pas en cours d'exécution."
+
+msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
+msgstr "Scannez le code QR ou saisissez l'URL\ndans votre navigateur.\n\nLes deux appareils doivent être sur le même réseau WiFi."
+
+msgid "Stop Server"
+msgstr "Arrêter le serveur"
+
+msgid "Server running in the background. Stop the server to save battery."
+msgstr "Serveur en cours d'exécution en arrière-plan. Arrêtez le serveur pour économiser la batterie."
+
+msgid "Image preview"
+msgstr "Aperçu de l'image"
+
+# ==============================
+# Web UI translations
+# ==============================
+
+msgid "Upload"
+msgstr "Envoyer"
+
+msgid "Folder"
+msgstr "Dossier"
+
+msgid "Filter files..."
+msgstr "Filtrer les fichiers..."
+
+msgid "Name A-Z"
+msgstr "Nom A-Z"
+
+msgid "Name Z-A"
+msgstr "Nom Z-A"
+
+msgid "Newest first"
+msgstr "Plus récents"
+
+msgid "Oldest first"
+msgstr "Plus anciens"
+
+msgid "Largest first"
+msgstr "Plus volumineux"
+
+msgid "Smallest first"
+msgstr "Plus petits"
+
+msgid "Type"
+msgstr "Type"
+
+msgid "Drag and drop files here, or"
+msgstr "Glissez-déposez des fichiers ici, ou"
+
+msgid "browse"
+msgstr "parcourir"
+
+msgid "Choose Files"
+msgstr "Choisir des fichiers"
+
+msgid "Loading..."
+msgstr "Chargement..."
+
+msgid "Failed to load files"
+msgstr "Échec du chargement des fichiers"
+
+msgid "This folder is empty"
+msgstr "Ce dossier est vide"
+
+msgid "Upload files or create a new folder"
+msgstr "Envoyez des fichiers ou créez un nouveau dossier"
+
+msgid "Folder label"
+msgstr "Dossier"
+
+msgid "File type"
+msgstr "Type de fichier"
+
+msgid "Size"
+msgstr "Taille"
+
+msgid "Modified"
+msgstr "Modifié"
+
+msgid "Download"
+msgstr "Télécharger"
+
+msgid "Downloading"
+msgstr "Téléchargement"
+
+msgid "Rename"
+msgstr "Renommer"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Back"
+msgstr "Retour"
+
+msgid "Create"
+msgstr "Créer"
+
+msgid "New Folder"
+msgstr "Nouveau dossier"
+
+msgid "Renamed successfully"
+msgstr "Renommé avec succès"
+
+msgid "Deleted successfully"
+msgstr "Supprimé avec succès"
+
+msgid "Folder created"
+msgstr "Dossier créé"
+
+msgid "uploaded"
+msgstr "envoyé"
+
+msgid "Rename failed:"
+msgstr "Échec du renommage :"
+
+msgid "Delete failed:"
+msgstr "Échec de la suppression :"
+
+msgid "Upload failed:"
+msgstr "Échec de l'envoi :"
+
+msgid "Failed to create folder:"
+msgstr "Échec de la création du dossier :"
+
+msgid "Home"
+msgstr "Accueil"
+
+msgid "Done"
+msgstr "Terminé"
+
+msgid "Failed"
+msgstr "Échec"
+
+msgid "Network error"
+msgstr "Erreur réseau"
+
+msgid "Delete file"
+msgstr "Supprimer le fichier"
+
+msgid "Delete folder"
+msgstr "Supprimer le dossier"
+
+msgid "Delete empty folder"
+msgstr "Supprimer le dossier vide"
+
+msgid "Are you sure you want to delete"
+msgstr "Voulez-vous vraiment supprimer"
+
+msgid "This will delete all contents inside."
+msgstr "Tout le contenu sera supprimé."
+
+msgid "This directory contains {n} files. All files will be permanently deleted."
+msgstr "Ce répertoire contient {n} fichiers. Tous les fichiers seront définitivement supprimés."
+
+msgid "Unknown"
+msgstr "Inconnu"
+
+msgid "Just now"
+msgstr "À l'instant"
+
+msgid "m ago"
+msgstr "min"
+
+msgid "h ago"
+msgstr "h"
+
+msgid "d ago"
+msgstr "j"
+
+msgid "Upload files"
+msgstr "Envoyer des fichiers"
+
+msgid "New folder"
+msgstr "Nouveau dossier"
+
+msgid "Also delete reading metadata (.sdr)"
+msgstr "Supprimer aussi les métadonnées de lecture (.sdr)"
