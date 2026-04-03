@@ -1,0 +1,253 @@
+# Russian translations for FileSync KOReader plugin
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ru\n"
+
+msgid "FileSync"
+msgstr "FileSync"
+
+msgid "FileSync - Wireless File Manager"
+msgstr "FileSync - Беспроводной файловый менеджер"
+
+msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
+msgstr "Запускает локальный HTTP веб-сервер и отображает QR-код. Отсканируйте его телефоном, чтобы управлять книгами и файлами на устройстве по беспроводной сети через удобный веб-интерфейс."
+
+msgid "Stop file server"
+msgstr "Остановить файловый сервер"
+
+msgid "Start file server"
+msgstr "Запустить файловый сервер"
+
+msgid "Server port"
+msgstr "Порт сервера"
+
+msgid "Safe mode"
+msgstr "Безопасный режим"
+
+msgid "Show QR code"
+msgstr "Показать QR-код"
+
+msgid "About"
+msgstr "О плагине"
+
+msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
+msgstr "FileSync v1.0.0\n\nБеспроводной файловый менеджер для KOReader.\n\nЗапустите сервер, отсканируйте QR-код телефоном и управляйте книгами из любого браузера в той же сети WiFi."
+
+msgid "Cancel"
+msgstr "Отмена"
+
+msgid "Save"
+msgstr "Сохранить"
+
+msgid "Port set to %1. Restart the server for changes to take effect."
+msgstr "Порт установлен на %1. Перезапустите сервер, чтобы изменения вступили в силу."
+
+msgid "Invalid port. Please enter a number between 1024 and 65535."
+msgstr "Недопустимый порт. Введите число от 1024 до 65535."
+
+msgid "FileSync server is already running."
+msgstr "Сервер FileSync уже запущен."
+
+msgid "WiFi is not enabled. Please turn on WiFi first."
+msgstr "WiFi не включён. Сначала включите WiFi."
+
+msgid "Could not determine device IP address. Make sure WiFi is connected."
+msgstr "Не удалось определить IP-адрес устройства. Убедитесь, что WiFi подключён."
+
+msgid "Failed to start server: %1"
+msgstr "Не удалось запустить сервер: %1"
+
+msgid "FileSync server stopped."
+msgstr "Сервер FileSync остановлен."
+
+msgid "Low Battery"
+msgstr "Низкий заряд батареи"
+
+msgid "Battery level is at %1%. Running the server may drain the battery quickly."
+msgstr "Уровень заряда батареи: %1%. Работа сервера может быстро разрядить батарею."
+
+msgid "Start Anyway"
+msgstr "Всё равно запустить"
+
+msgid "Server is not running."
+msgstr "Сервер не запущен."
+
+msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
+msgstr "Отсканируйте QR-код или введите URL\nв браузере.\n\nОба устройства должны быть в одной сети WiFi."
+
+msgid "Stop Server"
+msgstr "Остановить сервер"
+
+msgid "Server running in the background. Stop the server to save battery."
+msgstr "Сервер работает в фоновом режиме. Остановите сервер для экономии батареи."
+
+msgid "Image preview"
+msgstr "Предпросмотр изображения"
+
+# ==============================
+# Web UI translations
+# ==============================
+
+msgid "Upload"
+msgstr "Загрузить"
+
+msgid "Folder"
+msgstr "Папка"
+
+msgid "Filter files..."
+msgstr "Фильтр файлов..."
+
+msgid "Name A-Z"
+msgstr "Имя А-Я"
+
+msgid "Name Z-A"
+msgstr "Имя Я-А"
+
+msgid "Newest first"
+msgstr "Сначала новые"
+
+msgid "Oldest first"
+msgstr "Сначала старые"
+
+msgid "Largest first"
+msgstr "Сначала большие"
+
+msgid "Smallest first"
+msgstr "Сначала маленькие"
+
+msgid "Type"
+msgstr "Тип"
+
+msgid "Drag and drop files here, or"
+msgstr "Перетащите файлы сюда или"
+
+msgid "browse"
+msgstr "выберите"
+
+msgid "Choose Files"
+msgstr "Выбрать файлы"
+
+msgid "Loading..."
+msgstr "Загрузка..."
+
+msgid "Failed to load files"
+msgstr "Не удалось загрузить файлы"
+
+msgid "This folder is empty"
+msgstr "Эта папка пуста"
+
+msgid "Upload files or create a new folder"
+msgstr "Загрузите файлы или создайте новую папку"
+
+msgid "Folder label"
+msgstr "Папка"
+
+msgid "File type"
+msgstr "Тип файла"
+
+msgid "Size"
+msgstr "Размер"
+
+msgid "Modified"
+msgstr "Изменён"
+
+msgid "Download"
+msgstr "Скачать"
+
+msgid "Downloading"
+msgstr "Скачивание"
+
+msgid "Rename"
+msgstr "Переименовать"
+
+msgid "Delete"
+msgstr "Удалить"
+
+msgid "Back"
+msgstr "Назад"
+
+msgid "Create"
+msgstr "Создать"
+
+msgid "New Folder"
+msgstr "Новая папка"
+
+msgid "Renamed successfully"
+msgstr "Успешно переименовано"
+
+msgid "Deleted successfully"
+msgstr "Успешно удалено"
+
+msgid "Folder created"
+msgstr "Папка создана"
+
+msgid "uploaded"
+msgstr "загружено"
+
+msgid "Rename failed:"
+msgstr "Ошибка переименования:"
+
+msgid "Delete failed:"
+msgstr "Ошибка удаления:"
+
+msgid "Upload failed:"
+msgstr "Ошибка загрузки:"
+
+msgid "Failed to create folder:"
+msgstr "Не удалось создать папку:"
+
+msgid "Home"
+msgstr "Главная"
+
+msgid "Done"
+msgstr "Готово"
+
+msgid "Failed"
+msgstr "Ошибка"
+
+msgid "Network error"
+msgstr "Ошибка сети"
+
+msgid "Delete file"
+msgstr "Удалить файл"
+
+msgid "Delete folder"
+msgstr "Удалить папку"
+
+msgid "Delete empty folder"
+msgstr "Удалить пустую папку"
+
+msgid "Are you sure you want to delete"
+msgstr "Вы уверены, что хотите удалить"
+
+msgid "This will delete all contents inside."
+msgstr "Всё содержимое будет удалено."
+
+msgid "This directory contains {n} files. All files will be permanently deleted."
+msgstr "Эта директория содержит {n} файлов. Все файлы будут безвозвратно удалены."
+
+msgid "Unknown"
+msgstr "Неизвестно"
+
+msgid "Just now"
+msgstr "Только что"
+
+msgid "m ago"
+msgstr "мин"
+
+msgid "h ago"
+msgstr "ч"
+
+msgid "d ago"
+msgstr "дн"
+
+msgid "Upload files"
+msgstr "Загрузить файлы"
+
+msgid "New folder"
+msgstr "Новая папка"
+
+msgid "Also delete reading metadata (.sdr)"
+msgstr "Также удалить метаданные чтения (.sdr)"

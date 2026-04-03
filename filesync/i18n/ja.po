@@ -1,0 +1,253 @@
+# Japanese translations for FileSync KOReader plugin
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ja\n"
+
+msgid "FileSync"
+msgstr "FileSync"
+
+msgid "FileSync - Wireless File Manager"
+msgstr "FileSync - ワイヤレスファイルマネージャー"
+
+msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
+msgstr "ローカルHTTPウェブサーバーを起動し、QRコードを表示します。スマートフォンでスキャンすると、ウェブインターフェースからデバイス上の書籍やファイルをワイヤレスで管理できます。"
+
+msgid "Stop file server"
+msgstr "ファイルサーバーを停止"
+
+msgid "Start file server"
+msgstr "ファイルサーバーを起動"
+
+msgid "Server port"
+msgstr "サーバーポート"
+
+msgid "Safe mode"
+msgstr "セーフモード"
+
+msgid "Show QR code"
+msgstr "QRコードを表示"
+
+msgid "About"
+msgstr "このプラグインについて"
+
+msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
+msgstr "FileSync v1.0.0\n\nKOReader用ワイヤレスファイルマネージャー。\n\nサーバーを起動し、スマートフォンでQRコードをスキャンして、同じWiFiネットワーク上の任意のブラウザから書籍を管理できます。"
+
+msgid "Cancel"
+msgstr "キャンセル"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Port set to %1. Restart the server for changes to take effect."
+msgstr "ポートを%1に設定しました。変更を反映するにはサーバーを再起動してください。"
+
+msgid "Invalid port. Please enter a number between 1024 and 65535."
+msgstr "無効なポートです。1024から65535の間の数値を入力してください。"
+
+msgid "FileSync server is already running."
+msgstr "FileSyncサーバーはすでに実行中です。"
+
+msgid "WiFi is not enabled. Please turn on WiFi first."
+msgstr "WiFiが有効になっていません。先にWiFiをオンにしてください。"
+
+msgid "Could not determine device IP address. Make sure WiFi is connected."
+msgstr "デバイスのIPアドレスを取得できませんでした。WiFiが接続されていることを確認してください。"
+
+msgid "Failed to start server: %1"
+msgstr "サーバーの起動に失敗しました: %1"
+
+msgid "FileSync server stopped."
+msgstr "FileSyncサーバーが停止しました。"
+
+msgid "Low Battery"
+msgstr "バッテリー残量低下"
+
+msgid "Battery level is at %1%. Running the server may drain the battery quickly."
+msgstr "バッテリー残量は%1%です。サーバーを実行するとバッテリーが急速に消耗する可能性があります。"
+
+msgid "Start Anyway"
+msgstr "それでも起動"
+
+msgid "Server is not running."
+msgstr "サーバーは実行されていません。"
+
+msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
+msgstr "QRコードをスキャンするか、URLを\nブラウザに入力してください。\n\n両方のデバイスが同じWiFiネットワークに接続されている必要があります。"
+
+msgid "Stop Server"
+msgstr "サーバーを停止"
+
+msgid "Server running in the background. Stop the server to save battery."
+msgstr "サーバーがバックグラウンドで実行中です。バッテリーを節約するにはサーバーを停止してください。"
+
+msgid "Image preview"
+msgstr "画像プレビュー"
+
+# ==============================
+# Web UI translations
+# ==============================
+
+msgid "Upload"
+msgstr "アップロード"
+
+msgid "Folder"
+msgstr "フォルダ"
+
+msgid "Filter files..."
+msgstr "ファイルを検索..."
+
+msgid "Name A-Z"
+msgstr "名前 A-Z"
+
+msgid "Name Z-A"
+msgstr "名前 Z-A"
+
+msgid "Newest first"
+msgstr "新しい順"
+
+msgid "Oldest first"
+msgstr "古い順"
+
+msgid "Largest first"
+msgstr "大きい順"
+
+msgid "Smallest first"
+msgstr "小さい順"
+
+msgid "Type"
+msgstr "種類"
+
+msgid "Drag and drop files here, or"
+msgstr "ここにファイルをドラッグ＆ドロップ、または"
+
+msgid "browse"
+msgstr "参照"
+
+msgid "Choose Files"
+msgstr "ファイルを選択"
+
+msgid "Loading..."
+msgstr "読み込み中..."
+
+msgid "Failed to load files"
+msgstr "ファイルの読み込みに失敗しました"
+
+msgid "This folder is empty"
+msgstr "このフォルダは空です"
+
+msgid "Upload files or create a new folder"
+msgstr "ファイルをアップロードするか、新しいフォルダを作成してください"
+
+msgid "Folder label"
+msgstr "フォルダ"
+
+msgid "File type"
+msgstr "ファイル形式"
+
+msgid "Size"
+msgstr "サイズ"
+
+msgid "Modified"
+msgstr "更新日時"
+
+msgid "Download"
+msgstr "ダウンロード"
+
+msgid "Downloading"
+msgstr "ダウンロード中"
+
+msgid "Rename"
+msgstr "名前を変更"
+
+msgid "Delete"
+msgstr "削除"
+
+msgid "Back"
+msgstr "戻る"
+
+msgid "Create"
+msgstr "作成"
+
+msgid "New Folder"
+msgstr "新しいフォルダ"
+
+msgid "Renamed successfully"
+msgstr "名前を変更しました"
+
+msgid "Deleted successfully"
+msgstr "削除しました"
+
+msgid "Folder created"
+msgstr "フォルダを作成しました"
+
+msgid "uploaded"
+msgstr "アップロード完了"
+
+msgid "Rename failed:"
+msgstr "名前の変更に失敗:"
+
+msgid "Delete failed:"
+msgstr "削除に失敗:"
+
+msgid "Upload failed:"
+msgstr "アップロードに失敗:"
+
+msgid "Failed to create folder:"
+msgstr "フォルダの作成に失敗:"
+
+msgid "Home"
+msgstr "ホーム"
+
+msgid "Done"
+msgstr "完了"
+
+msgid "Failed"
+msgstr "失敗"
+
+msgid "Network error"
+msgstr "ネットワークエラー"
+
+msgid "Delete file"
+msgstr "ファイルを削除"
+
+msgid "Delete folder"
+msgstr "フォルダを削除"
+
+msgid "Delete empty folder"
+msgstr "空のフォルダを削除"
+
+msgid "Are you sure you want to delete"
+msgstr "本当に削除しますか"
+
+msgid "This will delete all contents inside."
+msgstr "フォルダ内のすべてのコンテンツが削除されます。"
+
+msgid "This directory contains {n} files. All files will be permanently deleted."
+msgstr "このディレクトリには{n}個のファイルが含まれています。すべてのファイルが完全に削除されます。"
+
+msgid "Unknown"
+msgstr "不明"
+
+msgid "Just now"
+msgstr "たった今"
+
+msgid "m ago"
+msgstr "分前"
+
+msgid "h ago"
+msgstr "時間前"
+
+msgid "d ago"
+msgstr "日前"
+
+msgid "Upload files"
+msgstr "ファイルをアップロード"
+
+msgid "New folder"
+msgstr "新しいフォルダ"
+
+msgid "Also delete reading metadata (.sdr)"
+msgstr "読書メタデータ (.sdr) も削除する"
