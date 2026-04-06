@@ -1,5 +1,7 @@
 # FileSync - Wireless File Manager for KOReader
 
+[English](README.md) | [Español](README.es.md) | [Português](README.pt_BR.md) | [中文](README.zh_CN.md) | [العربية](README.ar.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
+
 A KOReader plugin that launches a local web server on your e-reader and displays a QR code on screen. Scan the code with your phone to open a polished web interface for managing books and files wirelessly — no cables, no apps, just your browser.
 
 Works on **Kindle** and **Kobo** devices running KOReader.
@@ -24,6 +26,10 @@ Works on **Kindle** and **Kobo** devices running KOReader.
 - **Create Folders** — Organize your library into directories
 - **Rename & Delete** — Limited file management with confirmation dialogs
 - **Search & Sort** — Filter by name, sort by name/size/date/type
+- **Dark & Light Themes** — Auto-detected or toggled manually
+- **Multiple View Modes** — List, grid, and large grid views
+- **Multi-Language Support** — Available in 10 languages (English, Spanish, Portuguese, Chinese, Arabic, French, German, Russian, Japanese, Korean)
+- **RTL Layout Support** — Full right-to-left layout for Arabic
 - **Sleep Prevention** — Keeps device awake and WiFi alive while the server runs
 - **Safe Mode** — Show only books and images, hiding system files
 - **Responsive UI** — Designed for smartphones, works on any screen
@@ -74,7 +80,12 @@ Works on **Kindle** and **Kobo** devices running KOReader.
    │       │   └── index.html
    │       └── i18n/
    │           ├── en.po
-   │           └── es.po
+   │           ├── es.po
+   │           ├── pt_BR.po
+   │           ├── zh_CN.po
+   │           ├── ar.po
+   │           ├── fr.po
+   │           └── ...
    ├── other.koplugin/
    └── ...
    ```
