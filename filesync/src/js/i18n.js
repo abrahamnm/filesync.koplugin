@@ -4,12 +4,8 @@
     // The t() function returns the translation for the current language,
     // falling back to: exact locale -> base language -> English -> raw key.
     var currentLang = "en";
-    var RTL_LANGS = ["ar", "he", "fa", "ur"];
-
     function isRTLLanguage(lang) {
-        if (RTL_LANGS.indexOf(lang) !== -1) return true;
-        var base = lang.split("_")[0];
-        return RTL_LANGS.indexOf(base) !== -1;
+        return lang === "ar";
     }
 
     function t(key) {
