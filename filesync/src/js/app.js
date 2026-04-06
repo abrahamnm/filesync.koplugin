@@ -90,6 +90,9 @@
             // Keep English as default
         })
         .then(function() {
+            // Set document direction and language
+            document.documentElement.setAttribute("lang", currentLang.replace("_", "-"));
+            document.documentElement.setAttribute("dir", isRTLLanguage(currentLang) ? "rtl" : "ltr");
             initTheme();
             applyStaticTranslations();
             return loadFiles();

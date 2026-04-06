@@ -103,7 +103,7 @@
 }
 
 .file-list.view-grid .file-item.is-file .file-info {
-    padding-right: 18px;
+    padding-inline-end: 18px;
 }
 
 .file-list.view-grid .file-name {
@@ -137,7 +137,7 @@
 .file-list.view-grid .file-actions.file-actions-chevron {
     position: absolute;
     top: 50%;
-    right: 10px;
+    inset-inline-end: 10px;
     width: 20px;
     height: 20px;
     min-height: 0;
@@ -234,7 +234,7 @@
 .file-list.view-grid-large .file-actions.file-actions-chevron {
     position: absolute;
     top: 50%;
-    right: 10px;
+    inset-inline-end: 10px;
     width: 20px;
     height: 20px;
     min-height: 0;
@@ -383,7 +383,7 @@
     display: flex;
     gap: 4px;
     flex-shrink: 0;
-    margin-left: auto;
+    margin-inline-start: auto;
 }
 
 .file-actions .btn-icon {
@@ -446,7 +446,8 @@
         align-items: center;
         gap: 4px;
         border: 0;
-        padding: 2px 12px 2px 0;
+        padding-block: 2px;
+        padding-inline: 0 12px;
         background: transparent;
         color: var(--text);
         opacity: 0.98;
@@ -489,7 +490,7 @@
         grid-column: 2;
         align-self: center;
         min-width: 0;
-        padding-right: 8px;
+        padding-inline-end: 8px;
     }
 
     .file-list:not(.view-grid):not(.view-grid-large) .file-name {
@@ -551,4 +552,9 @@
     .file-actions .btn-icon {
         opacity: 1;
     }
+}
+
+/* RTL: mirror file chevron arrow */
+[dir="rtl"] .file-chevron svg {
+    transform: scaleX(-1);
 }
