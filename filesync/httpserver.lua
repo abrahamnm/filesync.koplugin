@@ -243,6 +243,7 @@ end
 --- API endpoints:
 ---   GET  /api/lang       - returns {lang: string} (KOReader UI language)
 ---   GET  /api/health     - returns {status, root_dir, fileops_loaded}
+---   GET  /api/home       - returns {home: string|null} (KOReader home_dir, relative to root_dir)
 ---   GET  /api/files      - list directory (query: path, sort, order, filter)
 ---   GET  /api/dirinfo    - recursive file count (query: path)
 ---   GET  /api/metadata   - file metadata (query: path)
@@ -301,6 +302,26 @@ function HttpServer:_route(client, method, path, query, headers, body)
                 root_dir = self.root_dir,
                 fileops_loaded = FileOps ~= nil,
             })
+            return
+        end
+
+        -- KOReader home folder, returned as a path relative to root_dir.
+        -- Returns null if home_dir is unset or lies outside root_dir, so the
+        -- frontend can decide its own fallback (currently: open at root).
+        if method == "GET" and path == "/api/home" then
+            local home_dir = G_reader_settings:readSetting("home_dir")
+            local home_rel = nil
+            if home_dir and home_dir ~= "" and self.root_dir then
+                local root = self.root_dir
+                if home_dir == root then
+                    home_rel = "/"
+                elseif home_dir:sub(1, #root) == root
+                    and (home_dir:sub(#root + 1, #root + 1) == "/" or #home_dir == #root) then
+                    home_rel = home_dir:sub(#root + 1)
+                    if home_rel == "" then home_rel = "/" end
+                end
+            end
+            self:_sendJSON(client, 200, {home = home_rel})
             return
         end
 
