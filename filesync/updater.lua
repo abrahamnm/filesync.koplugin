@@ -307,80 +307,85 @@ function Updater:checkForUpdates()
     local InfoMessage = require("ui/widget/infomessage")
     local NetworkMgr = require("ui/network/manager")
 
-    -- Check network availability
-    if not NetworkMgr:isWifiOn() then
-        UIManager:show(InfoMessage:new{
-            text = _("WiFi is not enabled. Please turn on WiFi and try again."),
-            timeout = 3,
-        })
-        return
+    -- Continuation: runs once the device is online (WAN reachable, since
+    -- we need to talk to api.github.com over HTTPS). Kept local so it
+    -- closes over the locals above.
+    local function runCheck()
+        -- Show a brief "checking" message
+        local checking_msg = InfoMessage:new{
+            text = _("Checking for updates..."),
+            timeout = 30,
+        }
+        UIManager:show(checking_msg)
+        UIManager:forceRePaint()
+
+        -- Perform the check in a scheduled callback to allow the UI to render
+        UIManager:scheduleIn(0.1, function()
+            local release, err = self:_fetchLatestRelease()
+
+            -- Close the "checking" message
+            if checking_msg then
+                UIManager:close(checking_msg)
+            end
+
+            if not release then
+                logger.warn("FileSync Updater:", err)
+                UIManager:show(InfoMessage:new{
+                    text = T(_("Could not check for updates.\n\n%1"), err),
+                    timeout = 5,
+                })
+                return
+            end
+
+            local remote_version_str = release.tag_name
+            if not remote_version_str then
+                UIManager:show(InfoMessage:new{
+                    text = _("Could not determine the latest version."),
+                    timeout = 3,
+                })
+                return
+            end
+
+            local current_version_str = self:_getCurrentVersion()
+            local remote_ver = self:_parseVersion(remote_version_str)
+            local local_ver = self:_parseVersion(current_version_str)
+
+            if not self:_isNewer(remote_ver, local_ver) then
+                UIManager:show(InfoMessage:new{
+                    text = T(_("FileSync is up to date (v%1)."), current_version_str),
+                    timeout = 3,
+                })
+                return
+            end
+
+            -- A new version is available — prompt the user
+            local display_version = remote_version_str:gsub("^v", "")
+            local changelog = self:_getChangelog(release)
+            local message = T(_("A new version of FileSync is available!\n\nCurrent: v%1\nNew: v%2"), current_version_str, display_version)
+            if changelog ~= "" then
+                message = message .. "\n\n" .. changelog
+            end
+
+            local ConfirmBox = require("ui/widget/confirmbox")
+            UIManager:show(ConfirmBox:new{
+                text = message,
+                ok_text = _("Update now"),
+                cancel_text = _("Later"),
+                ok_callback = function()
+                    self:_performUpdate(release)
+                end,
+            })
+        end)
     end
 
-    -- Show a brief "checking" message
-    local checking_msg = InfoMessage:new{
-        text = _("Checking for updates..."),
-        timeout = 30,
-    }
-    UIManager:show(checking_msg)
-    UIManager:forceRePaint()
-
-    -- Perform the check in a scheduled callback to allow the UI to render
-    UIManager:scheduleIn(0.1, function()
-        local release, err = self:_fetchLatestRelease()
-
-        -- Close the "checking" message
-        if checking_msg then
-            UIManager:close(checking_msg)
-        end
-
-        if not release then
-            logger.warn("FileSync Updater:", err)
-            UIManager:show(InfoMessage:new{
-                text = T(_("Could not check for updates.\n\n%1"), err),
-                timeout = 5,
-            })
-            return
-        end
-
-        local remote_version_str = release.tag_name
-        if not remote_version_str then
-            UIManager:show(InfoMessage:new{
-                text = _("Could not determine the latest version."),
-                timeout = 3,
-            })
-            return
-        end
-
-        local current_version_str = self:_getCurrentVersion()
-        local remote_ver = self:_parseVersion(remote_version_str)
-        local local_ver = self:_parseVersion(current_version_str)
-
-        if not self:_isNewer(remote_ver, local_ver) then
-            UIManager:show(InfoMessage:new{
-                text = T(_("FileSync is up to date (v%1)."), current_version_str),
-                timeout = 3,
-            })
-            return
-        end
-
-        -- A new version is available — prompt the user
-        local display_version = remote_version_str:gsub("^v", "")
-        local changelog = self:_getChangelog(release)
-        local message = T(_("A new version of FileSync is available!\n\nCurrent: v%1\nNew: v%2"), current_version_str, display_version)
-        if changelog ~= "" then
-            message = message .. "\n\n" .. changelog
-        end
-
-        local ConfirmBox = require("ui/widget/confirmbox")
-        UIManager:show(ConfirmBox:new{
-            text = message,
-            ok_text = _("Update now"),
-            cancel_text = _("Later"),
-            ok_callback = function()
-                self:_performUpdate(release)
-            end,
-        })
-    end)
+    -- Network gate. checkForUpdates is only ever invoked from the
+    -- "Check for updates" menu item, so it's always interactive.
+    -- runWhenOnline runs the callback immediately if already online,
+    -- otherwise it triggers KOReader's standard Wi-Fi prompt and fires
+    -- the callback after WAN reachability is confirmed. If the user
+    -- cancels the prompt, runCheck simply never runs and no error is
+    -- shown.
+    NetworkMgr:runWhenOnline(runCheck)
 end
 
 --- Download and install an update from the given release.

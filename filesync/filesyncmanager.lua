@@ -194,67 +194,83 @@ function FileSyncManager:start(silent)
         return
     end
 
-    -- Check WiFi
-    if not NetworkMgr:isWifiOn() then
-        if not silent then
-            UIManager:show(InfoMessage:new{
-                text = _("WiFi is not enabled. Please turn on WiFi first."),
-                timeout = 3,
-            })
+    -- Continuation: runs once WiFi is confirmed up (or immediately, if it
+    -- already was). Kept local to start() so it can close over `silent`.
+    local function continueStart()
+        -- Re-entrancy guard: an auto-start could have fired between the
+        -- WiFi prompt and the connectivity callback.
+        if self._running then return end
+
+        -- Get the local IP. NetworkMgr:runWhenConnected only guarantees
+        -- isConnected (IP + gateway), so the IP lookup may still fail on
+        -- some devices; keep the existing retry/fallback chain.
+        local ip = self:getLocalIP()
+        if not ip then
+            if not silent then
+                UIManager:show(InfoMessage:new{
+                    text = _("Could not determine device IP address. Make sure WiFi is connected."),
+                    timeout = 3,
+                })
+            end
+            return
         end
+
+        local port = self:getPort()
+        local root_dir = self:getRootDir()
+
+        -- Start the HTTP server
+        local HttpServer = require("filesync/httpserver")
+        local ok, err = pcall(function()
+            self._server = HttpServer:new{
+                port = port,
+                root_dir = root_dir,
+            }
+            self._server:start()
+        end)
+
+        if not ok then
+            logger.err("FileSync: Failed to start server:", err)
+            if not silent then
+                UIManager:show(InfoMessage:new{
+                    text = T(_("Failed to start server: %1"), tostring(err)),
+                    timeout = 5,
+                })
+            end
+            return
+        end
+
+        -- Add Kindle firewall rules
+        if Device:isKindle() then
+            self:openKindleFirewall(port)
+        end
+
+        self._running = true
+        self._ip = ip
+        self._port = port
+        self:preventStandby()
+        logger.info("FileSync: Server started on", ip .. ":" .. port)
+
+        if not silent then
+            self:showQRCode()
+        end
+    end
+
+    -- WiFi gate. In silent mode (auto-start on resume) we never want to
+    -- pop KOReader's "Turn on Wi-Fi?" prompt, so just bail if WiFi is off.
+    -- In interactive mode, defer to NetworkMgr: if already connected,
+    -- runWhenConnected fires the callback inline; otherwise it shows the
+    -- standard prompt and schedules the callback after IP is assigned.
+    -- If the user cancels the prompt, the callback simply never fires
+    -- and no error is shown -- which is what we want.
+    if not NetworkMgr:isConnected() then
+        if silent then
+            return
+        end
+        NetworkMgr:runWhenConnected(continueStart)
         return
     end
 
-    -- Get the local IP
-    local ip = self:getLocalIP()
-    if not ip then
-        if not silent then
-            UIManager:show(InfoMessage:new{
-                text = _("Could not determine device IP address. Make sure WiFi is connected."),
-                timeout = 3,
-            })
-        end
-        return
-    end
-
-    local port = self:getPort()
-    local root_dir = self:getRootDir()
-
-    -- Start the HTTP server
-    local HttpServer = require("filesync/httpserver")
-    local ok, err = pcall(function()
-        self._server = HttpServer:new{
-            port = port,
-            root_dir = root_dir,
-        }
-        self._server:start()
-    end)
-
-    if not ok then
-        logger.err("FileSync: Failed to start server:", err)
-        if not silent then
-            UIManager:show(InfoMessage:new{
-                text = T(_("Failed to start server: %1"), tostring(err)),
-                timeout = 5,
-            })
-        end
-        return
-    end
-
-    -- Add Kindle firewall rules
-    if Device:isKindle() then
-        self:openKindleFirewall(port)
-    end
-
-    self._running = true
-    self._ip = ip
-    self._port = port
-    self:preventStandby()
-    logger.info("FileSync: Server started on", ip .. ":" .. port)
-
-    if not silent then
-        self:showQRCode()
-    end
+    continueStart()
 end
 
 --- Stop the FileSync server: close QR screen, stop HttpServer, remove firewall rules.
