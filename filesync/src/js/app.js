@@ -71,7 +71,24 @@
 
     // Fetch language setting from server, then apply translations and load files
     var _initDetailPath = initState.detail ? initState.path : null;
-    fetch('/api/lang')
+    // When the user lands on the bare URL (no hash deep-link), prefer KOReader's
+    // configured home folder over filesystem root. Single attempt; on failure or
+    // when home is unset/outside root, keep currentPath ("/") as the fallback.
+    var _hasDeepLink = !!window.location.hash && window.location.hash !== '#' && window.location.hash !== '#/';
+    var _homeFetch = (_hasDeepLink || _initDetailPath)
+        ? Promise.resolve()
+        : fetch('/api/home')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data && typeof data.home === 'string' && data.home) {
+                    currentPath = data.home;
+                    history.replaceState({path: currentPath}, '', '#' + encodeURI(currentPath));
+                }
+            })
+            .catch(function() { /* fall back silently */ });
+
+    _homeFetch
+        .then(function() { return fetch('/api/lang'); })
         .then(function(res) { return res.json(); })
         .then(function(data) {
             if (data && data.lang) {
