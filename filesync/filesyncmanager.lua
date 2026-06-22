@@ -96,16 +96,25 @@ function FileSyncManager:configurePort()
                     is_enter_default = true,
                     callback = function()
                         local new_port = tonumber(port_dialog:getInputText())
-                        if new_port and new_port >= 1024 and new_port <= 65535 then
+                        if new_port and new_port >= 1 and new_port <= 65535 then
                             self:setPort(new_port)
                             UIManager:close(port_dialog)
+                            local msg
+                            if new_port < 1024 then
+                                -- Privileged ports only bind when KOReader runs
+                                -- as root (Kobo/Kindle). Elsewhere the server
+                                -- falls back to the default port at start time.
+                                msg = T(_("Port set to %1. Ports below 1024 need root access (available on Kobo/Kindle); if unavailable the server falls back to port %2. Restart the server for changes to take effect."), new_port, DEFAULT_PORT)
+                            else
+                                msg = T(_("Port set to %1. Restart the server for changes to take effect."), new_port)
+                            end
                             UIManager:show(InfoMessage:new{
-                                text = T(_("Port set to %1. Restart the server for changes to take effect."), new_port),
-                                timeout = 3,
+                                text = msg,
+                                timeout = 5,
                             })
                         else
                             UIManager:show(InfoMessage:new{
-                                text = _("Invalid port. Please enter a number between 1024 and 65535."),
+                                text = _("Invalid port. Please enter a number between 1 and 65535."),
                                 timeout = 3,
                             })
                         end
@@ -220,13 +229,39 @@ function FileSyncManager:start(silent)
 
         -- Start the HTTP server
         local HttpServer = require("filesync/httpserver")
-        local ok, err = pcall(function()
-            self._server = HttpServer:new{
-                port = port,
-                root_dir = root_dir,
-            }
-            self._server:start()
-        end)
+        local function tryStart(p)
+            return pcall(function()
+                self._server = HttpServer:new{
+                    port = p,
+                    root_dir = root_dir,
+                }
+                self._server:start()
+            end)
+        end
+
+        local ok, err = tryStart(port)
+
+        -- Privileged ports (<1024) only bind when KOReader runs as root, which
+        -- is the case on Kobo/Kindle but not on Android or desktop. If binding
+        -- such a port fails, fall back to the default port so the server still
+        -- comes up instead of failing outright.
+        if not ok and port < 1024 then
+            logger.warn("FileSync: Could not bind privileged port", port,
+                "- falling back to", DEFAULT_PORT)
+            local fb_ok, fb_err = tryStart(DEFAULT_PORT)
+            if fb_ok then
+                ok = true
+                if not silent then
+                    UIManager:show(InfoMessage:new{
+                        text = T(_("Port %1 needs root access and isn't available on this device. Using port %2 instead."), port, DEFAULT_PORT),
+                        timeout = 5,
+                    })
+                end
+                port = DEFAULT_PORT
+            else
+                err = fb_err
+            end
+        end
 
         if not ok then
             logger.err("FileSync: Failed to start server:", err)

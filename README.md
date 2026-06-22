@@ -163,8 +163,10 @@ All settings are restored to their previous values when the server is stopped. I
 
 1. Open the plugin menu
 2. Tap **Server port**
-3. Enter a port number between 1024 and 65535 (default: 8080)
+3. Enter a port number between 1 and 65535 (default: 8080)
 4. Restart the server for the change to take effect
+
+> **Note:** Ports below 1024 are privileged and only work when KOReader runs as root (e.g. on Kobo and Kindle). On Android and desktop the bind will fail and the server automatically falls back to the default port (8080).
 
 ### Safe Mode
 
