@@ -30,7 +30,8 @@
                     path: currentPath,
                     sort: currentSort,
                     order: currentOrder,
-                    filter: currentFilter
+                    filter: currentFilter,
+                    hidden: currentShowHidden
                 });
                 api('GET', '/api/files?' + params).then(function(data) {
                     renderBreadcrumbs(data.breadcrumbs);
