@@ -4,7 +4,7 @@
 
 Ein KOReader-Plugin, das einen lokalen Webserver auf Ihrem E-Reader startet und einen QR-Code auf dem Bildschirm anzeigt. Scannen Sie den Code mit Ihrem Smartphone, um eine ansprechende Weboberfläche zur kabellosen Verwaltung Ihrer Bücher und Dateien zu öffnen — keine Kabel, keine Apps, nur Ihr Browser.
 
-Funktioniert auf **Kindle**- und **Kobo**-Geräten mit KOReader.
+Funktioniert auf Geräten mit KOReader (entwickelt für **Kindle** und **Kobo**).
 
 <p align="center">
   <img src="screenshots/qr-screen.png" alt="QR-Code-Anzeige auf dem E-Reader" width="500">
@@ -46,7 +46,7 @@ Funktioniert auf **Kindle**- und **Kobo**-Geräten mit KOReader.
 
 ### Voraussetzungen
 
-- Ein Kindle- oder Kobo-E-Reader mit installiertem [KOReader](https://github.com/koreader/koreader)
+- Ein Gerät mit installiertem [KOReader](https://github.com/koreader/koreader)
 - E-Reader und Smartphone im selben WiFi-Netzwerk
 
 ### Option 1: Aus dem Release-Archiv (empfohlen)

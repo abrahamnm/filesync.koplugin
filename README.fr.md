@@ -4,7 +4,7 @@
 
 Un plugin KOReader qui lance un serveur web local sur votre liseuse et affiche un QR code à l'écran. Scannez le code avec votre téléphone pour ouvrir une interface web soignée permettant de gérer vos livres et fichiers sans fil — pas de câbles, pas d'applications, juste votre navigateur.
 
-Fonctionne sur les appareils **Kindle** et **Kobo** sous KOReader.
+Fonctionne sur les appareils sous KOReader (conçu pour **Kindle** et **Kobo**).
 
 <p align="center">
   <img src="screenshots/qr-screen.png" alt="Écran du QR code sur la liseuse" width="500">
@@ -46,7 +46,7 @@ Fonctionne sur les appareils **Kindle** et **Kobo** sous KOReader.
 
 ### Prérequis
 
-- Une liseuse Kindle ou Kobo avec [KOReader](https://github.com/koreader/koreader) installé
+- Un appareil avec [KOReader](https://github.com/koreader/koreader) installé
 - Votre liseuse et votre téléphone connectés au même réseau WiFi
 
 ### Option 1 : Depuis l'archive de la version (recommandé)
