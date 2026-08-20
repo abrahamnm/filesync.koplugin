@@ -5,14 +5,15 @@
 --- Key dependencies: device (KOReader), UIManager (KOReader), filesync/httpserver
 
 local Blitbuffer = require("ffi/blitbuffer")
+local ButtonTable = require("ui/widget/buttontable")
 local CenterContainer = require("ui/widget/container/centercontainer")
 local ConfirmBox = require("ui/widget/confirmbox")
 local Device = require("device")
+local FocusManager = require("ui/widget/focusmanager")
 local FrameContainer = require("ui/widget/container/framecontainer")
 local Geom = require("ui/geometry")
 local GestureRange = require("ui/gesturerange")
 local InfoMessage = require("ui/widget/infomessage")
-local InputContainer = require("ui/widget/container/inputcontainer")
 local NetworkMgr = require("ui/network/manager")
 local OverlapGroup = require("ui/widget/overlapgroup")
 local QRWidget = require("ui/widget/qrwidget")
@@ -373,6 +374,39 @@ function FileSyncManager:closeQRScreen()
     end
 end
 
+--- Stop the server from the QR screen: close it, show feedback, then stop and restart.
+--- Shared by the "Stop Server" button and the confirmation dialog.
+function FileSyncManager:stopFromQRScreen()
+    self:closeQRScreen()
+    UIManager:show(InfoMessage:new{
+        text = _("Stopping server..."),
+        timeout = 2,
+    })
+    -- Schedule the actual stop+restart after a brief moment so the
+    -- InfoMessage renders on the e-ink screen before the restart
+    UIManager:scheduleIn(0.5, function()
+        self:stop(true)
+        UIManager:restartKOReader()
+    end)
+end
+
+--- Ask the user what to do when leaving the QR screen while the server runs.
+--- Shared by the close button and the Back key.
+function FileSyncManager:confirmLeaveQRScreen()
+    UIManager:show(ConfirmBox:new{
+        title = _("File server is running"),
+        text = _("The server will keep running in the background and prevent the device from sleeping. What would you like to do?"),
+        ok_text = _("Stop server"),
+        cancel_text = _("Keep running"),
+        ok_callback = function()
+            self:stopFromQRScreen()
+        end,
+        cancel_callback = function()
+            self:closeQRScreen()
+        end,
+    })
+end
+
 --- Display a full-screen QR code with the server URL, stop button, and close button.
 --- Requires the server to be running (with a valid IP address).
 function FileSyncManager:showQRCode()
@@ -390,6 +424,18 @@ function FileSyncManager:showQRCode()
     local url = "http://" .. self._ip .. ":" .. self._port
     local screen_width = Screen:getWidth()
     local screen_height = Screen:getHeight()
+    local manager = self
+
+    -- The popup is a FocusManager so that D-pad devices can move focus between
+    -- the buttons below; it is created up-front because the ButtonTables need
+    -- it as their show_parent.
+    local widget = FocusManager:new{
+        name = "filesync_qrcode",
+        covers_fullscreen = true, -- hint for UIManager:_repaint()
+        width = screen_width,
+        height = screen_height,
+        layout = {},
+    }
 
     -- Build the QR code widget
     local qr_size = Screen:scaleBySize(260)
@@ -429,29 +475,48 @@ function FileSyncManager:showQRCode()
         max_width = screen_width - Screen:scaleBySize(40),
     }
 
-    -- Instructions text
+    -- Instructions text. On devices with physical keys we append a hint about
+    -- how to drive this screen without a touchscreen.
+    local instructions_text = _("Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network.")
+    if Device:hasDPad() then
+        instructions_text = instructions_text .. "\n\n"
+            .. _("Use the arrow keys to select a button and press the centre key to activate it. Press Back to leave this screen.")
+    elseif Device:hasKeys() then
+        instructions_text = instructions_text .. "\n\n" .. _("Press Back to leave this screen.")
+    end
     local instructions_widget = TextBoxWidget:new{
-        text = _("Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."),
+        text = instructions_text,
         face = Font:getFace("smallinfofont", 20),
         width = screen_width * 0.65,
         alignment = "center",
         fgcolor = Blitbuffer.COLOR_BLACK,
     }
 
-    -- Stop Server button
-    local button_text = TextWidget:new{
-        text = _("Stop Server"),
-        face = Font:getFace("infofont", 20),
-        fgcolor = Blitbuffer.COLOR_BLACK,
+    -- Stop Server button. Built as a real ButtonTable so it is tappable *and*
+    -- focusable/activatable with the D-pad; the FrameContainer around it only
+    -- restores the bordered look of the previous hand-rolled button.
+    local stop_button_table = ButtonTable:new{
+        width = Screen:scaleBySize(240),
+        buttons = {
+            {
+                {
+                    text = _("Stop Server"),
+                    font_face = "infofont",
+                    font_size = 20,
+                    callback = function()
+                        manager:stopFromQRScreen()
+                    end,
+                },
+            },
+        },
+        show_parent = widget,
     }
     local stop_button = FrameContainer:new{
         bordersize = Size.border.button,
         radius = Size.radius.button,
-        padding = Screen:scaleBySize(10),
-        padding_left = Screen:scaleBySize(30),
-        padding_right = Screen:scaleBySize(30),
+        padding = Screen:scaleBySize(6),
         background = Blitbuffer.COLOR_WHITE,
-        button_text,
+        stop_button_table,
     }
 
     -- Vertical layout
@@ -469,20 +534,29 @@ function FileSyncManager:showQRCode()
         stop_button,
     }
 
-    -- X (close) button in the top-right corner
-    local close_button_text = TextWidget:new{
-        text = "\u{00D7}", -- multiplication sign as X
-        face = Font:getFace("infofont", 32),
-        fgcolor = Blitbuffer.COLOR_BLACK,
+    -- X (close) button in the top-right corner, also a real ButtonTable button
+    local close_button_table = ButtonTable:new{
+        width = Screen:scaleBySize(64),
+        buttons = {
+            {
+                {
+                    text = "\u{00D7}", -- multiplication sign as X
+                    font_face = "infofont",
+                    font_size = 32,
+                    callback = function()
+                        manager:confirmLeaveQRScreen()
+                    end,
+                },
+            },
+        },
+        show_parent = widget,
     }
     local close_button = FrameContainer:new{
         bordersize = Size.border.button,
         radius = Size.radius.button,
-        padding = Screen:scaleBySize(6),
-        padding_left = Screen:scaleBySize(12),
-        padding_right = Screen:scaleBySize(12),
+        padding = Screen:scaleBySize(2),
         background = Blitbuffer.COLOR_WHITE,
-        close_button_text,
+        close_button_table,
     }
     local close_button_row = RightContainer:new{
         dimen = { w = screen_width - Screen:scaleBySize(10), h = close_button:getSize().h + Screen:scaleBySize(10) },
@@ -520,89 +594,44 @@ function FileSyncManager:showQRCode()
         overlap,
     }
 
-    -- Build the InputContainer for handling taps
-    local widget = InputContainer:new{
-        width = screen_width,
-        height = screen_height,
-    }
     widget[1] = frame
 
-    -- Store button references for hit testing
-    widget._stop_button = stop_button
-    widget._close_button = close_button
-    widget._manager = self
+    -- Hand both ButtonTables' focus rows to the popup, side by side, so that
+    -- Left/Right moves between "Stop Server" and the close button. (These are
+    -- no-ops on devices without a D-pad, where ButtonTable has no layout.)
+    widget:mergeLayoutInHorizontal(stop_button_table)
+    widget:mergeLayoutInHorizontal(close_button_table)
+    if widget.layout[1] and widget.layout[1][1] then
+        -- Start with "Stop Server" focused (only visibly so on non-touch devices)
+        widget:refocusWidget()
+    end
 
-    widget.ges_events = {
-        Tap = {
+    -- Key handling: on any device with keys, Back leaves the screen through the
+    -- same confirmation the close button shows. Focus movement and activation
+    -- (Up/Down/Left/Right, Press) are registered by FocusManager itself.
+    if Device:hasKeys() then
+        widget.key_events.Close = { { Device.input.group.Back } }
+    end
+
+    -- Touch handling: swallow taps that miss the buttons, so the popup is never
+    -- dismissed by an accidental tap (same as the previous behaviour).
+    if Device:isTouchDevice() then
+        widget.ges_events.TapSwallow = {
             GestureRange:new{
                 ges = "tap",
                 range = Geom:new{ x = 0, y = 0, w = screen_width, h = screen_height },
             },
-        },
-    }
+        }
+    end
 
-    function widget:onTap(_event, ges)
-        if not ges then return true end
-        local x, y = ges.pos.x, ges.pos.y
-
-        -- Check if the tap is on the Stop Server button
-        local btn = self._stop_button
-        if btn.dimen then
-            if x >= btn.dimen.x and x <= btn.dimen.x + btn.dimen.w
-               and y >= btn.dimen.y and y <= btn.dimen.y + btn.dimen.h then
-                -- Stop button tapped: show feedback, then stop and restart
-                self._manager:closeQRScreen()
-                UIManager:show(InfoMessage:new{
-                    text = _("Stopping server..."),
-                    timeout = 2,
-                })
-                -- Schedule the actual stop+restart after a brief moment so the
-                -- InfoMessage renders on the e-ink screen before the restart
-                UIManager:scheduleIn(0.5, function()
-                    self._manager:stop(true)
-                    UIManager:restartKOReader()
-                end)
-                return true
-            end
-        end
-
-        -- Check if the tap is on the X close button
-        local close_btn = self._close_button
-        if close_btn.dimen then
-            if x >= close_btn.dimen.x and x <= close_btn.dimen.x + close_btn.dimen.w
-               and y >= close_btn.dimen.y and y <= close_btn.dimen.y + close_btn.dimen.h then
-                -- X button tapped: ask user what to do
-                local manager = self._manager
-                UIManager:show(ConfirmBox:new{
-                    title = _("File server is running"),
-                    text = _("The server will keep running in the background and prevent the device from sleeping. What would you like to do?"),
-                    ok_text = _("Stop server"),
-                    cancel_text = _("Keep running"),
-                    ok_callback = function()
-                        manager:closeQRScreen()
-                        UIManager:show(InfoMessage:new{
-                            text = _("Stopping server..."),
-                            timeout = 2,
-                        })
-                        UIManager:scheduleIn(0.5, function()
-                            manager:stop(true)
-                            UIManager:restartKOReader()
-                        end)
-                    end,
-                    cancel_callback = function()
-                        manager:closeQRScreen()
-                    end,
-                })
-                return true
-            end
-        end
-
-        -- Tap anywhere else: do nothing (no dismiss)
+    --- Taps outside the buttons do nothing, but must not fall through.
+    function widget:onTapSwallow()
         return true
     end
 
+    --- Back key: leave the QR screen, warning that the server keeps running.
     function widget:onClose()
-        -- Only dismiss via X button, not via generic close/back key
+        manager:confirmLeaveQRScreen()
         return true
     end
 

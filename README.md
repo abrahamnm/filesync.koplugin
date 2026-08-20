@@ -4,7 +4,7 @@
 
 A KOReader plugin that launches a local web server on your e-reader and displays a QR code on screen. Scan the code with your phone to open a polished web interface for managing books and files wirelessly — no cables, no apps, just your browser.
 
-Works on devices running KOReader (designed for **Kindle** and **Kobo**).
+Works on devices running KOReader (designed for **Kindle** and **Kobo**), including non-touch, keypad-only e-readers — the on-device screens are fully operable with the D-pad and physical keys.
 
 <p align="center">
   <img src="screenshots/qr-screen.png" alt="QR code screen on e-reader" width="500">
@@ -33,6 +33,7 @@ Works on devices running KOReader (designed for **Kindle** and **Kobo**).
 - **Sleep Prevention** — Keeps device awake and WiFi alive while the server runs
 - **Safe Mode** — Show only books and images, hiding system files
 - **Responsive UI** — Designed for smartphones, works on any screen
+- **Touch and Key Navigation** — On-device screens work with taps or with the D-pad/physical keys on non-touch readers
 
 ## How It Works
 
