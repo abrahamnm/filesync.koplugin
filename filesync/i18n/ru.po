@@ -17,6 +17,9 @@ msgstr "Запускает локальный HTTP веб-сервер и ото
 msgid "Stop file server"
 msgstr "Остановить файловый сервер"
 
+msgid "File server"
+msgstr "Файловый сервер"
+
 msgid "Start file server"
 msgstr "Запустить файловый сервер"
 

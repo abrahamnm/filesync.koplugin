@@ -17,6 +17,9 @@ msgstr "ローカルHTTPウェブサーバーを起動し、QRコードを表示
 msgid "Stop file server"
 msgstr "ファイルサーバーを停止"
 
+msgid "File server"
+msgstr "ファイルサーバー"
+
 msgid "Start file server"
 msgstr "ファイルサーバーを起動"
 

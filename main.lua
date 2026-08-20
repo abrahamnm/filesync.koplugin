@@ -23,6 +23,9 @@ end
 
 function FileSync:init()
     self:onDispatcherRegisterActions()
+    -- Publish the server toggle as a Simple UI quick action (no-op when the
+    -- Simple UI plugin is not installed).
+    require("filesync/simpleui"):register()
     self.ui.menu:registerToMainMenu(self)
 end
 

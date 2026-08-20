@@ -18,6 +18,9 @@ msgstr ""
 msgid "Stop file server"
 msgstr ""
 
+msgid "File server"
+msgstr ""
+
 msgid "Start file server"
 msgstr ""
 
