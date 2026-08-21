@@ -38,7 +38,7 @@ local STREAM_CHUNK_SIZE = 65536
 local MAX_POLL_TIME = 3
 
 local HttpServer = {
-    port = 8080,
+    port = 80,
     root_dir = "/mnt/us",
     _server_socket = nil,
     _running = false,

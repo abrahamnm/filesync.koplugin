@@ -163,8 +163,10 @@ Tous les paramètres sont restaurés à leurs valeurs précédentes lorsque le s
 
 1. Ouvrez le menu du plugin
 2. Appuyez sur **Server port**
-3. Saisissez un numéro de port entre 1024 et 65535 (par défaut : 8080)
+3. Saisissez un numéro de port entre 1 et 65535 (par défaut : 80)
 4. Redémarrez le serveur pour appliquer le changement
+
+> **Remarque :** Le port par défaut 80 permet d'accéder au serveur en saisissant uniquement l'adresse IP de l'appareil (`http://192.168.1.5`), sans suffixe `:port`. Les ports inférieurs à 1024 sont privilégiés et ne fonctionnent que si KOReader s'exécute en root (par exemple sur Kobo et Kindle). Sous Android et sur ordinateur, la liaison échoue et le serveur bascule automatiquement sur le port 8080, l'URL devient alors `http://192.168.1.5:8080`.
 
 ### Mode sécurisé
 

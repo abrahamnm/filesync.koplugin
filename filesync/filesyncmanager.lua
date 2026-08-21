@@ -51,12 +51,28 @@ function FileSyncManager:new(o)
     return o
 end
 
-local DEFAULT_PORT = 8080
+-- Port used by a fresh install. Port 80 lets users reach the server by typing
+-- just the device IP (no ":port" suffix), which matters on e-ink keyboards.
+-- It only binds when KOReader runs as root (Kobo/Kindle); elsewhere the server
+-- start path falls back to FALLBACK_PORT.
+local DEFAULT_PORT = 80
+-- Port used when binding a privileged port (<1024) fails.
+local FALLBACK_PORT = 8080
 
 function FileSyncManager:getPort()
     if self._port then return self._port end
     self._port = G_reader_settings:readSetting("filesync_port", DEFAULT_PORT)
     return self._port
+end
+
+--- Build the URL users type or scan. Port 80 is the HTTP default, so it is
+--- omitted from the URL: "http://192.168.1.5" instead of ":80".
+function FileSyncManager:getServerURL()
+    local url = "http://" .. self._ip
+    if self._port ~= 80 then
+        url = url .. ":" .. self._port
+    end
+    return url
 end
 
 function FileSyncManager:setPort(port)
@@ -81,7 +97,7 @@ function FileSyncManager:configurePort()
         title = _("Server port"),
         input = tostring(self:getPort()),
         input_type = "number",
-        input_hint = "8080",
+        input_hint = "80",
         buttons = {
             {
                 {
@@ -103,8 +119,8 @@ function FileSyncManager:configurePort()
                             if new_port < 1024 then
                                 -- Privileged ports only bind when KOReader runs
                                 -- as root (Kobo/Kindle). Elsewhere the server
-                                -- falls back to the default port at start time.
-                                msg = T(_("Port set to %1. Ports below 1024 need root access (available on Kobo/Kindle); if unavailable the server falls back to port %2. Restart the server for changes to take effect."), new_port, DEFAULT_PORT)
+                                -- falls back to FALLBACK_PORT at start time.
+                                msg = T(_("Port set to %1. Ports below 1024 need root access (available on Kobo/Kindle); if unavailable the server falls back to port %2. Restart the server for changes to take effect."), new_port, FALLBACK_PORT)
                             else
                                 msg = T(_("Port set to %1. Restart the server for changes to take effect."), new_port)
                             end
@@ -243,21 +259,21 @@ function FileSyncManager:start(silent)
 
         -- Privileged ports (<1024) only bind when KOReader runs as root, which
         -- is the case on Kobo/Kindle but not on Android or desktop. If binding
-        -- such a port fails, fall back to the default port so the server still
+        -- such a port fails, fall back to FALLBACK_PORT so the server still
         -- comes up instead of failing outright.
         if not ok and port < 1024 then
             logger.warn("FileSync: Could not bind privileged port", port,
-                "- falling back to", DEFAULT_PORT)
-            local fb_ok, fb_err = tryStart(DEFAULT_PORT)
+                "- falling back to", FALLBACK_PORT)
+            local fb_ok, fb_err = tryStart(FALLBACK_PORT)
             if fb_ok then
                 ok = true
                 if not silent then
                     UIManager:show(InfoMessage:new{
-                        text = T(_("Port %1 needs root access and isn't available on this device. Using port %2 instead."), port, DEFAULT_PORT),
+                        text = T(_("Port %1 needs root access and isn't available on this device. Using port %2 instead."), port, FALLBACK_PORT),
                         timeout = 5,
                     })
                 end
-                port = DEFAULT_PORT
+                port = FALLBACK_PORT
             else
                 err = fb_err
             end
@@ -422,7 +438,7 @@ function FileSyncManager:showQRCode()
     -- Close any existing QR screen first
     self:closeQRScreen()
 
-    local url = "http://" .. self._ip .. ":" .. self._port
+    local url = self:getServerURL()
     local screen_width = Screen:getWidth()
     local screen_height = Screen:getHeight()
 
