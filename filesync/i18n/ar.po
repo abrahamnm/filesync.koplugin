@@ -17,6 +17,9 @@ msgstr "يُشغّل خادم HTTP محلي ويعرض رمز QR. امسحه ب�
 msgid "Stop file server"
 msgstr "إيقاف خادم الملفات"
 
+msgid "File server"
+msgstr "خادم الملفات"
+
 msgid "Start file server"
 msgstr "تشغيل خادم الملفات"
 

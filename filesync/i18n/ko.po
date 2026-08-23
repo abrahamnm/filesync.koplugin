@@ -17,6 +17,9 @@ msgstr "로컬 HTTP 웹 서버를 실행하고 QR 코드를 표시합니다. 휴
 msgid "Stop file server"
 msgstr "파일 서버 중지"
 
+msgid "File server"
+msgstr "파일 서버"
+
 msgid "Start file server"
 msgstr "파일 서버 시작"
 

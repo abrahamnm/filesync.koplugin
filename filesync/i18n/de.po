@@ -17,6 +17,9 @@ msgstr "Startet einen lokalen HTTP-Webserver und zeigt einen QR-Code an. Scannen
 msgid "Stop file server"
 msgstr "Dateiserver stoppen"
 
+msgid "File server"
+msgstr "Dateiserver"
+
 msgid "Start file server"
 msgstr "Dateiserver starten"
 

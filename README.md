@@ -160,6 +160,12 @@ All settings are restored to their previous values when the server is stopped. I
 - Tap **Stop file server** from the plugin menu, or
 - The server stops automatically when you exit KOReader
 
+### Simple UI Quick Action
+
+If you also use the [Simple UI](https://github.com/doctorhetfield-cmd/simpleui.koplugin) plugin, FileSync publishes the server toggle as a quick action so it can be added to Simple UI's bottom bar or homescreen. Pick **File server** from Simple UI's quick action list — its label follows the server state (**Start file server** / **Stop file server**).
+
+The toggle is also available as a gesture action: **Settings → Taps and gestures → Gesture manager → General → Toggle FileSync server**.
+
 ### Changing the Port
 
 1. Open the plugin menu
@@ -232,10 +238,10 @@ luarocks install busted
 busted
 ```
 
-This runs 177+ tests across 5 spec files. You should see output like:
+This runs 208+ tests across 6 spec files. You should see output like:
 
 ```
-177 successes / 0 failures / 0 errors / 0 pending : 0.04 seconds
+208 successes / 0 failures / 0 errors / 0 pending : 0.04 seconds
 ```
 
 **Run a specific spec file:**

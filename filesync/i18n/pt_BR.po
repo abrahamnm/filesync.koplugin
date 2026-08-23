@@ -17,6 +17,9 @@ msgstr "Inicie um servidor web HTTP local e exiba um código QR. Escaneie com se
 msgid "Stop file server"
 msgstr "Parar servidor de arquivos"
 
+msgid "File server"
+msgstr "Servidor de arquivos"
+
 msgid "Start file server"
 msgstr "Iniciar servidor de arquivos"
 

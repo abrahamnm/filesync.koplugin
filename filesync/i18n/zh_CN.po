@@ -17,6 +17,9 @@ msgstr "启动本地 HTTP Web 服务器并显示二维码。使用手机扫描�
 msgid "Stop file server"
 msgstr "停止文件服务器"
 
+msgid "File server"
+msgstr "文件服务器"
+
 msgid "Start file server"
 msgstr "启动文件服务器"
 
