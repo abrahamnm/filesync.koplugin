@@ -451,16 +451,24 @@ function Updater:_performUpdate(release)
                 return
             end
 
-            -- Success — prompt to restart
-            local ConfirmBox = require("ui/widget/confirmbox")
-            UIManager:show(ConfirmBox:new{
-                text = _("FileSync has been updated successfully!\n\nPlease restart KOReader for the changes to take effect."),
-                ok_text = _("Restart now"),
-                cancel_text = _("Later"),
-                ok_callback = function()
-                    UIManager:restartKOReader()
-                end,
-            })
+            -- Success — prompt to restart. Devices that cannot restart
+            -- themselves (Android) only get an informational message, since
+            -- offering "Restart now" there would just quit the app.
+            if Utils.canRestartKOReader() then
+                local ConfirmBox = require("ui/widget/confirmbox")
+                UIManager:show(ConfirmBox:new{
+                    text = _("FileSync has been updated successfully!\n\nPlease restart KOReader for the changes to take effect."),
+                    ok_text = _("Restart now"),
+                    cancel_text = _("Later"),
+                    ok_callback = function()
+                        Utils.restartKOReader()
+                    end,
+                })
+            else
+                UIManager:show(InfoMessage:new{
+                    text = _("FileSync has been updated successfully!\n\nPlease close and reopen KOReader for the changes to take effect."),
+                })
+            end
         end)
     end)
 end
