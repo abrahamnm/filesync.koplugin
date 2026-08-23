@@ -202,7 +202,8 @@ end
 --- @param sort_by string: sort field ("name", "size", "date", "type")
 --- @param sort_order string: "asc" or "desc"
 --- @param filter string: case-insensitive substring filter for filenames
---- @param safe_mode boolean: when true, only show whitelisted file types
+--- @param safe_mode boolean: when true, only show whitelisted file types and
+---   hide dotfiles; when false, list every entry including hidden ones
 --- @return table|nil: {path, entries, breadcrumbs, count} on success
 --- @return string|nil: error message on failure
 function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
@@ -220,8 +221,8 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
     local ok, iter_err = pcall(function()
         for name in lfs.dir(full_path) do
             if name ~= "." and name ~= ".." then
-                -- Skip hidden files starting with .
-                if name:sub(1, 1) ~= "." then
+                -- Hidden entries are listed only when safe mode is off
+                if not (safe_mode and name:sub(1, 1) == ".") then
                     -- Apply filter if present
                     local include = true
                     if filter and filter ~= "" then
