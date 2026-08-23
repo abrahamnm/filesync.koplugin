@@ -118,7 +118,7 @@ function FileSync:onToggleFileSyncServer()
         })
         UIManager:scheduleIn(0.5, function()
             FileSyncManager:stop(true)
-            UIManager:restartKOReader()
+            require("filesync/utils").restartKOReader()
         end)
     else
         FileSyncManager:checkBatteryAndStart()

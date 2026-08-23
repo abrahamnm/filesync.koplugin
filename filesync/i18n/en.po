@@ -148,6 +148,9 @@ msgstr ""
 msgid "FileSync has been updated successfully!\n\nPlease restart KOReader for the changes to take effect."
 msgstr ""
 
+msgid "FileSync has been updated successfully!\n\nPlease close and reopen KOReader for the changes to take effect."
+msgstr ""
+
 msgid "Restart now"
 msgstr ""
 

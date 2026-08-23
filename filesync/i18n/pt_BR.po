@@ -147,6 +147,9 @@ msgstr "Instalando atualização..."
 msgid "FileSync has been updated successfully!\n\nPlease restart KOReader for the changes to take effect."
 msgstr "O FileSync foi atualizado com sucesso!\n\nReinicie o KOReader para que as mudanças tenham efeito."
 
+msgid "FileSync has been updated successfully!\n\nPlease close and reopen KOReader for the changes to take effect."
+msgstr "O FileSync foi atualizado com sucesso!\n\nFeche e abra o KOReader novamente para que as mudanças tenham efeito."
+
 msgid "Restart now"
 msgstr "Reiniciar agora"
 

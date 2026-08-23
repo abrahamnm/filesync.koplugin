@@ -58,4 +58,59 @@ describe("filesync.utils", function()
             assert.are.equal("'/mnt/us/my books/novel.epub'", Utils.shellEscape("/mnt/us/my books/novel.epub"))
         end)
     end)
+
+    describe("restartKOReader", function()
+
+        local calls
+
+        -- Install minimal `device` / `ui/uimanager` stubs for the duration of
+        -- a test, recording which UIManager method the helper reached for.
+        local function stub_koreader(can_restart)
+            calls = {}
+            package.loaded["device"] = {
+                canRestart = function() return can_restart end,
+            }
+            package.loaded["ui/uimanager"] = {
+                restartKOReader = function() calls[#calls + 1] = "restart" end,
+                setDirty = function(_, widget, refresh)
+                    calls[#calls + 1] = "setDirty:" .. tostring(widget) .. ":" .. tostring(refresh)
+                end,
+            }
+        end
+
+        after_each(function()
+            package.loaded["device"] = nil
+            package.loaded["ui/uimanager"] = nil
+        end)
+
+        it("restarts KOReader when the device supports it", function()
+            stub_koreader(true)
+            assert.is_true(Utils.restartKOReader())
+            assert.are.same({ "restart" }, calls)
+        end)
+
+        it("forces a full refresh instead of restarting on Android", function()
+            stub_koreader(false)
+            assert.is_false(Utils.restartKOReader())
+            assert.are.same({ "setDirty:all:full" }, calls)
+        end)
+    end)
+
+    describe("canRestartKOReader", function()
+
+        after_each(function()
+            package.loaded["device"] = nil
+        end)
+
+        it("reports true when the device can restart", function()
+            package.loaded["device"] = { canRestart = function() return true end }
+            assert.is_true(Utils.canRestartKOReader())
+        end)
+
+        it("reports false when the device cannot restart", function()
+            -- KOReader's Device:canRestart is the `no` helper on Android
+            package.loaded["device"] = { canRestart = function() return false end }
+            assert.is_false(Utils.canRestartKOReader())
+        end)
+    end)
 end)

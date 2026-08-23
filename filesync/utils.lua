@@ -2,6 +2,7 @@
 --- Provides common helpers used across multiple modules:
 ---   - getPluginDir(): returns the absolute path to the plugin root directory
 ---   - shellEscape(s): escapes a string for safe use in shell commands
+---   - restartKOReader(): restarts KOReader only on platforms that support it
 
 local Utils = {}
 
@@ -33,6 +34,32 @@ function Utils.shellEscape(s)
     -- Replace each single quote with: end quote, escaped quote, start quote
     local escaped = s:gsub("'", "'\\''")
     return "'" .. escaped .. "'"
+end
+
+--- Restart KOReader, but only on platforms where a restart actually works.
+--- UIManager:restartKOReader() simply exits with code 85 and relies on the
+--- launcher shell script to relaunch the process.  Android has no such
+--- wrapper (it runs as a NativeActivity), so calling it there just quits the
+--- app -- which is why KOReader gates its own "Restart KOReader" menu entry
+--- on Device:canRestart().  Where a restart is unavailable, force a full
+--- screen refresh instead, which is all the restart was buying us.
+--- @return boolean: true if a restart was requested, false if it was skipped
+function Utils.restartKOReader()
+    local Device = require("device")
+    local UIManager = require("ui/uimanager")
+    if Device:canRestart() then
+        UIManager:restartKOReader()
+        return true
+    end
+    UIManager:setDirty("all", "full")
+    return false
+end
+
+--- Whether KOReader can restart itself on this device.
+--- @return boolean
+function Utils.canRestartKOReader()
+    local Device = require("device")
+    return Device:canRestart() and true or false
 end
 
 return Utils
