@@ -14,6 +14,9 @@ msgstr "FileSync - Gerenciador de Arquivos Sem Fio"
 msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
 msgstr "Inicie um servidor web HTTP local e exiba um código QR. Escaneie com seu telefone para gerenciar livros e arquivos no seu dispositivo sem fio por meio de interface web."
 
+msgid "Toggle FileSync server"
+msgstr "Alternar servidor FileSync"
+
 msgid "Stop file server"
 msgstr "Parar servidor de arquivos"
 
@@ -29,8 +32,14 @@ msgstr "Porta do servidor"
 msgid "Safe mode"
 msgstr "Modo seguro"
 
+msgid "When enabled, the web interface only lists document and image formats KOReader can open, and hides sidecar metadata folders and hidden files.\n\nDisable it to browse every file on the device, including hidden files and folders."
+msgstr "Quando ativado, a interface web lista apenas os formatos de documento e imagem que o KOReader consegue abrir e oculta as pastas de metadados e os arquivos ocultos.\n\nDesative para navegar por todos os arquivos do dispositivo, incluindo arquivos e pastas ocultos."
+
 msgid "Show QR code"
 msgstr "Mostrar código QR"
+
+msgid "Check for updates"
+msgstr "Verificar atualizações"
 
 msgid "About"
 msgstr "Sobre"
@@ -47,14 +56,17 @@ msgstr "Salvar"
 msgid "Port set to %1. Restart the server for changes to take effect."
 msgstr "Porta configurada em %1. Reinicie o servidor para realizar as mudanças."
 
-msgid "Invalid port. Please enter a number between 1024 and 65535."
-msgstr "Porta inválida. Insira un número entre 1024 e 65535."
+msgid "Port set to %1. Ports below 1024 need root access (available on Kobo/Kindle); if unavailable the server falls back to port %2. Restart the server for changes to take effect."
+msgstr "Porta configurada em %1. Portas abaixo de 1024 exigem acesso root (disponível em Kobo/Kindle); se não estiver disponível, o servidor usará a porta %2. Reinicie o servidor para aplicar as mudanças."
+
+msgid "Invalid port. Please enter a number between 1 and 65535."
+msgstr "Porta inválida. Insira um número entre 1 e 65535."
+
+msgid "Port %1 needs root access and isn't available on this device. Using port %2 instead."
+msgstr "A porta %1 exige acesso root e não está disponível neste dispositivo. Usando a porta %2 em vez dela."
 
 msgid "FileSync server is already running."
 msgstr "O servidor FileSync está em execução."
-
-msgid "WiFi is not enabled. Please turn on WiFi first."
-msgstr "WiFi está desativado. Ative o WiFi primeiro."
 
 msgid "Could not determine device IP address. Make sure WiFi is connected."
 msgstr "Endereço IP não identificado. Certifique-se que o WiFi está conectado."
@@ -64,6 +76,9 @@ msgstr "Erro ao iniciar o servidor: %1"
 
 msgid "FileSync server stopped."
 msgstr "Servidor FileSync parado."
+
+msgid "Stopping server..."
+msgstr "Parando o servidor..."
 
 msgid "Low Battery"
 msgstr "Bateria baixa"
@@ -80,17 +95,105 @@ msgstr "O servidor não está execução."
 msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
 msgstr "Escaneie o código QR ou digite a URL\nem seu navegador.\n\nAmbos os dispositivos devem estar na mesma rede WiFi."
 
+msgid "Use the arrow keys to select a button and press the centre key to activate it. Press Back to leave this screen."
+msgstr "Use as teclas de seta para selecionar um botão e pressione a tecla central para ativá-lo. Pressione Voltar para sair desta tela."
+
+msgid "Press Back to leave this screen."
+msgstr "Pressione Voltar para sair desta tela."
+
 msgid "Stop Server"
 msgstr "Parar o servidor"
 
-msgid "Stopping server..."
-msgstr "Parando o servidor..."
+msgid "File server is running"
+msgstr "O servidor de arquivos está em execução"
 
-msgid "Server running in the background. Stop the server to save battery."
-msgstr "Servidor em execução no segundo plano. Pare o servidor para economizar bateria."
+msgid "The server will keep running in the background and prevent the device from sleeping. What would you like to do?"
+msgstr "O servidor continuará em execução em segundo plano e impedirá que o dispositivo entre em suspensão. O que deseja fazer?"
+
+msgid "Stop server"
+msgstr "Parar o servidor"
+
+msgid "Keep running"
+msgstr "Manter em execução"
 
 msgid "Image preview"
 msgstr "Prévia de imagem"
+
+# ==============================
+# Plugin updater
+# ==============================
+
+msgid "Checking for updates..."
+msgstr "Verificando atualizações..."
+
+msgid "FileSync is up to date (v%1)."
+msgstr "O FileSync está atualizado (v%1)."
+
+msgid "A new version of FileSync is available!\n\nCurrent: v%1\nNew: v%2"
+msgstr "Uma nova versão do FileSync está disponível!\n\nAtual: v%1\nNova: v%2"
+
+msgid "Update now"
+msgstr "Atualizar agora"
+
+msgid "Later"
+msgstr "Mais tarde"
+
+msgid "Downloading update..."
+msgstr "Baixando atualização..."
+
+msgid "Installing update..."
+msgstr "Instalando atualização..."
+
+msgid "FileSync has been updated successfully!\n\nPlease restart KOReader for the changes to take effect."
+msgstr "O FileSync foi atualizado com sucesso!\n\nReinicie o KOReader para que as mudanças tenham efeito."
+
+msgid "Restart now"
+msgstr "Reiniciar agora"
+
+msgid "Could not check for updates.\n\n%1"
+msgstr "Não foi possível verificar atualizações.\n\n%1"
+
+msgid "Could not determine the latest version."
+msgstr "Não foi possível determinar a versão mais recente."
+
+msgid "Could not find a download URL for this release."
+msgstr "Não foi encontrada uma URL de download para esta versão."
+
+msgid "Failed to parse update information from GitHub."
+msgstr "Falha ao interpretar as informações de atualização do GitHub."
+
+msgid "GitHub API returned status %1."
+msgstr "A API do GitHub retornou o status %1."
+
+msgid "Network error: could not reach GitHub."
+msgstr "Erro de rede: não foi possível acessar o GitHub."
+
+msgid "Download failed with status %1."
+msgstr "O download falhou com o status %1."
+
+msgid "Download failed.\n\n%1"
+msgstr "Falha no download.\n\n%1"
+
+msgid "Download failed: network error."
+msgstr "Falha no download: erro de rede."
+
+msgid "Cannot create temporary file: %1"
+msgstr "Não é possível criar o arquivo temporário: %1"
+
+msgid "Cannot determine plugin parent directory."
+msgstr "Não é possível determinar o diretório pai do plugin."
+
+msgid "Failed to back up current plugin. Update aborted."
+msgstr "Falha ao fazer backup do plugin atual. Atualização cancelada."
+
+msgid "Failed to install update. Previous version has been restored."
+msgstr "Falha ao instalar a atualização. A versão anterior foi restaurada."
+
+msgid "Update installation failed.\n\n%1"
+msgstr "Falha na instalação da atualização.\n\n%1"
+
+msgid "Update verification failed: extracted files do not look like a valid plugin."
+msgstr "Falha na verificação da atualização: os arquivos extraídos não parecem ser um plugin válido."
 
 # ==============================
 # Web UI translations
@@ -257,9 +360,3 @@ msgstr "Nova pasta"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "Tamb\u00e9m excluir metadados de leitura (.sdr)"
-
-msgid "Large files may slow down the e-reader UI during transfer"
-msgstr "Arquivos grandes podem deixar a interface do leitor lenta durante a transfer\u00eancia"
-
-msgid "exceeds the 1 GB limit"
-msgstr "excede o limite de 1 GB"

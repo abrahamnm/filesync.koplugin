@@ -14,6 +14,9 @@ msgstr "FileSync - 무선 파일 관리자"
 msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
 msgstr "로컬 HTTP 웹 서버를 실행하고 QR 코드를 표시합니다. 휴대폰으로 스캔하여 웹 인터페이스를 통해 기기의 책과 파일을 무선으로 관리할 수 있습니다."
 
+msgid "Toggle FileSync server"
+msgstr "FileSync 서버 전환"
+
 msgid "Stop file server"
 msgstr "파일 서버 중지"
 
@@ -29,14 +32,20 @@ msgstr "서버 포트"
 msgid "Safe mode"
 msgstr "안전 모드"
 
+msgid "When enabled, the web interface only lists document and image formats KOReader can open, and hides sidecar metadata folders and hidden files.\n\nDisable it to browse every file on the device, including hidden files and folders."
+msgstr "활성화하면 웹 인터페이스에 KOReader가 열 수 있는 문서 및 이미지 형식만 표시되고, 메타데이터 폴더와 숨김 파일은 숨겨집니다.\n\n비활성화하면 숨김 파일과 폴더를 포함해 기기의 모든 파일을 탐색할 수 있습니다."
+
 msgid "Show QR code"
 msgstr "QR 코드 표시"
+
+msgid "Check for updates"
+msgstr "업데이트 확인"
 
 msgid "About"
 msgstr "정보"
 
-msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
-msgstr "FileSync v1.0.0\n\nKOReader용 무선 파일 관리자.\n\n서버를 시작하고 휴대폰으로 QR 코드를 스캔한 후, 같은 WiFi 네트워크의 브라우저에서 책을 관리하세요."
+msgid "FileSync v%1\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network.\n\nProject:\ngithub.com/abrahamnm/filesync.koplugin"
+msgstr "FileSync v%1\n\nKOReader용 무선 파일 관리자.\n\n서버를 시작하고 휴대폰으로 QR 코드를 스캔한 후, 같은 WiFi 네트워크의 브라우저에서 책을 관리하세요.\n\n프로젝트:\ngithub.com/abrahamnm/filesync.koplugin"
 
 msgid "Cancel"
 msgstr "취소"
@@ -47,14 +56,17 @@ msgstr "저장"
 msgid "Port set to %1. Restart the server for changes to take effect."
 msgstr "포트가 %1(으)로 설정되었습니다. 변경 사항을 적용하려면 서버를 다시 시작하세요."
 
-msgid "Invalid port. Please enter a number between 1024 and 65535."
-msgstr "잘못된 포트입니다. 1024에서 65535 사이의 숫자를 입력하세요."
+msgid "Port set to %1. Ports below 1024 need root access (available on Kobo/Kindle); if unavailable the server falls back to port %2. Restart the server for changes to take effect."
+msgstr "포트가 %1(으)로 설정되었습니다. 1024 미만의 포트에는 root 권한이 필요합니다(Kobo/Kindle에서 사용 가능). 사용할 수 없으면 서버가 포트 %2(으)로 대체됩니다. 변경 사항을 적용하려면 서버를 다시 시작하세요."
+
+msgid "Invalid port. Please enter a number between 1 and 65535."
+msgstr "잘못된 포트입니다. 1에서 65535 사이의 숫자를 입력하세요."
+
+msgid "Port %1 needs root access and isn't available on this device. Using port %2 instead."
+msgstr "포트 %1은(는) root 권한이 필요하며 이 기기에서는 사용할 수 없습니다. 대신 포트 %2을(를) 사용합니다."
 
 msgid "FileSync server is already running."
 msgstr "FileSync 서버가 이미 실행 중입니다."
-
-msgid "WiFi is not enabled. Please turn on WiFi first."
-msgstr "WiFi가 활성화되어 있지 않습니다. 먼저 WiFi를 켜주세요."
 
 msgid "Could not determine device IP address. Make sure WiFi is connected."
 msgstr "기기의 IP 주소를 확인할 수 없습니다. WiFi가 연결되어 있는지 확인하세요."
@@ -64,6 +76,9 @@ msgstr "서버 시작 실패: %1"
 
 msgid "FileSync server stopped."
 msgstr "FileSync 서버가 중지되었습니다."
+
+msgid "Stopping server..."
+msgstr "서버를 중지하는 중..."
 
 msgid "Low Battery"
 msgstr "배터리 부족"
@@ -80,14 +95,105 @@ msgstr "서버가 실행되고 있지 않습니다."
 msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
 msgstr "QR 코드를 스캔하거나 브라우저에\nURL을 입력하세요.\n\n두 기기가 같은 WiFi 네트워크에 있어야 합니다."
 
+msgid "Use the arrow keys to select a button and press the centre key to activate it. Press Back to leave this screen."
+msgstr "화살표 키로 버튼을 선택하고 가운데 키를 눌러 실행하세요. 뒤로 버튼을 누르면 이 화면에서 나갑니다."
+
+msgid "Press Back to leave this screen."
+msgstr "뒤로 버튼을 누르면 이 화면에서 나갑니다."
+
 msgid "Stop Server"
 msgstr "서버 중지"
 
-msgid "Server running in the background. Stop the server to save battery."
-msgstr "서버가 백그라운드에서 실행 중입니다. 배터리를 절약하려면 서버를 중지하세요."
+msgid "File server is running"
+msgstr "파일 서버가 실행 중입니다"
+
+msgid "The server will keep running in the background and prevent the device from sleeping. What would you like to do?"
+msgstr "서버가 백그라운드에서 계속 실행되어 기기가 절전 모드로 전환되지 않습니다. 어떻게 하시겠습니까?"
+
+msgid "Stop server"
+msgstr "서버 중지"
+
+msgid "Keep running"
+msgstr "계속 실행"
 
 msgid "Image preview"
 msgstr "이미지 미리보기"
+
+# ==============================
+# Plugin updater
+# ==============================
+
+msgid "Checking for updates..."
+msgstr "업데이트를 확인하는 중..."
+
+msgid "FileSync is up to date (v%1)."
+msgstr "FileSync가 최신 버전입니다(v%1)."
+
+msgid "A new version of FileSync is available!\n\nCurrent: v%1\nNew: v%2"
+msgstr "FileSync의 새 버전이 있습니다!\n\n현재: v%1\n신규: v%2"
+
+msgid "Update now"
+msgstr "지금 업데이트"
+
+msgid "Later"
+msgstr "나중에"
+
+msgid "Downloading update..."
+msgstr "업데이트를 다운로드하는 중..."
+
+msgid "Installing update..."
+msgstr "업데이트를 설치하는 중..."
+
+msgid "FileSync has been updated successfully!\n\nPlease restart KOReader for the changes to take effect."
+msgstr "FileSync가 성공적으로 업데이트되었습니다!\n\n변경 사항을 적용하려면 KOReader를 다시 시작하세요."
+
+msgid "Restart now"
+msgstr "지금 다시 시작"
+
+msgid "Could not check for updates.\n\n%1"
+msgstr "업데이트를 확인할 수 없습니다.\n\n%1"
+
+msgid "Could not determine the latest version."
+msgstr "최신 버전을 확인할 수 없습니다."
+
+msgid "Could not find a download URL for this release."
+msgstr "이 릴리스의 다운로드 URL을 찾을 수 없습니다."
+
+msgid "Failed to parse update information from GitHub."
+msgstr "GitHub의 업데이트 정보를 해석하지 못했습니다."
+
+msgid "GitHub API returned status %1."
+msgstr "GitHub API가 상태 %1을(를) 반환했습니다."
+
+msgid "Network error: could not reach GitHub."
+msgstr "네트워크 오류: GitHub에 연결할 수 없습니다."
+
+msgid "Download failed with status %1."
+msgstr "다운로드가 실패했습니다(상태 %1)."
+
+msgid "Download failed.\n\n%1"
+msgstr "다운로드에 실패했습니다.\n\n%1"
+
+msgid "Download failed: network error."
+msgstr "다운로드에 실패했습니다: 네트워크 오류."
+
+msgid "Cannot create temporary file: %1"
+msgstr "임시 파일을 만들 수 없습니다: %1"
+
+msgid "Cannot determine plugin parent directory."
+msgstr "플러그인의 상위 디렉터리를 확인할 수 없습니다."
+
+msgid "Failed to back up current plugin. Update aborted."
+msgstr "현재 플러그인을 백업하지 못했습니다. 업데이트가 중단되었습니다."
+
+msgid "Failed to install update. Previous version has been restored."
+msgstr "업데이트를 설치하지 못했습니다. 이전 버전이 복원되었습니다."
+
+msgid "Update installation failed.\n\n%1"
+msgstr "업데이트 설치에 실패했습니다.\n\n%1"
+
+msgid "Update verification failed: extracted files do not look like a valid plugin."
+msgstr "업데이트 검증에 실패했습니다: 추출된 파일이 유효한 플러그인이 아닌 것 같습니다."
 
 # ==============================
 # Web UI translations
@@ -254,9 +360,3 @@ msgstr "새 폴더"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "읽기 메타데이터(.sdr)도 함께 삭제"
-
-msgid "Large files may slow down the e-reader UI during transfer"
-msgstr "큰 파일은 전송 중 전자책 리더 UI가 느려질 수 있습니다"
-
-msgid "exceeds the 1 GB limit"
-msgstr "1 GB 제한을 초과합니다"

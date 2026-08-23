@@ -15,6 +15,9 @@ msgstr ""
 msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
 msgstr ""
 
+msgid "Toggle FileSync server"
+msgstr ""
+
 msgid "Stop file server"
 msgstr ""
 
@@ -30,13 +33,19 @@ msgstr ""
 msgid "Safe mode"
 msgstr ""
 
+msgid "When enabled, the web interface only lists document and image formats KOReader can open, and hides sidecar metadata folders and hidden files.\n\nDisable it to browse every file on the device, including hidden files and folders."
+msgstr ""
+
 msgid "Show QR code"
+msgstr ""
+
+msgid "Check for updates"
 msgstr ""
 
 msgid "About"
 msgstr ""
 
-msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
+msgid "FileSync v%1\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network.\n\nProject:\ngithub.com/abrahamnm/filesync.koplugin"
 msgstr ""
 
 msgid "Cancel"
@@ -48,13 +57,16 @@ msgstr ""
 msgid "Port set to %1. Restart the server for changes to take effect."
 msgstr ""
 
-msgid "Invalid port. Please enter a number between 1024 and 65535."
+msgid "Port set to %1. Ports below 1024 need root access (available on Kobo/Kindle); if unavailable the server falls back to port %2. Restart the server for changes to take effect."
+msgstr ""
+
+msgid "Invalid port. Please enter a number between 1 and 65535."
+msgstr ""
+
+msgid "Port %1 needs root access and isn't available on this device. Using port %2 instead."
 msgstr ""
 
 msgid "FileSync server is already running."
-msgstr ""
-
-msgid "WiFi is not enabled. Please turn on WiFi first."
 msgstr ""
 
 msgid "Could not determine device IP address. Make sure WiFi is connected."
@@ -64,6 +76,9 @@ msgid "Failed to start server: %1"
 msgstr ""
 
 msgid "FileSync server stopped."
+msgstr ""
+
+msgid "Stopping server..."
 msgstr ""
 
 msgid "Low Battery"
@@ -81,13 +96,104 @@ msgstr ""
 msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
 msgstr ""
 
+msgid "Use the arrow keys to select a button and press the centre key to activate it. Press Back to leave this screen."
+msgstr ""
+
+msgid "Press Back to leave this screen."
+msgstr ""
+
 msgid "Stop Server"
 msgstr ""
 
-msgid "Server running in the background. Stop the server to save battery."
+msgid "File server is running"
+msgstr ""
+
+msgid "The server will keep running in the background and prevent the device from sleeping. What would you like to do?"
+msgstr ""
+
+msgid "Stop server"
+msgstr ""
+
+msgid "Keep running"
 msgstr ""
 
 msgid "Image preview"
+msgstr ""
+
+# ==============================
+# Plugin updater
+# ==============================
+
+msgid "Checking for updates..."
+msgstr ""
+
+msgid "FileSync is up to date (v%1)."
+msgstr ""
+
+msgid "A new version of FileSync is available!\n\nCurrent: v%1\nNew: v%2"
+msgstr ""
+
+msgid "Update now"
+msgstr ""
+
+msgid "Later"
+msgstr ""
+
+msgid "Downloading update..."
+msgstr ""
+
+msgid "Installing update..."
+msgstr ""
+
+msgid "FileSync has been updated successfully!\n\nPlease restart KOReader for the changes to take effect."
+msgstr ""
+
+msgid "Restart now"
+msgstr ""
+
+msgid "Could not check for updates.\n\n%1"
+msgstr ""
+
+msgid "Could not determine the latest version."
+msgstr ""
+
+msgid "Could not find a download URL for this release."
+msgstr ""
+
+msgid "Failed to parse update information from GitHub."
+msgstr ""
+
+msgid "GitHub API returned status %1."
+msgstr ""
+
+msgid "Network error: could not reach GitHub."
+msgstr ""
+
+msgid "Download failed with status %1."
+msgstr ""
+
+msgid "Download failed.\n\n%1"
+msgstr ""
+
+msgid "Download failed: network error."
+msgstr ""
+
+msgid "Cannot create temporary file: %1"
+msgstr ""
+
+msgid "Cannot determine plugin parent directory."
+msgstr ""
+
+msgid "Failed to back up current plugin. Update aborted."
+msgstr ""
+
+msgid "Failed to install update. Previous version has been restored."
+msgstr ""
+
+msgid "Update installation failed.\n\n%1"
+msgstr ""
+
+msgid "Update verification failed: extracted files do not look like a valid plugin."
 msgstr ""
 
 # ==============================
@@ -254,10 +360,4 @@ msgid "New folder"
 msgstr ""
 
 msgid "Also delete reading metadata (.sdr)"
-msgstr ""
-
-msgid "Large files may slow down the e-reader UI during transfer"
-msgstr ""
-
-msgid "exceeds the 1 GB limit"
 msgstr ""
