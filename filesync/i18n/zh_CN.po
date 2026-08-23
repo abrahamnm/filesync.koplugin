@@ -14,6 +14,9 @@ msgstr "FileSync - 无线文件管理器"
 msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
 msgstr "启动本地 HTTP Web 服务器并显示二维码。使用手机扫描二维码，通过简洁的 Web 界面无线管理设备上的书籍和文件。"
 
+msgid "Toggle FileSync server"
+msgstr "切换 FileSync 服务器"
+
 msgid "Stop file server"
 msgstr "停止文件服务器"
 
@@ -29,14 +32,20 @@ msgstr "服务器端口"
 msgid "Safe mode"
 msgstr "安全模式"
 
+msgid "When enabled, the web interface only lists document and image formats KOReader can open, and hides sidecar metadata folders and hidden files.\n\nDisable it to browse every file on the device, including hidden files and folders."
+msgstr "启用后，Web 界面仅列出 KOReader 能够打开的文档和图片格式，并隐藏元数据文件夹和隐藏文件。\n\n关闭后可浏览设备上的所有文件，包括隐藏的文件和文件夹。"
+
 msgid "Show QR code"
 msgstr "显示二维码"
+
+msgid "Check for updates"
+msgstr "检查更新"
 
 msgid "About"
 msgstr "关于"
 
-msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
-msgstr "FileSync v1.0.0\n\nKOReader 无线文件管理器。\n\n启动服务器，使用手机扫描二维码，即可在同一 WiFi 网络的任何浏览器中管理您的书籍。"
+msgid "FileSync v%1\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network.\n\nProject:\ngithub.com/abrahamnm/filesync.koplugin"
+msgstr "FileSync v%1\n\nKOReader 无线文件管理器。\n\n启动服务器，使用手机扫描二维码，即可在同一 WiFi 网络的任何浏览器中管理您的书籍。\n\n项目主页：\ngithub.com/abrahamnm/filesync.koplugin"
 
 msgid "Cancel"
 msgstr "取消"
@@ -47,14 +56,17 @@ msgstr "保存"
 msgid "Port set to %1. Restart the server for changes to take effect."
 msgstr "端口已设置为 %1。请重启服务器以使更改生效。"
 
-msgid "Invalid port. Please enter a number between 1024 and 65535."
-msgstr "无效的端口。请输入 1024 到 65535 之间的数字。"
+msgid "Port set to %1. Ports below 1024 need root access (available on Kobo/Kindle); if unavailable the server falls back to port %2. Restart the server for changes to take effect."
+msgstr "端口已设置为 %1。低于 1024 的端口需要 root 权限（Kobo/Kindle 上可用）；若不可用，服务器将改用端口 %2。请重启服务器以使更改生效。"
+
+msgid "Invalid port. Please enter a number between 1 and 65535."
+msgstr "无效的端口。请输入 1 到 65535 之间的数字。"
+
+msgid "Port %1 needs root access and isn't available on this device. Using port %2 instead."
+msgstr "端口 %1 需要 root 权限，在此设备上不可用。改用端口 %2。"
 
 msgid "FileSync server is already running."
 msgstr "FileSync 服务器已在运行。"
-
-msgid "WiFi is not enabled. Please turn on WiFi first."
-msgstr "WiFi 未启用。请先开启 WiFi。"
 
 msgid "Could not determine device IP address. Make sure WiFi is connected."
 msgstr "无法确定设备 IP 地址。请确保 WiFi 已连接。"
@@ -64,6 +76,9 @@ msgstr "启动服务器失败：%1"
 
 msgid "FileSync server stopped."
 msgstr "FileSync 服务器已停止。"
+
+msgid "Stopping server..."
+msgstr "正在停止服务器..."
 
 msgid "Low Battery"
 msgstr "电量不足"
@@ -80,17 +95,105 @@ msgstr "服务器未运行。"
 msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
 msgstr "扫描二维码或在浏览器中输入 URL。\n\n两个设备必须在同一 WiFi 网络上。"
 
+msgid "Use the arrow keys to select a button and press the centre key to activate it. Press Back to leave this screen."
+msgstr "使用方向键选择按钮，按中键激活。按返回键退出此界面。"
+
+msgid "Press Back to leave this screen."
+msgstr "按返回键退出此界面。"
+
 msgid "Stop Server"
 msgstr "停止服务器"
 
-msgid "Stopping server..."
-msgstr "正在停止服务器..."
+msgid "File server is running"
+msgstr "文件服务器正在运行"
 
-msgid "Server running in the background. Stop the server to save battery."
-msgstr "服务器正在后台运行。停止服务器以节省电量。"
+msgid "The server will keep running in the background and prevent the device from sleeping. What would you like to do?"
+msgstr "服务器将在后台继续运行，并阻止设备进入休眠。您想怎么做？"
+
+msgid "Stop server"
+msgstr "停止服务器"
+
+msgid "Keep running"
+msgstr "保持运行"
 
 msgid "Image preview"
 msgstr "图片预览"
+
+# ==============================
+# Plugin updater
+# ==============================
+
+msgid "Checking for updates..."
+msgstr "正在检查更新..."
+
+msgid "FileSync is up to date (v%1)."
+msgstr "FileSync 已是最新版本（v%1）。"
+
+msgid "A new version of FileSync is available!\n\nCurrent: v%1\nNew: v%2"
+msgstr "FileSync 有新版本可用！\n\n当前：v%1\n最新：v%2"
+
+msgid "Update now"
+msgstr "立即更新"
+
+msgid "Later"
+msgstr "稍后"
+
+msgid "Downloading update..."
+msgstr "正在下载更新..."
+
+msgid "Installing update..."
+msgstr "正在安装更新..."
+
+msgid "FileSync has been updated successfully!\n\nPlease restart KOReader for the changes to take effect."
+msgstr "FileSync 更新成功！\n\n请重启 KOReader 以使更改生效。"
+
+msgid "Restart now"
+msgstr "立即重启"
+
+msgid "Could not check for updates.\n\n%1"
+msgstr "无法检查更新。\n\n%1"
+
+msgid "Could not determine the latest version."
+msgstr "无法确定最新版本。"
+
+msgid "Could not find a download URL for this release."
+msgstr "未找到此版本的下载链接。"
+
+msgid "Failed to parse update information from GitHub."
+msgstr "无法解析来自 GitHub 的更新信息。"
+
+msgid "GitHub API returned status %1."
+msgstr "GitHub API 返回状态 %1。"
+
+msgid "Network error: could not reach GitHub."
+msgstr "网络错误：无法连接到 GitHub。"
+
+msgid "Download failed with status %1."
+msgstr "下载失败，状态 %1。"
+
+msgid "Download failed.\n\n%1"
+msgstr "下载失败。\n\n%1"
+
+msgid "Download failed: network error."
+msgstr "下载失败：网络错误。"
+
+msgid "Cannot create temporary file: %1"
+msgstr "无法创建临时文件：%1"
+
+msgid "Cannot determine plugin parent directory."
+msgstr "无法确定插件的上级目录。"
+
+msgid "Failed to back up current plugin. Update aborted."
+msgstr "备份当前插件失败。更新已中止。"
+
+msgid "Failed to install update. Previous version has been restored."
+msgstr "安装更新失败。已恢复到先前版本。"
+
+msgid "Update installation failed.\n\n%1"
+msgstr "更新安装失败。\n\n%1"
+
+msgid "Update verification failed: extracted files do not look like a valid plugin."
+msgstr "更新校验失败：解压出的文件不像是有效的插件。"
 
 # ==============================
 # Web UI translations
@@ -257,9 +360,3 @@ msgstr "新建文件夹"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "同时删除阅读元数据（.sdr）"
-
-msgid "Large files may slow down the e-reader UI during transfer"
-msgstr "大文件可能会在传输期间导致阅读器界面变慢"
-
-msgid "exceeds the 1 GB limit"
-msgstr "超过 1 GB 限制"

@@ -14,6 +14,9 @@ msgstr "FileSync - Gestor de archivos inalámbrico"
 msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
 msgstr "Inicia un servidor web HTTP local y muestra un código QR. Escanéalo con tu teléfono para gestionar libros y archivos en tu dispositivo de forma inalámbrica a través de una interfaz web."
 
+msgid "Toggle FileSync server"
+msgstr "Alternar servidor FileSync"
+
 msgid "Stop file server"
 msgstr "Detener servidor de archivos"
 
@@ -29,14 +32,20 @@ msgstr "Puerto del servidor"
 msgid "Safe mode"
 msgstr "Modo seguro"
 
+msgid "When enabled, the web interface only lists document and image formats KOReader can open, and hides sidecar metadata folders and hidden files.\n\nDisable it to browse every file on the device, including hidden files and folders."
+msgstr "Cuando está activado, la interfaz web solo muestra los formatos de documento e imagen que KOReader puede abrir, y oculta las carpetas de metadatos y los archivos ocultos.\n\nDesactívalo para explorar todos los archivos del dispositivo, incluidos los archivos y carpetas ocultos."
+
 msgid "Show QR code"
 msgstr "Mostrar código QR"
+
+msgid "Check for updates"
+msgstr "Buscar actualizaciones"
 
 msgid "About"
 msgstr "Acerca de"
 
-msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
-msgstr "FileSync v1.0.0\n\nGestor de archivos inalámbrico para KOReader.\n\nInicia el servidor, escanea el código QR con tu teléfono y gestiona tus libros desde cualquier navegador en la misma red WiFi."
+msgid "FileSync v%1\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network.\n\nProject:\ngithub.com/abrahamnm/filesync.koplugin"
+msgstr "FileSync v%1\n\nGestor de archivos inalámbrico para KOReader.\n\nInicia el servidor, escanea el código QR con tu teléfono y gestiona tus libros desde cualquier navegador en la misma red WiFi.\n\nProyecto:\ngithub.com/abrahamnm/filesync.koplugin"
 
 msgid "Cancel"
 msgstr "Cancelar"
@@ -47,14 +56,17 @@ msgstr "Guardar"
 msgid "Port set to %1. Restart the server for changes to take effect."
 msgstr "Puerto configurado a %1. Reinicia el servidor para que los cambios surtan efecto."
 
-msgid "Invalid port. Please enter a number between 1024 and 65535."
-msgstr "Puerto no válido. Introduce un número entre 1024 y 65535."
+msgid "Port set to %1. Ports below 1024 need root access (available on Kobo/Kindle); if unavailable the server falls back to port %2. Restart the server for changes to take effect."
+msgstr "Puerto configurado a %1. Los puertos por debajo de 1024 requieren acceso root (disponible en Kobo/Kindle); si no está disponible, el servidor usará el puerto %2. Reinicia el servidor para que los cambios surtan efecto."
+
+msgid "Invalid port. Please enter a number between 1 and 65535."
+msgstr "Puerto no válido. Introduce un número entre 1 y 65535."
+
+msgid "Port %1 needs root access and isn't available on this device. Using port %2 instead."
+msgstr "El puerto %1 requiere acceso root y no está disponible en este dispositivo. Se usará el puerto %2 en su lugar."
 
 msgid "FileSync server is already running."
 msgstr "El servidor FileSync ya está en ejecución."
-
-msgid "WiFi is not enabled. Please turn on WiFi first."
-msgstr "El WiFi no está activado. Activa el WiFi primero."
 
 msgid "Could not determine device IP address. Make sure WiFi is connected."
 msgstr "No se pudo determinar la dirección IP del dispositivo. Asegúrate de que el WiFi esté conectado."
@@ -64,6 +76,9 @@ msgstr "Error al iniciar el servidor: %1"
 
 msgid "FileSync server stopped."
 msgstr "Servidor FileSync detenido."
+
+msgid "Stopping server..."
+msgstr "Deteniendo servidor..."
 
 msgid "Low Battery"
 msgstr "Batería baja"
@@ -80,17 +95,105 @@ msgstr "El servidor no está en ejecución."
 msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
 msgstr "Escanea el código QR o ingresa la URL\nen tu navegador.\n\nAmbos dispositivos deben estar en la misma red WiFi."
 
+msgid "Use the arrow keys to select a button and press the centre key to activate it. Press Back to leave this screen."
+msgstr "Usa las teclas de flecha para seleccionar un botón y pulsa la tecla central para activarlo. Pulsa Atrás para salir de esta pantalla."
+
+msgid "Press Back to leave this screen."
+msgstr "Pulsa Atrás para salir de esta pantalla."
+
 msgid "Stop Server"
 msgstr "Detener servidor"
 
-msgid "Stopping server..."
-msgstr "Deteniendo servidor..."
+msgid "File server is running"
+msgstr "El servidor de archivos está en ejecución"
 
-msgid "Server running in the background. Stop the server to save battery."
-msgstr "Servidor ejecutándose en segundo plano. Detén el servidor para ahorrar batería."
+msgid "The server will keep running in the background and prevent the device from sleeping. What would you like to do?"
+msgstr "El servidor seguirá ejecutándose en segundo plano e impedirá que el dispositivo entre en suspensión. ¿Qué quieres hacer?"
+
+msgid "Stop server"
+msgstr "Detener servidor"
+
+msgid "Keep running"
+msgstr "Mantener en ejecución"
 
 msgid "Image preview"
 msgstr "Vista previa de imagen"
+
+# ==============================
+# Plugin updater
+# ==============================
+
+msgid "Checking for updates..."
+msgstr "Buscando actualizaciones..."
+
+msgid "FileSync is up to date (v%1)."
+msgstr "FileSync está actualizado (v%1)."
+
+msgid "A new version of FileSync is available!\n\nCurrent: v%1\nNew: v%2"
+msgstr "¡Hay una nueva versión de FileSync disponible!\n\nActual: v%1\nNueva: v%2"
+
+msgid "Update now"
+msgstr "Actualizar ahora"
+
+msgid "Later"
+msgstr "Más tarde"
+
+msgid "Downloading update..."
+msgstr "Descargando actualización..."
+
+msgid "Installing update..."
+msgstr "Instalando actualización..."
+
+msgid "FileSync has been updated successfully!\n\nPlease restart KOReader for the changes to take effect."
+msgstr "¡FileSync se ha actualizado correctamente!\n\nReinicia KOReader para que los cambios surtan efecto."
+
+msgid "Restart now"
+msgstr "Reiniciar ahora"
+
+msgid "Could not check for updates.\n\n%1"
+msgstr "No se pudo buscar actualizaciones.\n\n%1"
+
+msgid "Could not determine the latest version."
+msgstr "No se pudo determinar la última versión."
+
+msgid "Could not find a download URL for this release."
+msgstr "No se encontró una URL de descarga para esta versión."
+
+msgid "Failed to parse update information from GitHub."
+msgstr "No se pudo procesar la información de actualización de GitHub."
+
+msgid "GitHub API returned status %1."
+msgstr "La API de GitHub devolvió el estado %1."
+
+msgid "Network error: could not reach GitHub."
+msgstr "Error de red: no se pudo conectar con GitHub."
+
+msgid "Download failed with status %1."
+msgstr "La descarga falló con el estado %1."
+
+msgid "Download failed.\n\n%1"
+msgstr "La descarga falló.\n\n%1"
+
+msgid "Download failed: network error."
+msgstr "La descarga falló: error de red."
+
+msgid "Cannot create temporary file: %1"
+msgstr "No se puede crear el archivo temporal: %1"
+
+msgid "Cannot determine plugin parent directory."
+msgstr "No se puede determinar el directorio padre del complemento."
+
+msgid "Failed to back up current plugin. Update aborted."
+msgstr "No se pudo hacer una copia de seguridad del complemento actual. Actualización cancelada."
+
+msgid "Failed to install update. Previous version has been restored."
+msgstr "No se pudo instalar la actualización. Se ha restaurado la versión anterior."
+
+msgid "Update installation failed.\n\n%1"
+msgstr "Error al instalar la actualización.\n\n%1"
+
+msgid "Update verification failed: extracted files do not look like a valid plugin."
+msgstr "Error al verificar la actualización: los archivos extraídos no parecen un complemento válido."
 
 # ==============================
 # Web UI translations
@@ -257,9 +360,3 @@ msgstr "Nueva carpeta"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "Tambi\u00e9n eliminar metadatos de lectura (.sdr)"
-
-msgid "Large files may slow down the e-reader UI during transfer"
-msgstr "Los archivos grandes pueden ralentizar la interfaz del lector durante la transferencia"
-
-msgid "exceeds the 1 GB limit"
-msgstr "supera el l\u00edmite de 1 GB"

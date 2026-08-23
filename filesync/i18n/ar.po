@@ -14,6 +14,9 @@ msgstr "FileSync - مدير الملفات اللاسلكي"
 msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
 msgstr "يُشغّل خادم HTTP محلي ويعرض رمز QR. امسحه بهاتفك لإدارة الكتب والملفات على جهازك لاسلكيًا من خلال واجهة ويب بسيطة."
 
+msgid "Toggle FileSync server"
+msgstr "تبديل خادم FileSync"
+
 msgid "Stop file server"
 msgstr "إيقاف خادم الملفات"
 
@@ -29,14 +32,20 @@ msgstr "منفذ الخادم"
 msgid "Safe mode"
 msgstr "الوضع الآمن"
 
+msgid "When enabled, the web interface only lists document and image formats KOReader can open, and hides sidecar metadata folders and hidden files.\n\nDisable it to browse every file on the device, including hidden files and folders."
+msgstr "عند التفعيل، تعرض واجهة الويب فقط صيغ المستندات والصور التي يمكن لـ KOReader فتحها، وتخفي مجلدات البيانات الوصفية المرافقة والملفات المخفية.\n\nعطّله لتصفّح جميع الملفات على الجهاز، بما في ذلك الملفات والمجلدات المخفية."
+
 msgid "Show QR code"
 msgstr "عرض رمز QR"
+
+msgid "Check for updates"
+msgstr "التحقق من التحديثات"
 
 msgid "About"
 msgstr "حول"
 
-msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
-msgstr "FileSync v1.0.0\n\nمدير ملفات لاسلكي لـ KOReader.\n\nشغّل الخادم، وامسح رمز QR بهاتفك، وأدِر كتبك من أي متصفح على نفس شبكة WiFi."
+msgid "FileSync v%1\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network.\n\nProject:\ngithub.com/abrahamnm/filesync.koplugin"
+msgstr "FileSync v%1\n\nمدير ملفات لاسلكي لـ KOReader.\n\nشغّل الخادم، وامسح رمز QR بهاتفك، وأدِر كتبك من أي متصفح على نفس شبكة WiFi.\n\nالمشروع:\ngithub.com/abrahamnm/filesync.koplugin"
 
 msgid "Cancel"
 msgstr "إلغاء"
@@ -47,14 +56,17 @@ msgstr "حفظ"
 msgid "Port set to %1. Restart the server for changes to take effect."
 msgstr "تم تعيين المنفذ إلى %1. أعد تشغيل الخادم لتطبيق التغييرات."
 
-msgid "Invalid port. Please enter a number between 1024 and 65535."
-msgstr "منفذ غير صالح. يرجى إدخال رقم بين 1024 و65535."
+msgid "Port set to %1. Ports below 1024 need root access (available on Kobo/Kindle); if unavailable the server falls back to port %2. Restart the server for changes to take effect."
+msgstr "تم تعيين المنفذ إلى %1. المنافذ الأقل من 1024 تتطلب صلاحيات الجذر (متوفرة على Kobo/Kindle)؛ وإن لم تتوفر فسيعود الخادم إلى المنفذ %2. أعد تشغيل الخادم لتطبيق التغييرات."
+
+msgid "Invalid port. Please enter a number between 1 and 65535."
+msgstr "منفذ غير صالح. يرجى إدخال رقم بين 1 و65535."
+
+msgid "Port %1 needs root access and isn't available on this device. Using port %2 instead."
+msgstr "المنفذ %1 يتطلب صلاحيات الجذر وهو غير متاح على هذا الجهاز. سيتم استخدام المنفذ %2 بدلًا منه."
 
 msgid "FileSync server is already running."
 msgstr "خادم FileSync يعمل بالفعل."
-
-msgid "WiFi is not enabled. Please turn on WiFi first."
-msgstr "WiFi غير مفعّل. يرجى تشغيل WiFi أولًا."
 
 msgid "Could not determine device IP address. Make sure WiFi is connected."
 msgstr "تعذّر تحديد عنوان IP الخاص بالجهاز. تأكد من أن WiFi متصل."
@@ -64,6 +76,9 @@ msgstr "فشل تشغيل الخادم: %1"
 
 msgid "FileSync server stopped."
 msgstr "تم إيقاف خادم FileSync."
+
+msgid "Stopping server..."
+msgstr "جارٍ إيقاف الخادم..."
 
 msgid "Low Battery"
 msgstr "بطارية منخفضة"
@@ -80,14 +95,105 @@ msgstr "الخادم لا يعمل."
 msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
 msgstr "امسح رمز QR أو أدخل عنوان URL\nفي متصفحك.\n\nيجب أن يكون كلا الجهازين على نفس شبكة WiFi."
 
+msgid "Use the arrow keys to select a button and press the centre key to activate it. Press Back to leave this screen."
+msgstr "استخدم مفاتيح الأسهم لاختيار زر واضغط المفتاح الأوسط لتفعيله. اضغط رجوع لمغادرة هذه الشاشة."
+
+msgid "Press Back to leave this screen."
+msgstr "اضغط رجوع لمغادرة هذه الشاشة."
+
 msgid "Stop Server"
 msgstr "إيقاف الخادم"
 
-msgid "Server running in the background. Stop the server to save battery."
-msgstr "الخادم يعمل في الخلفية. أوقف الخادم للحفاظ على البطارية."
+msgid "File server is running"
+msgstr "خادم الملفات يعمل"
+
+msgid "The server will keep running in the background and prevent the device from sleeping. What would you like to do?"
+msgstr "سيستمر الخادم في العمل في الخلفية وسيمنع الجهاز من الدخول في وضع السكون. ماذا تريد أن تفعل؟"
+
+msgid "Stop server"
+msgstr "إيقاف الخادم"
+
+msgid "Keep running"
+msgstr "إبقاؤه يعمل"
 
 msgid "Image preview"
 msgstr "معاينة الصورة"
+
+# ==============================
+# Plugin updater
+# ==============================
+
+msgid "Checking for updates..."
+msgstr "جارٍ التحقق من التحديثات..."
+
+msgid "FileSync is up to date (v%1)."
+msgstr "FileSync محدّث (v%1)."
+
+msgid "A new version of FileSync is available!\n\nCurrent: v%1\nNew: v%2"
+msgstr "يتوفر إصدار جديد من FileSync!\n\nالحالي: v%1\nالجديد: v%2"
+
+msgid "Update now"
+msgstr "التحديث الآن"
+
+msgid "Later"
+msgstr "لاحقًا"
+
+msgid "Downloading update..."
+msgstr "جارٍ تنزيل التحديث..."
+
+msgid "Installing update..."
+msgstr "جارٍ تثبيت التحديث..."
+
+msgid "FileSync has been updated successfully!\n\nPlease restart KOReader for the changes to take effect."
+msgstr "تم تحديث FileSync بنجاح!\n\nيرجى إعادة تشغيل KOReader لتطبيق التغييرات."
+
+msgid "Restart now"
+msgstr "إعادة التشغيل الآن"
+
+msgid "Could not check for updates.\n\n%1"
+msgstr "تعذّر التحقق من التحديثات.\n\n%1"
+
+msgid "Could not determine the latest version."
+msgstr "تعذّر تحديد أحدث إصدار."
+
+msgid "Could not find a download URL for this release."
+msgstr "تعذّر العثور على رابط تنزيل لهذا الإصدار."
+
+msgid "Failed to parse update information from GitHub."
+msgstr "فشل تحليل معلومات التحديث من GitHub."
+
+msgid "GitHub API returned status %1."
+msgstr "أعادت واجهة GitHub البرمجية الحالة %1."
+
+msgid "Network error: could not reach GitHub."
+msgstr "خطأ في الشبكة: تعذّر الوصول إلى GitHub."
+
+msgid "Download failed with status %1."
+msgstr "فشل التنزيل بالحالة %1."
+
+msgid "Download failed.\n\n%1"
+msgstr "فشل التنزيل.\n\n%1"
+
+msgid "Download failed: network error."
+msgstr "فشل التنزيل: خطأ في الشبكة."
+
+msgid "Cannot create temporary file: %1"
+msgstr "تعذّر إنشاء ملف مؤقت: %1"
+
+msgid "Cannot determine plugin parent directory."
+msgstr "تعذّر تحديد المجلد الأصل للإضافة."
+
+msgid "Failed to back up current plugin. Update aborted."
+msgstr "فشل النسخ الاحتياطي للإضافة الحالية. تم إلغاء التحديث."
+
+msgid "Failed to install update. Previous version has been restored."
+msgstr "فشل تثبيت التحديث. تمت استعادة الإصدار السابق."
+
+msgid "Update installation failed.\n\n%1"
+msgstr "فشل تثبيت التحديث.\n\n%1"
+
+msgid "Update verification failed: extracted files do not look like a valid plugin."
+msgstr "فشل التحقق من التحديث: الملفات المستخرجة لا تبدو إضافة صالحة."
 
 # ==============================
 # Web UI translations
@@ -254,9 +360,3 @@ msgstr "مجلد جديد"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "حذف بيانات القراءة أيضًا (.sdr)"
-
-msgid "Large files may slow down the e-reader UI during transfer"
-msgstr "قد تتسبب الملفات الكبيرة في إبطاء واجهة جهاز القراءة أثناء النقل"
-
-msgid "exceeds the 1 GB limit"
-msgstr "يتجاوز الحد الأقصى البالغ 1 غيغابايت"

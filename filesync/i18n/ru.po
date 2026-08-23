@@ -14,6 +14,9 @@ msgstr "FileSync - Беспроводной файловый менеджер"
 msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
 msgstr "Запускает локальный HTTP веб-сервер и отображает QR-код. Отсканируйте его телефоном, чтобы управлять книгами и файлами на устройстве по беспроводной сети через удобный веб-интерфейс."
 
+msgid "Toggle FileSync server"
+msgstr "Переключить сервер FileSync"
+
 msgid "Stop file server"
 msgstr "Остановить файловый сервер"
 
@@ -29,14 +32,20 @@ msgstr "Порт сервера"
 msgid "Safe mode"
 msgstr "Безопасный режим"
 
+msgid "When enabled, the web interface only lists document and image formats KOReader can open, and hides sidecar metadata folders and hidden files.\n\nDisable it to browse every file on the device, including hidden files and folders."
+msgstr "Когда включён, веб-интерфейс показывает только форматы документов и изображений, которые может открыть KOReader, и скрывает папки метаданных и скрытые файлы.\n\nОтключите его, чтобы просматривать все файлы на устройстве, включая скрытые файлы и папки."
+
 msgid "Show QR code"
 msgstr "Показать QR-код"
+
+msgid "Check for updates"
+msgstr "Проверить обновления"
 
 msgid "About"
 msgstr "О плагине"
 
-msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
-msgstr "FileSync v1.0.0\n\nБеспроводной файловый менеджер для KOReader.\n\nЗапустите сервер, отсканируйте QR-код телефоном и управляйте книгами из любого браузера в той же сети WiFi."
+msgid "FileSync v%1\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network.\n\nProject:\ngithub.com/abrahamnm/filesync.koplugin"
+msgstr "FileSync v%1\n\nБеспроводной файловый менеджер для KOReader.\n\nЗапустите сервер, отсканируйте QR-код телефоном и управляйте книгами из любого браузера в той же сети WiFi.\n\nПроект:\ngithub.com/abrahamnm/filesync.koplugin"
 
 msgid "Cancel"
 msgstr "Отмена"
@@ -47,14 +56,17 @@ msgstr "Сохранить"
 msgid "Port set to %1. Restart the server for changes to take effect."
 msgstr "Порт установлен на %1. Перезапустите сервер, чтобы изменения вступили в силу."
 
-msgid "Invalid port. Please enter a number between 1024 and 65535."
-msgstr "Недопустимый порт. Введите число от 1024 до 65535."
+msgid "Port set to %1. Ports below 1024 need root access (available on Kobo/Kindle); if unavailable the server falls back to port %2. Restart the server for changes to take effect."
+msgstr "Порт установлен на %1. Порты ниже 1024 требуют прав root (доступны на Kobo/Kindle); если они недоступны, сервер использует порт %2. Перезапустите сервер, чтобы изменения вступили в силу."
+
+msgid "Invalid port. Please enter a number between 1 and 65535."
+msgstr "Недопустимый порт. Введите число от 1 до 65535."
+
+msgid "Port %1 needs root access and isn't available on this device. Using port %2 instead."
+msgstr "Порт %1 требует прав root и недоступен на этом устройстве. Вместо него используется порт %2."
 
 msgid "FileSync server is already running."
 msgstr "Сервер FileSync уже запущен."
-
-msgid "WiFi is not enabled. Please turn on WiFi first."
-msgstr "WiFi не включён. Сначала включите WiFi."
 
 msgid "Could not determine device IP address. Make sure WiFi is connected."
 msgstr "Не удалось определить IP-адрес устройства. Убедитесь, что WiFi подключён."
@@ -64,6 +76,9 @@ msgstr "Не удалось запустить сервер: %1"
 
 msgid "FileSync server stopped."
 msgstr "Сервер FileSync остановлен."
+
+msgid "Stopping server..."
+msgstr "Остановка сервера..."
 
 msgid "Low Battery"
 msgstr "Низкий заряд батареи"
@@ -80,14 +95,105 @@ msgstr "Сервер не запущен."
 msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
 msgstr "Отсканируйте QR-код или введите URL\nв браузере.\n\nОба устройства должны быть в одной сети WiFi."
 
+msgid "Use the arrow keys to select a button and press the centre key to activate it. Press Back to leave this screen."
+msgstr "Используйте клавиши со стрелками, чтобы выбрать кнопку, и нажмите центральную клавишу, чтобы её активировать. Нажмите «Назад», чтобы покинуть этот экран."
+
+msgid "Press Back to leave this screen."
+msgstr "Нажмите «Назад», чтобы покинуть этот экран."
+
 msgid "Stop Server"
 msgstr "Остановить сервер"
 
-msgid "Server running in the background. Stop the server to save battery."
-msgstr "Сервер работает в фоновом режиме. Остановите сервер для экономии батареи."
+msgid "File server is running"
+msgstr "Файловый сервер работает"
+
+msgid "The server will keep running in the background and prevent the device from sleeping. What would you like to do?"
+msgstr "Сервер продолжит работать в фоновом режиме и не даст устройству перейти в спящий режим. Что вы хотите сделать?"
+
+msgid "Stop server"
+msgstr "Остановить сервер"
+
+msgid "Keep running"
+msgstr "Оставить работать"
 
 msgid "Image preview"
 msgstr "Предпросмотр изображения"
+
+# ==============================
+# Plugin updater
+# ==============================
+
+msgid "Checking for updates..."
+msgstr "Проверка обновлений..."
+
+msgid "FileSync is up to date (v%1)."
+msgstr "FileSync обновлён до последней версии (v%1)."
+
+msgid "A new version of FileSync is available!\n\nCurrent: v%1\nNew: v%2"
+msgstr "Доступна новая версия FileSync!\n\nТекущая: v%1\nНовая: v%2"
+
+msgid "Update now"
+msgstr "Обновить сейчас"
+
+msgid "Later"
+msgstr "Позже"
+
+msgid "Downloading update..."
+msgstr "Загрузка обновления..."
+
+msgid "Installing update..."
+msgstr "Установка обновления..."
+
+msgid "FileSync has been updated successfully!\n\nPlease restart KOReader for the changes to take effect."
+msgstr "FileSync успешно обновлён!\n\nПерезапустите KOReader, чтобы изменения вступили в силу."
+
+msgid "Restart now"
+msgstr "Перезапустить сейчас"
+
+msgid "Could not check for updates.\n\n%1"
+msgstr "Не удалось проверить обновления.\n\n%1"
+
+msgid "Could not determine the latest version."
+msgstr "Не удалось определить последнюю версию."
+
+msgid "Could not find a download URL for this release."
+msgstr "Не удалось найти ссылку для загрузки этой версии."
+
+msgid "Failed to parse update information from GitHub."
+msgstr "Не удалось обработать информацию об обновлении с GitHub."
+
+msgid "GitHub API returned status %1."
+msgstr "GitHub API вернул статус %1."
+
+msgid "Network error: could not reach GitHub."
+msgstr "Ошибка сети: не удалось подключиться к GitHub."
+
+msgid "Download failed with status %1."
+msgstr "Загрузка не удалась, статус %1."
+
+msgid "Download failed.\n\n%1"
+msgstr "Загрузка не удалась.\n\n%1"
+
+msgid "Download failed: network error."
+msgstr "Загрузка не удалась: ошибка сети."
+
+msgid "Cannot create temporary file: %1"
+msgstr "Не удалось создать временный файл: %1"
+
+msgid "Cannot determine plugin parent directory."
+msgstr "Не удалось определить родительский каталог плагина."
+
+msgid "Failed to back up current plugin. Update aborted."
+msgstr "Не удалось создать резервную копию текущего плагина. Обновление отменено."
+
+msgid "Failed to install update. Previous version has been restored."
+msgstr "Не удалось установить обновление. Предыдущая версия восстановлена."
+
+msgid "Update installation failed.\n\n%1"
+msgstr "Не удалось установить обновление.\n\n%1"
+
+msgid "Update verification failed: extracted files do not look like a valid plugin."
+msgstr "Проверка обновления не пройдена: извлечённые файлы не похожи на действительный плагин."
 
 # ==============================
 # Web UI translations
@@ -254,9 +360,3 @@ msgstr "Новая папка"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "Также удалить метаданные чтения (.sdr)"
-
-msgid "Large files may slow down the e-reader UI during transfer"
-msgstr "Большие файлы могут замедлить интерфейс электронной книги во время передачи"
-
-msgid "exceeds the 1 GB limit"
-msgstr "превышает лимит в 1 ГБ"

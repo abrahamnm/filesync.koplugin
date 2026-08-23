@@ -14,6 +14,9 @@ msgstr "FileSync - Gestionnaire de fichiers sans fil"
 msgid "Launches a local HTTP web server and displays a QR code. Scan with your phone to manage books and files on your device wirelessly through a clean web interface."
 msgstr "Lance un serveur web HTTP local et affiche un code QR. Scannez-le avec votre téléphone pour gérer vos livres et fichiers sur votre appareil sans fil via une interface web épurée."
 
+msgid "Toggle FileSync server"
+msgstr "Basculer le serveur FileSync"
+
 msgid "Stop file server"
 msgstr "Arrêter le serveur de fichiers"
 
@@ -29,14 +32,20 @@ msgstr "Port du serveur"
 msgid "Safe mode"
 msgstr "Mode sécurisé"
 
+msgid "When enabled, the web interface only lists document and image formats KOReader can open, and hides sidecar metadata folders and hidden files.\n\nDisable it to browse every file on the device, including hidden files and folders."
+msgstr "Lorsqu'il est activé, l'interface web n'affiche que les formats de document et d'image que KOReader peut ouvrir, et masque les dossiers de métadonnées ainsi que les fichiers cachés.\n\nDésactivez-le pour parcourir tous les fichiers de l'appareil, y compris les fichiers et dossiers cachés."
+
 msgid "Show QR code"
 msgstr "Afficher le code QR"
+
+msgid "Check for updates"
+msgstr "Rechercher des mises à jour"
 
 msgid "About"
 msgstr "À propos"
 
-msgid "FileSync v1.0.0\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network."
-msgstr "FileSync v1.0.0\n\nGestionnaire de fichiers sans fil pour KOReader.\n\nDémarrez le serveur, scannez le code QR avec votre téléphone et gérez vos livres depuis n'importe quel navigateur sur le même réseau WiFi."
+msgid "FileSync v%1\n\nWireless file manager for KOReader.\n\nStart the server, scan the QR code with your phone, and manage your books from any browser on the same WiFi network.\n\nProject:\ngithub.com/abrahamnm/filesync.koplugin"
+msgstr "FileSync v%1\n\nGestionnaire de fichiers sans fil pour KOReader.\n\nDémarrez le serveur, scannez le code QR avec votre téléphone et gérez vos livres depuis n'importe quel navigateur sur le même réseau WiFi.\n\nProjet :\ngithub.com/abrahamnm/filesync.koplugin"
 
 msgid "Cancel"
 msgstr "Annuler"
@@ -47,14 +56,17 @@ msgstr "Enregistrer"
 msgid "Port set to %1. Restart the server for changes to take effect."
 msgstr "Port défini sur %1. Redémarrez le serveur pour appliquer les modifications."
 
-msgid "Invalid port. Please enter a number between 1024 and 65535."
-msgstr "Port non valide. Veuillez entrer un nombre entre 1024 et 65535."
+msgid "Port set to %1. Ports below 1024 need root access (available on Kobo/Kindle); if unavailable the server falls back to port %2. Restart the server for changes to take effect."
+msgstr "Port défini sur %1. Les ports inférieurs à 1024 nécessitent un accès root (disponible sur Kobo/Kindle) ; s'il n'est pas disponible, le serveur utilisera le port %2. Redémarrez le serveur pour appliquer les modifications."
+
+msgid "Invalid port. Please enter a number between 1 and 65535."
+msgstr "Port non valide. Veuillez entrer un nombre entre 1 et 65535."
+
+msgid "Port %1 needs root access and isn't available on this device. Using port %2 instead."
+msgstr "Le port %1 nécessite un accès root et n'est pas disponible sur cet appareil. Le port %2 sera utilisé à la place."
 
 msgid "FileSync server is already running."
 msgstr "Le serveur FileSync est déjà en cours d'exécution."
-
-msgid "WiFi is not enabled. Please turn on WiFi first."
-msgstr "Le WiFi n'est pas activé. Veuillez d'abord activer le WiFi."
 
 msgid "Could not determine device IP address. Make sure WiFi is connected."
 msgstr "Impossible de déterminer l'adresse IP de l'appareil. Vérifiez que le WiFi est connecté."
@@ -64,6 +76,9 @@ msgstr "Échec du démarrage du serveur : %1"
 
 msgid "FileSync server stopped."
 msgstr "Serveur FileSync arrêté."
+
+msgid "Stopping server..."
+msgstr "Arrêt du serveur..."
 
 msgid "Low Battery"
 msgstr "Batterie faible"
@@ -80,14 +95,105 @@ msgstr "Le serveur n'est pas en cours d'exécution."
 msgid "Scan the QR code or enter the URL\nin your browser.\n\nBoth devices must be on the same WiFi network."
 msgstr "Scannez le code QR ou saisissez l'URL\ndans votre navigateur.\n\nLes deux appareils doivent être sur le même réseau WiFi."
 
+msgid "Use the arrow keys to select a button and press the centre key to activate it. Press Back to leave this screen."
+msgstr "Utilisez les touches fléchées pour sélectionner un bouton et appuyez sur la touche centrale pour l'activer. Appuyez sur Retour pour quitter cet écran."
+
+msgid "Press Back to leave this screen."
+msgstr "Appuyez sur Retour pour quitter cet écran."
+
 msgid "Stop Server"
 msgstr "Arrêter le serveur"
 
-msgid "Server running in the background. Stop the server to save battery."
-msgstr "Serveur en cours d'exécution en arrière-plan. Arrêtez le serveur pour économiser la batterie."
+msgid "File server is running"
+msgstr "Le serveur de fichiers est en cours d'exécution"
+
+msgid "The server will keep running in the background and prevent the device from sleeping. What would you like to do?"
+msgstr "Le serveur continuera de fonctionner en arrière-plan et empêchera l'appareil de se mettre en veille. Que souhaitez-vous faire ?"
+
+msgid "Stop server"
+msgstr "Arrêter le serveur"
+
+msgid "Keep running"
+msgstr "Laisser en marche"
 
 msgid "Image preview"
 msgstr "Aperçu de l'image"
+
+# ==============================
+# Plugin updater
+# ==============================
+
+msgid "Checking for updates..."
+msgstr "Recherche de mises à jour..."
+
+msgid "FileSync is up to date (v%1)."
+msgstr "FileSync est à jour (v%1)."
+
+msgid "A new version of FileSync is available!\n\nCurrent: v%1\nNew: v%2"
+msgstr "Une nouvelle version de FileSync est disponible !\n\nActuelle : v%1\nNouvelle : v%2"
+
+msgid "Update now"
+msgstr "Mettre à jour maintenant"
+
+msgid "Later"
+msgstr "Plus tard"
+
+msgid "Downloading update..."
+msgstr "Téléchargement de la mise à jour..."
+
+msgid "Installing update..."
+msgstr "Installation de la mise à jour..."
+
+msgid "FileSync has been updated successfully!\n\nPlease restart KOReader for the changes to take effect."
+msgstr "FileSync a été mis à jour avec succès !\n\nVeuillez redémarrer KOReader pour appliquer les modifications."
+
+msgid "Restart now"
+msgstr "Redémarrer maintenant"
+
+msgid "Could not check for updates.\n\n%1"
+msgstr "Impossible de rechercher des mises à jour.\n\n%1"
+
+msgid "Could not determine the latest version."
+msgstr "Impossible de déterminer la dernière version."
+
+msgid "Could not find a download URL for this release."
+msgstr "Aucune URL de téléchargement n'a été trouvée pour cette version."
+
+msgid "Failed to parse update information from GitHub."
+msgstr "Impossible d'analyser les informations de mise à jour depuis GitHub."
+
+msgid "GitHub API returned status %1."
+msgstr "L'API GitHub a renvoyé le statut %1."
+
+msgid "Network error: could not reach GitHub."
+msgstr "Erreur réseau : impossible de joindre GitHub."
+
+msgid "Download failed with status %1."
+msgstr "Échec du téléchargement avec le statut %1."
+
+msgid "Download failed.\n\n%1"
+msgstr "Échec du téléchargement.\n\n%1"
+
+msgid "Download failed: network error."
+msgstr "Échec du téléchargement : erreur réseau."
+
+msgid "Cannot create temporary file: %1"
+msgstr "Impossible de créer le fichier temporaire : %1"
+
+msgid "Cannot determine plugin parent directory."
+msgstr "Impossible de déterminer le répertoire parent du greffon."
+
+msgid "Failed to back up current plugin. Update aborted."
+msgstr "Échec de la sauvegarde du greffon actuel. Mise à jour annulée."
+
+msgid "Failed to install update. Previous version has been restored."
+msgstr "Échec de l'installation de la mise à jour. La version précédente a été restaurée."
+
+msgid "Update installation failed.\n\n%1"
+msgstr "Échec de l'installation de la mise à jour.\n\n%1"
+
+msgid "Update verification failed: extracted files do not look like a valid plugin."
+msgstr "Échec de la vérification de la mise à jour : les fichiers extraits ne semblent pas être un greffon valide."
 
 # ==============================
 # Web UI translations
@@ -254,9 +360,3 @@ msgstr "Nouveau dossier"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "Supprimer aussi les métadonnées de lecture (.sdr)"
-
-msgid "Large files may slow down the e-reader UI during transfer"
-msgstr "Les fichiers volumineux peuvent ralentir l'interface de la liseuse pendant le transfert"
-
-msgid "exceeds the 1 GB limit"
-msgstr "dépasse la limite de 1 Go"
