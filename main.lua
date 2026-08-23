@@ -149,6 +149,32 @@ function FileSync:onLeaveStandby()
     self:onResume()
 end
 
+--- Called by KOReader's plugin manager (v2026.07+) when the user picks
+--- "Delete plugin settings". Its presence is what makes those menu entries
+--- appear: settings live as flat keys in G_reader_settings, so neither
+--- settings_file nor settings_key applies here.
+function FileSync:deletePluginSettings()
+    local FileSyncManager = require("filesync/filesyncmanager")
+    FileSyncManager:deleteSettings()
+end
+
+--- Called by KOReader's plugin manager before the plugin directory is removed.
+--- Shuts the HTTP server down (and drops the Kindle firewall rules) so nothing
+--- outlives the deletion; the caller restarts KOReader afterwards.
+function FileSync:stopPlugin(force)
+    local FileSyncManager = require("filesync/filesyncmanager")
+    if not FileSyncManager:isRunning() then
+        return true
+    end
+    local ok, err = pcall(function()
+        FileSyncManager:stop(true) -- silent: no restart, the caller handles it
+    end)
+    if not ok and force then
+        return true
+    end
+    return ok, err
+end
+
 function FileSync:onExit()
     local FileSyncManager = require("filesync/filesyncmanager")
     if FileSyncManager:isRunning() then

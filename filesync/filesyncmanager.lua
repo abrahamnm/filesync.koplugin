@@ -92,6 +92,21 @@ function FileSyncManager:setSafeMode(enabled)
     G_reader_settings:flush()
 end
 
+--- Settings this plugin persists in G_reader_settings. Kept in one place so
+--- deleteSettings() cannot drift from the readers/writers above.
+local SETTINGS_KEYS = { "filesync_port", "filesync_safe_mode" }
+
+--- Remove every setting this plugin owns, restoring first-run defaults.
+--- Called by KOReader's plugin manager through FileSync:deletePluginSettings().
+function FileSyncManager:deleteSettings()
+    for _i, key in ipairs(SETTINGS_KEYS) do
+        G_reader_settings:delSetting(key)
+    end
+    G_reader_settings:flush()
+    -- Drop the cached port so a still-loaded instance re-reads the default.
+    self._port = nil
+end
+
 function FileSyncManager:configurePort()
     local InputDialog = require("ui/widget/inputdialog")
     local port_dialog
