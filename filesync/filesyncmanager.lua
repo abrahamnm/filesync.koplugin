@@ -4,6 +4,7 @@
 ---
 --- Key dependencies: device (KOReader), UIManager (KOReader), filesync/httpserver
 
+local BD = require("ui/bidi")
 local Blitbuffer = require("ffi/blitbuffer")
 local ButtonTable = require("ui/widget/buttontable")
 local CenterContainer = require("ui/widget/container/centercontainer")
@@ -604,6 +605,26 @@ function FileSyncManager:showQRCode()
     if widget.layout[1] and widget.layout[1][1] then
         -- Start with "Stop Server" focused (only visibly so on non-touch devices)
         widget:refocusWidget()
+    end
+
+    -- FocusManager only steps vertically between rows of its layout, and our
+    -- two buttons live side by side in a single row, so Up/Down would move
+    -- nowhere. Map them onto the equivalent horizontal move, so the buttons can
+    -- be cycled with either axis (Left is not even available on few-keys
+    -- devices, where Up/Down is the only way across).
+    local focusMove = widget.onFocusMove
+    function widget:onFocusMove(args)
+        local dx, dy = unpack(args)
+        if dx == 0 and dy ~= 0 and #self.layout == 1 then
+            dx = dy > 0 and 1 or -1
+            if BD.mirroredUILayout() then
+                -- onFocusMove flips dx again in RTL; undo it here so that Down
+                -- always moves to the next button as laid out on screen.
+                dx = -dx
+            end
+            args = { dx, 0 }
+        end
+        return focusMove(self, args)
     end
 
     -- Key handling: on any device with keys, Back leaves the screen through the
