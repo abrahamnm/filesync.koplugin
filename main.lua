@@ -58,6 +58,9 @@ function FileSync:addToMainMenu(menu_items)
             },
             {
                 text = _("Safe mode"),
+                help_text = _([[When enabled, the web interface only lists document and image formats KOReader can open, and hides sidecar metadata folders and hidden files.
+
+Disable it to browse every file on the device, including hidden files and folders.]]),
                 checked_func = function()
                     local FileSyncManager = require("filesync/filesyncmanager")
                     return FileSyncManager:getSafeMode()

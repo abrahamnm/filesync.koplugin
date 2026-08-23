@@ -1,9 +1,52 @@
 -- Stub lfs before requiring fileops, since fileops tries to load it at require-time.
--- We only need a minimal stub; the pure-logic helpers we test don't use lfs.
-package.loaded["lfs"] = {
+-- Most of the helpers we test are pure logic and never touch it; listDirectory does,
+-- so the stub is programmable via mountTree() below. fileops keeps a reference to
+-- this exact table, so replacing its fields in place is enough to steer it.
+local lfs_stub = {
     attributes = function() return nil end,
     dir = function() return function() return nil end end,
 }
+package.loaded["lfs"] = lfs_stub
+
+--- Point the lfs stub at a virtual filesystem.
+--- @param tree table: map of absolute path -> {mode = "directory"|"file", size, modification}
+local function mountTree(tree)
+    lfs_stub.attributes = function(path)
+        return tree[path]
+    end
+    lfs_stub.dir = function(path)
+        local names = {".", ".."}
+        local prefix = path .. "/"
+        for entry_path, _ in pairs(tree) do
+            local name = entry_path:sub(#prefix + 1)
+            -- Direct children only: starts with the prefix, no further slash
+            if entry_path:sub(1, #prefix) == prefix and name ~= "" and not name:find("/") then
+                table.insert(names, name)
+            end
+        end
+        table.sort(names)
+        local i = 0
+        return function()
+            i = i + 1
+            return names[i]
+        end
+    end
+end
+
+--- Restore the inert default stub so unrelated tests are unaffected.
+local function unmountTree()
+    lfs_stub.attributes = function() return nil end
+    lfs_stub.dir = function() return function() return nil end end
+end
+
+--- Collect entry names from a listDirectory result into a lookup table.
+local function nameSet(result)
+    local set = {}
+    for _, entry in ipairs(result.entries) do
+        set[entry.name] = true
+    end
+    return set
+end
 
 local FileOps = require("filesync/fileops")
 
@@ -344,6 +387,86 @@ describe("filesync.fileops", function()
 
         it("returns false for nil", function()
             assert.is_false(FileOps:isExtensionSafe(nil))
+        end)
+    end)
+    describe("listDirectory hidden entries", function()
+
+        -- A root holding every interesting category: hidden dir, hidden dotfile
+        -- with a non-whitelisted name, hidden dotfile that *is* whitelisted,
+        -- a sidecar .sdr directory, and ordinary safe/unsafe files.
+        local TREE = {
+            ["/mnt/us"]              = {mode = "directory", size = 4096, modification = 100},
+            ["/mnt/us/.config"]      = {mode = "directory", size = 4096, modification = 100},
+            ["/mnt/us/.gitignore"]   = {mode = "file",      size = 12,   modification = 100},
+            ["/mnt/us/.hidden.epub"] = {mode = "file",      size = 34,   modification = 100},
+            ["/mnt/us/Books"]        = {mode = "directory", size = 4096, modification = 100},
+            ["/mnt/us/book.epub"]    = {mode = "file",      size = 56,   modification = 100},
+            ["/mnt/us/book.sdr"]     = {mode = "directory", size = 4096, modification = 100},
+            ["/mnt/us/notes.txt"]    = {mode = "file",      size = 78,   modification = 100},
+            ["/mnt/us/script.sh"]    = {mode = "file",      size = 90,   modification = 100},
+        }
+
+        before_each(function()
+            FileOps:setRootDir("/mnt/us")
+            mountTree(TREE)
+        end)
+
+        after_each(function()
+            unmountTree()
+        end)
+
+        it("hides dotfiles and dot-directories in safe mode", function()
+            local result = FileOps:listDirectory("/", "name", "asc", "", true)
+            local names = nameSet(result)
+            assert.is_nil(names[".config"])
+            assert.is_nil(names[".gitignore"])
+        end)
+
+        it("hides dotfiles in safe mode even with a whitelisted extension", function()
+            local result = FileOps:listDirectory("/", "name", "asc", "", true)
+            assert.is_nil(nameSet(result)[".hidden.epub"])
+        end)
+
+        it("lists dotfiles and dot-directories when safe mode is off", function()
+            local result = FileOps:listDirectory("/", "name", "asc", "", false)
+            local names = nameSet(result)
+            assert.is_true(names[".config"])
+            assert.is_true(names[".gitignore"])
+            assert.is_true(names[".hidden.epub"])
+        end)
+
+        it("still applies the extension whitelist in safe mode", function()
+            local result = FileOps:listDirectory("/", "name", "asc", "", true)
+            local names = nameSet(result)
+            assert.is_true(names["book.epub"])
+            assert.is_true(names["notes.txt"])
+            assert.is_nil(names["script.sh"])
+        end)
+
+        it("still hides .sdr directories in safe mode", function()
+            local result = FileOps:listDirectory("/", "name", "asc", "", true)
+            assert.is_nil(nameSet(result)["book.sdr"])
+        end)
+
+        it("lists .sdr directories and every extension when safe mode is off", function()
+            local result = FileOps:listDirectory("/", "name", "asc", "", false)
+            local names = nameSet(result)
+            assert.is_true(names["book.sdr"])
+            assert.is_true(names["script.sh"])
+        end)
+
+        it("keeps the name filter applied to hidden entries", function()
+            local result = FileOps:listDirectory("/", "name", "asc", "git", false)
+            local names = nameSet(result)
+            assert.is_true(names[".gitignore"])
+            assert.is_nil(names["book.epub"])
+        end)
+
+        it("reports a count matching the visible entries", function()
+            local safe = FileOps:listDirectory("/", "name", "asc", "", true)
+            local unsafe = FileOps:listDirectory("/", "name", "asc", "", false)
+            assert.are.equal(3, safe.count)
+            assert.are.equal(8, unsafe.count)
         end)
     end)
 end)
