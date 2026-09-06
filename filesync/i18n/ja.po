@@ -363,3 +363,40 @@ msgstr "新しいフォルダ"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "読書メタデータ (.sdr) も削除する"
+
+# ==============================
+# Web UI — text editor
+# ==============================
+msgid "Edit"
+msgstr "編集"
+
+msgid "Edit file"
+msgstr "ファイルを編集"
+
+msgid "Read-only"
+msgstr "読み取り専用"
+
+msgid "lines"
+msgstr "行"
+
+msgid "Unsaved changes"
+msgstr "未保存の変更"
+
+msgid "Discard unsaved changes?"
+msgstr "未保存の変更を破棄しますか？"
+
+msgid "Discard"
+msgstr "破棄"
+
+msgid "Saving..."
+msgstr "保存中..."
+
+msgid "Saved successfully"
+msgstr "保存しました"
+
+msgid "Save failed:"
+msgstr "保存に失敗しました:"
+
+msgid "Failed to open file"
+msgstr "ファイルを開けませんでした"
+

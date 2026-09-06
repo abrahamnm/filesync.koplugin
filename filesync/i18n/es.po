@@ -363,3 +363,40 @@ msgstr "Nueva carpeta"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "Tambi\u00e9n eliminar metadatos de lectura (.sdr)"
+
+# ==============================
+# Web UI — text editor
+# ==============================
+msgid "Edit"
+msgstr "Editar"
+
+msgid "Edit file"
+msgstr "Editar archivo"
+
+msgid "Read-only"
+msgstr "Solo lectura"
+
+msgid "lines"
+msgstr "líneas"
+
+msgid "Unsaved changes"
+msgstr "Cambios sin guardar"
+
+msgid "Discard unsaved changes?"
+msgstr "¿Descartar los cambios sin guardar?"
+
+msgid "Discard"
+msgstr "Descartar"
+
+msgid "Saving..."
+msgstr "Guardando..."
+
+msgid "Saved successfully"
+msgstr "Guardado correctamente"
+
+msgid "Save failed:"
+msgstr "Error al guardar:"
+
+msgid "Failed to open file"
+msgstr "No se pudo abrir el archivo"
+

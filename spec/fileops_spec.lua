@@ -469,4 +469,61 @@ describe("filesync.fileops", function()
             assert.are.equal(8, unsafe.count)
         end)
     end)
+
+    describe("isEditableExtension", function()
+        it("recognises common text/code extensions", function()
+            assert.is_true(FileOps:isEditableExtension("settings.lua"))
+            assert.is_true(FileOps:isEditableExtension("app.js"))
+            assert.is_true(FileOps:isEditableExtension("package.json"))
+            assert.is_true(FileOps:isEditableExtension("style.css"))
+            assert.is_true(FileOps:isEditableExtension("notes.md"))
+            assert.is_true(FileOps:isEditableExtension("koreader.conf"))
+            assert.is_true(FileOps:isEditableExtension("settings.reader.lua"))
+            assert.is_true(FileOps:isEditableExtension("plain.txt"))
+        end)
+
+        it("is case-insensitive", function()
+            assert.is_true(FileOps:isEditableExtension("README.MD"))
+            assert.is_true(FileOps:isEditableExtension("File.LUA"))
+        end)
+
+        it("rejects binary/document-only extensions", function()
+            assert.is_false(FileOps:isEditableExtension("book.epub"))
+            assert.is_false(FileOps:isEditableExtension("photo.jpg"))
+            assert.is_false(FileOps:isEditableExtension("doc.pdf"))
+        end)
+
+        it("rejects files without an extension", function()
+            assert.is_false(FileOps:isEditableExtension("Makefile"))
+            assert.is_false(FileOps:isEditableExtension("README"))
+        end)
+
+        it("rejects nil", function()
+            assert.is_false(FileOps:isEditableExtension(nil))
+        end)
+    end)
+
+    describe("_looksLikeText", function()
+        it("treats ASCII and UTF-8 content as text", function()
+            assert.is_true(FileOps:_looksLikeText("hello world\nsecond line\n"))
+            assert.is_true(FileOps:_looksLikeText("caf\xc3\xa9 \xe2\x9c\x93 utf8")) -- café ✓
+        end)
+
+        it("treats a NUL byte as binary", function()
+            assert.is_false(FileOps:_looksLikeText("abc\0def"))
+            assert.is_false(FileOps:_looksLikeText("\0\0\0"))
+        end)
+
+        it("only samples the requested number of leading bytes", function()
+            -- NUL appears after the sample window -> still text
+            assert.is_true(FileOps:_looksLikeText("12345\0rest", 5))
+            -- NUL inside the sample window -> binary
+            assert.is_false(FileOps:_looksLikeText("12345\0rest", 10))
+        end)
+
+        it("treats empty and nil content as text", function()
+            assert.is_true(FileOps:_looksLikeText(""))
+            assert.is_true(FileOps:_looksLikeText(nil))
+        end)
+    end)
 end)

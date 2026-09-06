@@ -363,3 +363,40 @@ msgstr "Neuer Ordner"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "Auch Lesemetadaten (.sdr) löschen"
+
+# ==============================
+# Web UI — text editor
+# ==============================
+msgid "Edit"
+msgstr "Bearbeiten"
+
+msgid "Edit file"
+msgstr "Datei bearbeiten"
+
+msgid "Read-only"
+msgstr "Nur lesen"
+
+msgid "lines"
+msgstr "Zeilen"
+
+msgid "Unsaved changes"
+msgstr "Nicht gespeicherte Änderungen"
+
+msgid "Discard unsaved changes?"
+msgstr "Nicht gespeicherte Änderungen verwerfen?"
+
+msgid "Discard"
+msgstr "Verwerfen"
+
+msgid "Saving..."
+msgstr "Speichern..."
+
+msgid "Saved successfully"
+msgstr "Erfolgreich gespeichert"
+
+msgid "Save failed:"
+msgstr "Speichern fehlgeschlagen:"
+
+msgid "Failed to open file"
+msgstr "Datei konnte nicht geöffnet werden"
+

@@ -363,3 +363,40 @@ msgstr "新建文件夹"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "同时删除阅读元数据（.sdr）"
+
+# ==============================
+# Web UI — text editor
+# ==============================
+msgid "Edit"
+msgstr "编辑"
+
+msgid "Edit file"
+msgstr "编辑文件"
+
+msgid "Read-only"
+msgstr "只读"
+
+msgid "lines"
+msgstr "行"
+
+msgid "Unsaved changes"
+msgstr "未保存的更改"
+
+msgid "Discard unsaved changes?"
+msgstr "放弃未保存的更改？"
+
+msgid "Discard"
+msgstr "放弃"
+
+msgid "Saving..."
+msgstr "保存中..."
+
+msgid "Saved successfully"
+msgstr "保存成功"
+
+msgid "Save failed:"
+msgstr "保存失败："
+
+msgid "Failed to open file"
+msgstr "无法打开文件"
+

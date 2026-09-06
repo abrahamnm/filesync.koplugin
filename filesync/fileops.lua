@@ -197,6 +197,169 @@ function FileOps:isExtensionSafe(filename)
     return SAFE_MODE_EXTENSIONS[ext:lower()] == true
 end
 
+-- ============================================================================
+-- In-browser text editor support (read/write text-like files)
+-- ============================================================================
+
+-- Extensions that are treated as text-like (viewable/editable in the web UI).
+-- These are purely a *frontend usability* hint: the server still allows the
+-- editor to open any file whose content is text (see _looksLikeText). Only
+-- binary content is rejected. This mirrors the extension list the frontend
+-- already uses to categorise files as "text"/"code".
+local EDITABLE_TEXT_EXTENSIONS = {
+    txt = true, text = true, md = true, markdown = true, mkd = true, mdown = true,
+    lua = true, js = true, mjs = true, cjs = true, ts = true, jsx = true, tsx = true,
+    json = true, xml = true, yml = true, yaml = true, toml = true,
+    ini = true, cfg = true, conf = true, log = true, sh = true, bash = true, zsh = true,
+    py = true, rb = true, php = true, go = true, rs = true,
+    c = true, h = true, cpp = true, hpp = true, cc = true, cs = true, java = true, kt = true,
+    css = true, scss = true, sass = true, less = true, sql = true,
+    html = true, htm = true, csv = true, svg = true, env = true, properties = true,
+    gradle = true, makefile = true, dockerfile = true,
+}
+
+-- Maximum size (bytes) of a file the editor will open. Larger files stay
+-- download-only to avoid loading huge/binary content into memory.
+local MAX_EDIT_SIZE = 5 * 1024 * 1024 -- 5 MB
+
+--- Extensions that are treated as text-like in the editor.
+--- Used by the frontend-agnostic parts and tests.
+function FileOps:isEditableExtension(filename)
+    if not filename then return false end
+    local ext = filename:match("%.([^%.]+)$")
+    if not ext then return false end
+    return EDITABLE_TEXT_EXTENSIONS[ext:lower()] == true
+end
+
+--- Guess whether file content is text (UTF-8/ASCII) rather than binary.
+--- A file is considered binary if a NUL byte appears within the first
+--- 'sample_bytes' bytes. This is a cheap heuristic that is safe for the
+--- encodings KOReader devices typically hold (UTF-8/ASCII/Latin-1).
+--- @param content string: file content (at least a sample)
+--- @param sample_bytes number|nil: how many leading bytes to inspect
+--- @return boolean: true when the content looks like text
+function FileOps:_looksLikeText(content, sample_bytes)
+    if not content then return true end
+    local limit = sample_bytes or 8000
+    if #content < limit then limit = #content end
+    for i = 1, limit do
+        if string.byte(content, i) == 0 then
+            return false
+        end
+    end
+    return true
+end
+
+--- Read a text file's content for the in-browser editor.
+--- Enforces a size cap (files above MAX_EDIT_SIZE stay download-only) and
+--- rejects binary content so the editor never loads garbage.
+--- @param rel_path string: relative path from root_dir
+--- @return table|nil: {content = string, name = string, editable = boolean} on success
+--- @return string|nil: error message on failure
+function FileOps:readTextFile(rel_path)
+    local full_path, err = self:_resolvePath(rel_path)
+    if not full_path then
+        return nil, err
+    end
+
+    local attr = lfs.attributes(full_path)
+    if not attr or attr.mode ~= "file" then
+        return nil, "Not a file"
+    end
+
+    if attr.size > MAX_EDIT_SIZE then
+        return nil, "File is too large to edit"
+    end
+
+    local f = io.open(full_path, "rb")
+    if not f then
+        return nil, "Cannot open file"
+    end
+
+    local content = f:read("*a")
+    f:close()
+
+    if not content then
+        return nil, "Cannot read file"
+    end
+
+    -- Reject binary content (NUL byte in the head sample). Binary files keep
+    -- today's download-only behaviour and never reach the text editor.
+    if not self:_looksLikeText(content) then
+        return nil, "Binary file cannot be opened in the editor"
+    end
+
+    local filename = full_path:match("([^/]+)$") or "file"
+
+    return {
+        content = content,
+        name = filename,
+        -- Any file that passed the binary/size checks above is text, so it is
+        -- editable — regardless of whether the extension is a "known" code
+        -- type. This lets unknown-extension text files (e.g. ".key" that is
+        -- actually plain text, ".lua.old", "metadata.calibre", or files with
+        -- no extension) be opened and saved. Whether the user may actually
+        -- *save* is decided at the route layer (safe mode).
+        editable = true,
+    }
+end
+
+--- Write text content back to a file (in-place save from the editor).
+--- Uses an atomic temp-file + rename so a failed write never corrupts the
+--- original. Only existing regular files can be overwritten (no creation of
+--- new files, no directory targets).
+--- @param rel_path string: relative path from root_dir
+--- @param content string: full new file content
+--- @return boolean: true on success
+--- @return string|nil: error message on failure
+function FileOps:writeTextFile(rel_path, content)
+    if type(content) ~= "string" then
+        return false, "Invalid content"
+    end
+
+    local full_path, err = self:_resolvePath(rel_path)
+    if not full_path then
+        return false, err
+    end
+
+    -- Only overwrite existing regular files. Refuse to create brand-new files
+    -- or to write into directories — saving is an in-place edit operation.
+    local attr = lfs.attributes(full_path)
+    if not attr or attr.mode ~= "file" then
+        return false, "Not a file"
+    end
+
+    -- Refuse to write over the plugin's own served index as a sanity guard
+    -- (defense in depth; path traversal is already blocked by _resolvePath).
+    if full_path == self._root_dir .. "/filesync/static/index.html" then
+        return false, "Protected file"
+    end
+
+    -- Write to a temp file in the same directory, then atomically rename.
+    local tmp_path = full_path .. ".filesync-tmp"
+    local f, open_err = io.open(tmp_path, "wb")
+    if not f then
+        return false, "Cannot write file: " .. tostring(open_err)
+    end
+
+    local ok, write_err = f:write(content)
+    f:close()
+
+    if not ok then
+        os.remove(tmp_path)
+        return false, "Cannot write file: " .. tostring(write_err)
+    end
+
+    local renamed, rename_err = os.rename(tmp_path, full_path)
+    if not renamed then
+        os.remove(tmp_path)
+        return false, "Cannot save file: " .. tostring(rename_err)
+    end
+
+    logger.info("FileSync: Saved text file", full_path)
+    return true
+end
+
 --- List directory contents with sorting, filtering, and safe mode enforcement.
 --- @param rel_path string: relative path from root_dir
 --- @param sort_by string: sort field ("name", "size", "date", "type")

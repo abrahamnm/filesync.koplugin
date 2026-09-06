@@ -218,6 +218,46 @@
     </div>
 </div>
 
+<!-- Text Editor View -->
+<div class="editor-view" id="editorView">
+    <div class="editor-header">
+        <button class="btn btn-secondary btn-sm" type="button" onclick="editorClose()" data-i18n="Back" title="Back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            <span data-i18n="Back">Back</span>
+        </button>
+        <div class="editor-file">
+            <div class="file-icon text" id="editorIcon"></div>
+            <span class="editor-filename" id="editorFilename"></span>
+            <span class="editor-badge" id="editorBadge" style="display:none;"></span>
+        </div>
+        <div class="editor-status" id="editorStatus"></div>
+        <button class="btn btn-primary btn-sm" type="button" id="editorSaveBtn" onclick="editorSave()" style="display:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+            </svg>
+            <span data-i18n="Save">Save</span>
+        </button>
+    </div>
+    <div class="editor-body">
+        <div class="editor-scroll" id="editorScroll">
+            <div class="editor-layer">
+                <pre class="editor-code editor-highlight" id="editorHighlight" aria-hidden="true"></pre>
+                <textarea class="editor-code editor-input" id="editorInput" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" wrap="off"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="editor-footer">
+        <span class="editor-lines" id="editorLines"></span>
+        <span class="editor-dirty" id="editorDirty" style="display:none;" data-i18n="Unsaved changes"></span>
+        <span class="editor-fs" id="editorSize"></span>
+    </div>
+</div>
+
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 

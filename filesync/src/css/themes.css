@@ -61,4 +61,22 @@
     --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
     --shadow-md: 0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2);
     --shadow-lg: 0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.3);
+    --editor-bg: #0d1118;
+    --editor-fg: #e5e7eb;
+    --editor-tok-kw: #ff7b72;      /* keyword */
+    --editor-tok-str: #a5d6ff;     /* string */
+    --editor-tok-num: #79c0ff;     /* number */
+    --editor-tok-com: #8b949e;     /* comment */
+    --editor-tok-fn: #d2a8ff;      /* function / builtin */
+    --editor-tok-type: #ffa657;    /* type */
+    --editor-tok-op: #e5e7eb;      /* operator */
+    --editor-tok-tag: #7ee787;     /* html tag */
+    --editor-tok-attr: #ffa657;    /* html attr */
+    --editor-tok-prop: #79c0ff;    /* css/ini property */
+    --editor-tok-meta: #8b949e;    /* meta/punctuation */
+    --editor-gutter: #11161d;
+    --editor-gutter-border: #2d3541;
+    --editor-caret: #e5e7eb;
+    --editor-selection: rgba(127, 176, 255, 0.25);
+    --editor-line-active: rgba(127, 176, 255, 0.06);
 }

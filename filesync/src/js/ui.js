@@ -22,6 +22,10 @@
         return months[d.getMonth()] + ' ' + d.getDate() + (d.getFullYear() !== now.getFullYear() ? ', ' + d.getFullYear() : '');
     }
 
+    // Backup suffixes ignored when classifying a filename, so a file like
+    // "settings.lua.old" is still recognised as code (lua).
+    var BACKUP_SUFFIX_RE = /\.(old|bak|orig|backup|copy|save|new)$/;
+
     function getTypeClassFromFilename(name) {
         var lowerName = String(name || '').toLowerCase();
         if (!lowerName) return '';
@@ -34,7 +38,30 @@
         }
         var extMatch = lowerName.match(/\.([^.]+)$/);
         if (!extMatch) return '';
-        return FILE_TYPE_BY_EXTENSION[extMatch[1]] || '';
+        var direct = FILE_TYPE_BY_EXTENSION[extMatch[1]] || '';
+        if (direct) return direct;
+        // Unknown trailing extension: if it is a backup suffix, retry on the
+        // trimmed name so "book.lua.old" resolves via "book.lua".
+        if (BACKUP_SUFFIX_RE.test(lowerName)) {
+            var trimmed = lowerName.replace(BACKUP_SUFFIX_RE, '');
+            if (trimmed) return getTypeClassFromFilename(trimmed);
+        }
+        return '';
+    }
+
+    // Decide whether a file is worth offering the in-browser Edit button.
+    // We offer it for anything that is *not* a clearly-binary/reader format
+    // (ebooks, PDF, comics, images, audio, video, archives, office docs).
+    // Unknown extensions (e.g. .key, .lua.old, metadata.calibre, no extension)
+    // default to editable - the server content-sniffs text vs binary and will
+    // render the file read-only or reject it if it is actually binary.
+    var NON_EDITABLE_TYPE_CLASSES = {
+        ebook: true, reader: true, pdf: true, comic: true, image: true,
+        archive: true, audio: true, video: true, document: true,
+    };
+    function isPotentiallyEditableFile(name) {
+        var cls = getTypeClassFromFilename(name);
+        return !NON_EDITABLE_TYPE_CLASSES[cls];
     }
 
     function getFileDisplayParts(name) {
