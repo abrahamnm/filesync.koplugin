@@ -2,6 +2,10 @@
 
 [English](README.md) | [Español](README.es.md) | [Português](README.pt_BR.md) | [中文](README.zh_CN.md) | **العربية** | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
 
+<p align="center">
+  <a href="https://ko-fi.com/abrahamnm"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" height="36"></a>
+</p>
+
 إضافة لتطبيق KOReader تُشغّل خادم ويب محلي على جهاز القراءة الإلكتروني وتعرض رمز QR على الشاشة. امسح الرمز بهاتفك لفتح واجهة ويب أنيقة لإدارة الكتب والملفات لاسلكيًا — بدون كابلات، بدون تطبيقات، فقط متصفحك.
 
 يعمل على أجهزة **Kindle** و**Kobo** التي تشغّل KOReader.
@@ -255,6 +259,20 @@ busted spec/json_spec.lua
 | `spec/httpserver_spec.lua` | فك ترميز عناوين URL، تحليل سلاسل الاستعلام |
 
 عند إضافة ميزات جديدة، يُرجى إضافة اختبارات مقابلة لأي دوال منطقية بحتة.
+
+## المساهمون
+
+<a href="https://github.com/abrahamnm/filesync.koplugin/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=abrahamnm/filesync.koplugin" />
+</a>
+
+## الدعم
+
+إذا وفّر لك FileSync بعض الوقت، يمكنك دعوتي إلى فنجان قهوة. تقديرك محل ترحيب دائم، ولكنه ليس متوقعًا أبدًا.
+
+<a href="https://ko-fi.com/abrahamnm">
+  <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" />
+</a>
 
 ## الترخيص
 
