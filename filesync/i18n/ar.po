@@ -369,3 +369,40 @@ msgstr "مجلد جديد"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "حذف بيانات القراءة أيضًا (.sdr)"
+
+# ==============================
+# Web UI — text editor
+# ==============================
+msgid "Edit"
+msgstr "تحرير"
+
+msgid "Edit file"
+msgstr "تحرير الملف"
+
+msgid "Read-only"
+msgstr "للقراءة فقط"
+
+msgid "lines"
+msgstr "سطر"
+
+msgid "Unsaved changes"
+msgstr "تغييرات غير محفوظة"
+
+msgid "Discard unsaved changes?"
+msgstr "هل تريد تجاهل التغييرات غير المحفوظة؟"
+
+msgid "Discard"
+msgstr "تجاهل"
+
+msgid "Saving..."
+msgstr "جارٍ الحفظ..."
+
+msgid "Saved successfully"
+msgstr "تم الحفظ بنجاح"
+
+msgid "Save failed:"
+msgstr "فشل الحفظ:"
+
+msgid "Failed to open file"
+msgstr "تعذّر فتح الملف"
+

@@ -369,3 +369,40 @@ msgstr "새 폴더"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "읽기 메타데이터(.sdr)도 함께 삭제"
+
+# ==============================
+# Web UI — text editor
+# ==============================
+msgid "Edit"
+msgstr "편집"
+
+msgid "Edit file"
+msgstr "파일 편집"
+
+msgid "Read-only"
+msgstr "읽기 전용"
+
+msgid "lines"
+msgstr "줄"
+
+msgid "Unsaved changes"
+msgstr "저장되지 않은 변경 사항"
+
+msgid "Discard unsaved changes?"
+msgstr "저장하지 않은 변경 사항을 취소할까요?"
+
+msgid "Discard"
+msgstr "취소"
+
+msgid "Saving..."
+msgstr "저장 중..."
+
+msgid "Saved successfully"
+msgstr "저장되었습니다"
+
+msgid "Save failed:"
+msgstr "저장 실패:"
+
+msgid "Failed to open file"
+msgstr "파일을 열지 못했습니다"
+

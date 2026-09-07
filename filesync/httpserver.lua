@@ -208,7 +208,8 @@ function HttpServer:_handleClient(client)
     local body = nil
     if content_length and content_length > 0 then
         if content_length > MAX_JSON_BODY_SIZE then
-            self:_sendError(client, 413, "Payload Too Large")
+            -- JSON so API clients can parse the error body.
+            self:_sendJSON(client, 413, {error = "Payload too large (limit: 1 MB)"})
             return
         end
         body = self:_readBody(client, content_length)
@@ -249,6 +250,8 @@ end
 ---   GET  /api/metadata   - file metadata (query: path)
 ---   GET  /api/cover      - book cover image (query: path)
 ---   GET  /api/download   - file download (query: path, preview)
+---   GET  /api/read       - read a text file for the editor (query: path)
+---   POST /api/save       - save a text file (body: {path, content}) — disabled in safe mode
 ---   POST /api/upload     - multipart file upload (query: path)
 ---   POST /api/mkdir      - create directory (body: {path, recursive})
 ---   POST /api/rename     - rename file/dir (body: {old_path, new_path})
@@ -444,6 +447,49 @@ function HttpServer:_route(client, method, path, query, headers, body)
                     end
                 end
                 result.file_handle:close()
+            end
+
+        elseif method == "GET" and path == "/api/read" then
+            local file_path = query.path
+            if not file_path then
+                self:_sendJSON(client, 400, {error = "Missing path parameter"})
+                return
+            end
+            -- In safe mode only whitelisted (reader-safe) files may be viewed.
+            if safe_mode then
+                local filename = file_path:match("([^/]+)$")
+                if filename and not FileOps:isExtensionSafe(filename) then
+                    self:_sendJSON(client, 403, {error = "Access denied: file type not allowed in safe mode"})
+                    return
+                end
+            end
+            local result, err_msg = FileOps:readTextFile(file_path)
+            if result then
+                self:_sendJSON(client, 200, {
+                    name = result.name,
+                    content = result.content,
+                    editable = result.editable and not safe_mode,
+                })
+            else
+                self:_sendJSON(client, 400, {error = err_msg or "Cannot read file"})
+            end
+
+        elseif method == "POST" and path == "/api/save" then
+            -- Safe mode is strictly read-only: no writes at all.
+            if safe_mode then
+                self:_sendJSON(client, 403, {error = "Saving is disabled in safe mode"})
+                return
+            end
+            local data = JSON.decode(body)
+            if data and data.path then
+                local ok, err_msg = FileOps:writeTextFile(data.path, data.content)
+                if ok then
+                    self:_sendJSON(client, 200, {success = true})
+                else
+                    self:_sendJSON(client, 400, {error = err_msg or "Cannot save file"})
+                end
+            else
+                self:_sendJSON(client, 400, {error = "Missing path"})
             end
 
         elseif method == "POST" and path == "/api/mkdir" then

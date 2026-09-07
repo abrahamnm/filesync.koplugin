@@ -112,6 +112,7 @@
             document.documentElement.setAttribute("dir", isRTLLanguage(currentLang) ? "rtl" : "ltr");
             initTheme();
             applyStaticTranslations();
+            initEditor();
             return loadFiles();
         })
         .then(function() {

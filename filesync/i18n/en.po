@@ -370,3 +370,40 @@ msgstr ""
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr ""
+
+# ==============================
+# Web UI — text editor
+# ==============================
+
+msgid "Edit"
+msgstr ""
+
+msgid "Edit file"
+msgstr ""
+
+msgid "Read-only"
+msgstr ""
+
+msgid "lines"
+msgstr ""
+
+msgid "Unsaved changes"
+msgstr ""
+
+msgid "Discard unsaved changes?"
+msgstr ""
+
+msgid "Discard"
+msgstr ""
+
+msgid "Saving..."
+msgstr ""
+
+msgid "Saved successfully"
+msgstr ""
+
+msgid "Save failed:"
+msgstr ""
+
+msgid "Failed to open file"
+msgstr ""

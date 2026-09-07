@@ -490,6 +490,118 @@ describe("filesync.fileops", function()
         end)
     end)
 
+    describe("_looksLikeText", function()
+        it("treats ASCII and UTF-8 content as text", function()
+            assert.is_true(FileOps:_looksLikeText("hello world\nsecond line\n"))
+            assert.is_true(FileOps:_looksLikeText("caf\xc3\xa9 \xe2\x9c\x93 utf8")) -- café ✓
+        end)
+
+        it("treats a NUL byte as binary", function()
+            assert.is_false(FileOps:_looksLikeText("abc\0def"))
+            assert.is_false(FileOps:_looksLikeText("\0\0\0"))
+        end)
+
+        it("only samples the requested number of leading bytes", function()
+            -- NUL appears after the sample window -> still text
+            assert.is_true(FileOps:_looksLikeText("12345\0rest", 5))
+            -- NUL inside the sample window -> binary
+            assert.is_false(FileOps:_looksLikeText("12345\0rest", 10))
+        end)
+
+        it("treats empty and nil content as text", function()
+            assert.is_true(FileOps:_looksLikeText(""))
+            assert.is_true(FileOps:_looksLikeText(nil))
+        end)
+    end)
+
+    describe("readTextFile", function()
+
+        before_each(function()
+            FileOps:setRootDir("/mnt/us")
+            mountTree({
+                ["/mnt/us"] = {mode = "directory"},
+                ["/mnt/us/notes.txt"] = {mode = "file", size = 10},
+                ["/mnt/us/huge.log"] = {mode = "file", size = 1024 * 1024},
+                ["/mnt/us/subdir"] = {mode = "directory"},
+            })
+        end)
+
+        after_each(function()
+            unmountTree()
+        end)
+
+        it("rejects path traversal", function()
+            local result, err = FileOps:readTextFile("/../etc/passwd")
+            assert.is_nil(result)
+            assert.is_truthy(err:find("traversal"))
+        end)
+
+        it("returns 'Not a file' for a directory", function()
+            local result, err = FileOps:readTextFile("/subdir")
+            assert.is_nil(result)
+            assert.are.equal("Not a file", err)
+        end)
+
+        it("returns 'Not a file' for a missing path", function()
+            local result, err = FileOps:readTextFile("/missing.txt")
+            assert.is_nil(result)
+            assert.are.equal("Not a file", err)
+        end)
+
+        it("refuses files over the size cap", function()
+            -- MAX_EDIT_SIZE is 256 KB; huge.log is 1 MB.
+            local result, err = FileOps:readTextFile("/huge.log")
+            assert.is_nil(result)
+            assert.are.equal("File is too large to edit", err)
+        end)
+    end)
+
+    describe("writeTextFile", function()
+
+        before_each(function()
+            FileOps:setRootDir("/mnt/us")
+            mountTree({
+                ["/mnt/us"] = {mode = "directory"},
+                ["/mnt/us/notes.txt"] = {mode = "file", size = 10},
+                ["/mnt/us/subdir"] = {mode = "directory"},
+            })
+        end)
+
+        after_each(function()
+            unmountTree()
+        end)
+
+        it("rejects nil content", function()
+            local ok, err = FileOps:writeTextFile("/notes.txt", nil)
+            assert.is_false(ok)
+            assert.are.equal("Invalid content", err)
+        end)
+
+        it("rejects non-string content", function()
+            local ok, err = FileOps:writeTextFile("/notes.txt", 12345)
+            assert.is_false(ok)
+            assert.are.equal("Invalid content", err)
+        end)
+
+        it("rejects a missing target file", function()
+            local ok, err = FileOps:writeTextFile("/missing.txt", "data")
+            assert.is_false(ok)
+            assert.are.equal("Not a file", err)
+        end)
+
+        it("rejects a directory target", function()
+            local ok, err = FileOps:writeTextFile("/subdir", "data")
+            assert.is_false(ok)
+            assert.are.equal("Not a file", err)
+        end)
+
+        it("rejects path traversal", function()
+            local ok, err = FileOps:writeTextFile("/../etc/passwd", "data")
+            assert.is_false(ok)
+            assert.is_truthy(err:find("traversal"))
+        end)
+    end)
+
     describe("createDirectory", function()
 
         local tree, created

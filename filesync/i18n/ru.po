@@ -369,3 +369,40 @@ msgstr "Новая папка"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "Также удалить метаданные чтения (.sdr)"
+
+# ==============================
+# Web UI — text editor
+# ==============================
+msgid "Edit"
+msgstr "Редактировать"
+
+msgid "Edit file"
+msgstr "Редактировать файл"
+
+msgid "Read-only"
+msgstr "Только чтение"
+
+msgid "lines"
+msgstr "строк"
+
+msgid "Unsaved changes"
+msgstr "Несохранённые изменения"
+
+msgid "Discard unsaved changes?"
+msgstr "Отменить несохранённые изменения?"
+
+msgid "Discard"
+msgstr "Отменить"
+
+msgid "Saving..."
+msgstr "Сохранение..."
+
+msgid "Saved successfully"
+msgstr "Сохранено успешно"
+
+msgid "Save failed:"
+msgstr "Не удалось сохранить:"
+
+msgid "Failed to open file"
+msgstr "Не удалось открыть файл"
+

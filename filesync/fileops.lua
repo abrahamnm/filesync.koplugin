@@ -197,6 +197,134 @@ function FileOps:isExtensionSafe(filename)
     return SAFE_MODE_EXTENSIONS[ext:lower()] == true
 end
 
+-- ============================================================================
+-- In-browser text editor support (read/write text-like files)
+-- ============================================================================
+
+-- Maximum size (bytes) of a file the editor will open/save.
+-- Kept under the 1 MB JSON body limit in httpserver.lua so saves always fit.
+local MAX_EDIT_SIZE = 256 * 1024 -- 256 KB
+
+--- Guess whether file content is text (UTF-8/ASCII) rather than binary.
+--- A file is considered binary if a NUL byte appears within the first
+--- 'sample_bytes' bytes. This is a cheap heuristic that is safe for the
+--- encodings KOReader devices typically hold (UTF-8/ASCII/Latin-1).
+--- @param content string: file content (at least a sample)
+--- @param sample_bytes number|nil: how many leading bytes to inspect
+--- @return boolean: true when the content looks like text
+function FileOps:_looksLikeText(content, sample_bytes)
+    if not content then return true end
+    local limit = sample_bytes or 8000
+    if #content < limit then limit = #content end
+    for i = 1, limit do
+        if string.byte(content, i) == 0 then
+            return false
+        end
+    end
+    return true
+end
+
+--- Read a text file's content for the in-browser editor.
+--- Enforces a size cap (files above MAX_EDIT_SIZE stay download-only) and
+--- rejects binary content so the editor never loads garbage.
+--- @param rel_path string: relative path from root_dir
+--- @return table|nil: {content = string, name = string, editable = boolean} on success
+--- @return string|nil: error message on failure
+function FileOps:readTextFile(rel_path)
+    local full_path, err = self:_resolvePath(rel_path)
+    if not full_path then
+        return nil, err
+    end
+
+    local attr = lfs.attributes(full_path)
+    if not attr or attr.mode ~= "file" then
+        return nil, "Not a file"
+    end
+
+    if attr.size > MAX_EDIT_SIZE then
+        return nil, "File is too large to edit"
+    end
+
+    local f = io.open(full_path, "rb")
+    if not f then
+        return nil, "Cannot open file"
+    end
+
+    local content = f:read("*a")
+    f:close()
+
+    if not content then
+        return nil, "Cannot read file"
+    end
+
+    -- Reject binary content (NUL byte in the head sample). Binary files keep
+    -- today's download-only behaviour and never reach the text editor.
+    if not self:_looksLikeText(content) then
+        return nil, "Binary file cannot be opened in the editor"
+    end
+
+    local filename = full_path:match("([^/]+)$") or "file"
+
+    return {
+        content = content,
+        name = filename,
+        -- Any file that passed the binary/size checks above is text, so it is
+        -- editable — regardless of whether the extension is a "known" code
+        -- type. This lets unknown-extension text files (e.g. ".key" that is
+        -- actually plain text, ".lua.old", "metadata.calibre", or files with
+        -- no extension) be opened and saved. Whether the user may actually
+        -- *save* is decided at the route layer (safe mode).
+        editable = true,
+    }
+end
+
+--- Write text content back to a file (in-place save from the editor).
+--- Writes directly into the existing file (no temp file + rename) so the
+--- original permissions are kept and symlinks write through to their target.
+--- @param rel_path string: relative path from root_dir
+--- @param content string: full new file content
+--- @return boolean: true on success
+--- @return string|nil: error message on failure
+function FileOps:writeTextFile(rel_path, content)
+    if type(content) ~= "string" then
+        return false, "Invalid content"
+    end
+
+    local full_path, err = self:_resolvePath(rel_path)
+    if not full_path then
+        return false, err
+    end
+
+    -- Only overwrite existing regular files.
+    local attr = lfs.attributes(full_path)
+    if not attr or attr.mode ~= "file" then
+        return false, "Not a file"
+    end
+
+    -- Never overwrite the plugin's served web UI (defense in depth).
+    local plugin_dir = Utils.getPluginDir()
+    local protected_index = plugin_dir ~= "." and (plugin_dir .. "/filesync/static/index.html") or nil
+    if protected_index and full_path == protected_index then
+        return false, "Protected file"
+    end
+
+    -- Write in place (not atomic, but preserves mode and follows symlinks).
+    local f, open_err = io.open(full_path, "wb")
+    if not f then
+        return false, "Cannot write file: " .. tostring(open_err)
+    end
+
+    local ok, write_err = f:write(content)
+    f:close()
+
+    if not ok then
+        return false, "Cannot write file: " .. tostring(write_err)
+    end
+
+    logger.info("FileSync: Saved text file", full_path)
+    return true
+end
+
 --- List directory contents with sorting, filtering, and safe mode enforcement.
 --- @param rel_path string: relative path from root_dir
 --- @param sort_by string: sort field ("name", "size", "date", "type")
