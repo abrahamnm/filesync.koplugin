@@ -4,11 +4,36 @@
         document.getElementById('dropzone').classList.toggle('visible', uploadZoneVisible);
     };
 
+    // The plugin's HTTP server handles a single request at a time, so every
+    // upload path funnels through one queue: a second drop landing mid
+    // transfer, or loose files racing a folder, would just stall on timeouts.
+    var uploadQueue = Promise.resolve();
+
+    function enqueueUpload(task) {
+        var next = uploadQueue.then(task);
+        // One failure must not poison the queue for later uploads.
+        uploadQueue = next.catch(function() {});
+        return next;
+    }
+
+    // jobs: [{file}] for a plain file, [{tree}] for a whole folder tree.
+    async function runUploadJobs(jobs) {
+        for (var i = 0; i < jobs.length; i++) {
+            if (jobs[i].tree) {
+                await uploadTree(jobs[i].tree);
+            } else {
+                await uploadFile(jobs[i].file);
+            }
+        }
+    }
+
     window.handleFileSelect = function(files) {
         if (!files || files.length === 0) return;
+        var jobs = [];
         for (var fi = 0; fi < files.length; fi++) {
-            uploadFile(files[fi]);
+            jobs.push({ file: files[fi] });
         }
+        enqueueUpload(function() { return runUploadJobs(jobs); });
         document.getElementById('fileInput').value = '';
     };
 
@@ -18,34 +43,31 @@
     window.handleFolderSelect = function(files) {
         var input = document.getElementById('folderInput');
         if (files && files.length > 0) {
-            var trees = {};
-            var order = [];
+            // Object.create(null), not {}: a folder named "constructor" or
+            // "toString" would otherwise hit the inherited Object.prototype
+            // member and never get its own entry.
+            var trees = Object.create(null);
+            var jobs = [];
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
                 var relPath = file.webkitRelativePath || file.name;
                 var slash = relPath.indexOf('/');
                 if (slash <= 0) {
                     // No folder component — treat it as a plain file upload
-                    uploadFile(file);
+                    jobs.push({ file: file });
                     continue;
                 }
                 var root = relPath.substring(0, slash);
                 if (!trees[root]) {
                     trees[root] = { name: root, files: [], dirs: [root] };
-                    order.push(root);
+                    jobs.push({ tree: trees[root] });
                 }
                 trees[root].files.push({ file: file, relPath: relPath });
             }
-            uploadTreesInOrder(order.map(function(name) { return trees[name]; }));
+            enqueueUpload(function() { return runUploadJobs(jobs); });
         }
         if (input) input.value = '';
     };
-
-    async function uploadTreesInOrder(trees) {
-        for (var i = 0; i < trees.length; i++) {
-            await uploadTree(trees[i]);
-        }
-    }
 
     // Folder picking needs webkitdirectory; hide the CTA where it is missing
     // (notably Android browsers) rather than opening a picker that can't
@@ -169,6 +191,8 @@
             } catch (err) {
                 finishUploadItem(id, false, t('Failed'));
                 showToast(t('Failed to create folder:') + ' ' + err.message, 'error');
+                // Earlier mkdirs in this loop may already have landed.
+                loadFiles();
                 return;
             }
         }
@@ -215,7 +239,7 @@
      * a recursive mkdir on the deepest path creates them anyway.
      */
     function collectUploadDirs(tree) {
-        var seen = {};
+        var seen = Object.create(null);
         var dirs = [];
         function add(dir) {
             if (dir && !seen[dir]) { seen[dir] = true; dirs.push(dir); }
@@ -331,7 +355,7 @@
         }
 
         if (entries.length > 0) {
-            handleDroppedEntries(entries);
+            enqueueUpload(function() { return handleDroppedEntries(entries); });
         } else if (e.dataTransfer.files.length > 0) {
             handleFileSelect(e.dataTransfer.files);
         }

@@ -183,6 +183,7 @@ Safe mode is **enabled by default** and limits the web interface to only show fi
 - System files, configuration files, and other non-book files are hidden
 - Hidden files and folders (names starting with `.`) are hidden
 - KOReader metadata directories (`.sdr` folders) are hidden and automatically cleaned up when deleting a book
+- Folders you upload are stored in full, but any file inside them that isn't a book, document, or image (a plugin's `.lua` files, for example) stays hidden until you turn safe mode off
 
 To toggle safe mode, open the plugin menu and tap **Safe mode**. Disabling it will show every file on the device, including hidden files and folders, which are dimmed in the listing to set them apart.
 

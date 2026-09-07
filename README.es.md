@@ -130,7 +130,7 @@ Si ves la entrada en el menú, el plugin está correctamente instalado.
 Una vez conectado, la interfaz web te permite:
 
 - **Explorar** — Toca las carpetas para navegar por tu biblioteca. Usa la barra de migas de pan en la parte superior para volver a cualquier directorio anterior.
-- **Subir** — Toca el botón **Subir** en la barra superior, luego selecciona archivos o arrástralos a la zona de carga. Se pueden subir varios archivos a la vez. Para subir una carpeta entera, usa **Choose Folder** o arrastra la carpeta — las subcarpetas se recrean en el dispositivo.
+- **Subir** — Toca el botón **Subir** en la barra superior, luego selecciona archivos o arrástralos a la zona de carga. Se pueden subir varios archivos a la vez. Para subir una carpeta entera, usa **Elegir carpeta** o arrastra la carpeta — las subcarpetas se recrean en el dispositivo.
 - **Detalles del archivo** — Toca cualquier archivo para ver su detalle, donde puedes **descargarlo**, **renombrarlo** o **eliminarlo**.
 - **Crear carpetas** — Toca el botón **Carpeta** en la barra superior e ingresa un nombre.
 - **Buscar** — Usa la barra de búsqueda para filtrar el directorio actual por nombre de archivo.
@@ -175,6 +175,7 @@ El modo seguro está **activado por defecto** y limita la interfaz web para most
 - Solo se muestran **libros electrónicos** (EPUB, PDF, MOBI, AZW3, FB2, DJVU, CBZ, etc.), **documentos** (TXT, DOC, RTF, HTML, etc.) e **imágenes** (JPG, PNG, GIF, WebP)
 - Los archivos del sistema, archivos de configuración y otros archivos no relacionados con libros se ocultan
 - Los directorios de metadatos de KOReader (carpetas `.sdr`) se ocultan y se limpian automáticamente al eliminar un libro
+- Las carpetas que subas se guardan completas, pero los archivos que contienen y que no son libros, documentos ni imágenes (por ejemplo, los archivos `.lua` de un plugin) permanecen ocultos hasta que desactives el modo seguro
 
 Para alternar el modo seguro, abre el menú del plugin y toca **Modo seguro**. Desactivarlo mostrará todos los archivos del dispositivo.
 

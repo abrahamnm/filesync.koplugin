@@ -130,7 +130,7 @@ Wenn der Menüeintrag angezeigt wird, ist das Plugin korrekt installiert.
 Nach der Verbindung können Sie über die Weboberfläche:
 
 - **Durchsuchen** — Tippen Sie auf Ordner, um durch Ihre Bibliothek zu navigieren. Verwenden Sie die Breadcrumb-Leiste oben, um zu einem übergeordneten Verzeichnis zurückzuspringen.
-- **Hochladen** — Tippen Sie auf die Schaltfläche **Upload** in der Kopfzeile, wählen Sie dann Dateien aus oder ziehen Sie sie in den Ablagebereich. Mehrere Dateien können gleichzeitig hochgeladen werden. Für einen ganzen Ordner verwenden Sie **Choose Folder** oder ziehen den Ordner hinein — Unterordner werden auf dem Gerät neu angelegt.
+- **Hochladen** — Tippen Sie auf die Schaltfläche **Upload** in der Kopfzeile, wählen Sie dann Dateien aus oder ziehen Sie sie in den Ablagebereich. Mehrere Dateien können gleichzeitig hochgeladen werden. Für einen ganzen Ordner verwenden Sie **Ordner auswählen** oder ziehen den Ordner hinein — Unterordner werden auf dem Gerät neu angelegt.
 - **Dateidetails** — Tippen Sie auf eine beliebige Datei, um die Detailansicht zu öffnen, in der Sie die Datei **herunterladen**, **umbenennen** oder **löschen** können.
 - **Ordner erstellen** — Tippen Sie auf die Schaltfläche **Folder** in der Kopfzeile und geben Sie einen Namen ein.
 - **Suchen** — Verwenden Sie die Suchleiste, um das aktuelle Verzeichnis nach Dateinamen zu filtern.
@@ -175,6 +175,7 @@ Der sichere Modus ist **standardmäßig aktiviert** und beschränkt die Weboberf
 - Es werden nur **E-Books** (EPUB, PDF, MOBI, AZW3, FB2, DJVU, CBZ usw.), **Dokumente** (TXT, DOC, RTF, HTML usw.) und **Bilder** (JPG, PNG, GIF, WebP) angezeigt
 - Systemdateien, Konfigurationsdateien und andere nicht buchbezogene Dateien werden ausgeblendet
 - KOReader-Metadatenverzeichnisse (`.sdr`-Ordner) werden ausgeblendet und beim Löschen eines Buches automatisch bereinigt
+- Hochgeladene Ordner werden vollständig gespeichert, aber darin enthaltene Dateien, die keine Bücher, Dokumente oder Bilder sind (z. B. die `.lua`-Dateien eines Plugins), bleiben ausgeblendet, bis Sie den sicheren Modus deaktivieren
 
 Um den sicheren Modus umzuschalten, öffnen Sie das Plugin-Menü und tippen Sie auf **Safe mode**. Durch Deaktivierung werden alle Dateien auf dem Gerät angezeigt.
 

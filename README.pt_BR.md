@@ -130,7 +130,7 @@ Se a entrada aparecer no menu, o plugin está instalado corretamente.
 Uma vez conectado, a interface web permite:
 
 - **Navegar** — Toque nas pastas para explorar sua biblioteca. Use a barra de breadcrumbs no topo para voltar a qualquer diretório anterior.
-- **Enviar** — Toque no botão **Upload** no cabeçalho, depois escolha arquivos ou arraste-os para a zona de upload. Vários arquivos podem ser enviados de uma vez. Para enviar uma pasta inteira, use **Choose Folder** ou arraste a pasta — as subpastas são recriadas no dispositivo.
+- **Enviar** — Toque no botão **Upload** no cabeçalho, depois escolha arquivos ou arraste-os para a zona de upload. Vários arquivos podem ser enviados de uma vez. Para enviar uma pasta inteira, use **Escolher pasta** ou arraste a pasta — as subpastas são recriadas no dispositivo.
 - **Detalhes do arquivo** — Toque em qualquer arquivo para abrir sua visualização detalhada, onde você pode **baixar**, **renomear** ou **excluir**.
 - **Criar pastas** — Toque no botão **Pasta** no cabeçalho e digite um nome.
 - **Buscar** — Use a barra de busca para filtrar o diretório atual por nome de arquivo.
@@ -175,6 +175,7 @@ O modo seguro está **ativado por padrão** e limita a interface web para exibir
 - Apenas **e-books** (EPUB, PDF, MOBI, AZW3, FB2, DJVU, CBZ, etc.), **documentos** (TXT, DOC, RTF, HTML, etc.) e **imagens** (JPG, PNG, GIF, WebP) são exibidos
 - Arquivos do sistema, arquivos de configuração e outros arquivos não relacionados a livros ficam ocultos
 - Diretórios de metadados do KOReader (pastas `.sdr`) ficam ocultos e são limpos automaticamente ao excluir um livro
+- As pastas que você envia são salvas por completo, mas os arquivos dentro delas que não são livros, documentos nem imagens (os arquivos `.lua` de um plugin, por exemplo) permanecem ocultos até você desativar o modo seguro
 
 Para alternar o modo seguro, abra o menu do plugin e toque em **Modo seguro**. Desativá-lo mostrará todos os arquivos do dispositivo.
 
