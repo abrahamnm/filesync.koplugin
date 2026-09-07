@@ -162,7 +162,9 @@
     min-width: 208px;
     min-height: 50px;
     padding: 10px 18px;
-    margin: 0 auto;
+    /* No auto margin: with two CTAs in the flex row it would eat the free
+       space and fling them to opposite edges instead of centring the pair. */
+    margin: 0;
     border: 1px solid var(--upload-cta-border);
     border-radius: 14px;
     background: var(--upload-cta-bg);
@@ -224,7 +226,36 @@
     stroke: currentColor;
 }
 
+/* Folder upload is the secondary action: same shape, neutral surface, so the
+   two CTAs sitting side by side keep a clear hierarchy. */
+.dropzone-cta-folder {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text);
+    box-shadow: none;
+}
+
+.dropzone-cta-folder:hover {
+    background: var(--surface-hover);
+    box-shadow: var(--shadow);
+}
+
+.dropzone-cta-folder .dropzone-cta-icon {
+    background: var(--file-icon-dir-bg);
+    color: var(--file-icon-dir-text);
+}
+
+.dropzone-cta-folder .dropzone-cta-icon svg,
+.dropzone-cta-folder .dropzone-cta-icon svg * {
+    color: var(--file-icon-dir-text);
+    stroke: currentColor;
+}
+
 @media (max-width: 520px) {
+    .dropzone-actions {
+        flex-direction: column;
+    }
+
     .dropzone-cta {
         width: 100%;
     }

@@ -112,9 +112,10 @@
             <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
         <div class="dropzone-text" id="dropzoneText">
-            Drag and drop files here, or <strong onclick="document.getElementById('fileInput').click()">browse</strong>
+            Drag and drop files or folders here, or <strong onclick="document.getElementById('fileInput').click()">browse</strong>
         </div>
         <input type="file" id="fileInput" multiple style="display:none" onchange="handleFileSelect(this.files)">
+        <input type="file" id="folderInput" webkitdirectory multiple style="display:none" onchange="handleFolderSelect(this.files)">
         <div class="dropzone-actions">
             <button class="dropzone-cta dropzone-cta-file" id="btnUploadFilesCta" type="button" onclick="document.getElementById('fileInput').click()">
                 <span class="dropzone-cta-icon" aria-hidden="true">
@@ -126,6 +127,16 @@
                     </svg>
                 </span>
                 <span class="dropzone-cta-label" data-i18n="Choose Files">Choose Files</span>
+            </button>
+            <button class="dropzone-cta dropzone-cta-folder" id="btnUploadFolderCta" type="button" onclick="document.getElementById('folderInput').click()">
+                <span class="dropzone-cta-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H10l2 2h6.5A2.5 2.5 0 0 1 21 9.5v7A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5z"/>
+                        <path d="M12 16v-5"/>
+                        <path d="M9.5 13.5L12 11l2.5 2.5"/>
+                    </svg>
+                </span>
+                <span class="dropzone-cta-label" data-i18n="Choose Folder">Choose Folder</span>
             </button>
         </div>
     </div>

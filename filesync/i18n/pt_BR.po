@@ -232,14 +232,17 @@ msgstr "Menores primeiro"
 msgid "Type"
 msgstr "Tipo"
 
-msgid "Drag and drop files here, or"
-msgstr "Arraste arquivos aqui, ou"
+msgid "Drag and drop files or folders here, or"
+msgstr "Arraste arquivos ou pastas aqui, ou"
 
 msgid "browse"
 msgstr "procure"
 
 msgid "Choose Files"
 msgstr "Escolher arquivos"
+
+msgid "Choose Folder"
+msgstr "Escolher pasta"
 
 msgid "Loading..."
 msgstr "Carregando..."
@@ -306,6 +309,9 @@ msgstr "Erro ao excluir:"
 
 msgid "Upload failed:"
 msgstr "Erro ao enviar:"
+
+msgid "{n} of {m} files failed to upload"
+msgstr "Falha ao enviar {n} de {m} arquivos"
 
 msgid "Failed to create folder:"
 msgstr "Erro ao criar pasta:"

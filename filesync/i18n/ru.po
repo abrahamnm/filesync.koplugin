@@ -232,14 +232,17 @@ msgstr "Сначала маленькие"
 msgid "Type"
 msgstr "Тип"
 
-msgid "Drag and drop files here, or"
-msgstr "Перетащите файлы сюда или"
+msgid "Drag and drop files or folders here, or"
+msgstr "Перетащите файлы или папки сюда или"
 
 msgid "browse"
 msgstr "выберите"
 
 msgid "Choose Files"
 msgstr "Выбрать файлы"
+
+msgid "Choose Folder"
+msgstr "Выбрать папку"
 
 msgid "Loading..."
 msgstr "Загрузка..."
@@ -306,6 +309,9 @@ msgstr "Ошибка удаления:"
 
 msgid "Upload failed:"
 msgstr "Ошибка загрузки:"
+
+msgid "{n} of {m} files failed to upload"
+msgstr "Не удалось загрузить {n} из {m} файлов"
 
 msgid "Failed to create folder:"
 msgstr "Не удалось создать папку:"

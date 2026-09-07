@@ -252,7 +252,7 @@ end
 ---   GET  /api/read       - read a text file for the editor (query: path)
 ---   POST /api/save       - save a text file (body: {path, content}) — disabled in safe mode
 ---   POST /api/upload     - multipart file upload (query: path)
----   POST /api/mkdir      - create directory (body: {path})
+---   POST /api/mkdir      - create directory (body: {path, recursive})
 ---   POST /api/rename     - rename file/dir (body: {old_path, new_path})
 ---   POST /api/delete     - delete file/dir (body: {path, delete_sdr})
 function HttpServer:_route(client, method, path, query, headers, body)
@@ -494,7 +494,11 @@ function HttpServer:_route(client, method, path, query, headers, body)
         elseif method == "POST" and path == "/api/mkdir" then
             local data = JSON.decode(body)
             if data and data.path then
-                local ok, err_msg = FileOps:createDirectory(data.path)
+                -- recursive gives mkdir -p semantics: intermediate directories
+                -- are created and an existing directory is not an error. Folder
+                -- uploads use it to lay down the tree before sending files.
+                local mkdir_options = {recursive = data.recursive == true}
+                local ok, err_msg = FileOps:createDirectory(data.path, mkdir_options)
                 if ok then
                     self:_sendJSON(client, 200, {success = true})
                 else

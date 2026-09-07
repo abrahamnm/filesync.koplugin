@@ -232,14 +232,17 @@ msgstr "最小优先"
 msgid "Type"
 msgstr "类型"
 
-msgid "Drag and drop files here, or"
-msgstr "拖放文件到此处，或"
+msgid "Drag and drop files or folders here, or"
+msgstr "拖放文件或文件夹到此处，或"
 
 msgid "browse"
 msgstr "浏览"
 
 msgid "Choose Files"
 msgstr "选择文件"
+
+msgid "Choose Folder"
+msgstr "选择文件夹"
 
 msgid "Loading..."
 msgstr "加载中..."
@@ -306,6 +309,9 @@ msgstr "删除失败："
 
 msgid "Upload failed:"
 msgstr "上传失败："
+
+msgid "{n} of {m} files failed to upload"
+msgstr "{m} 个文件中有 {n} 个上传失败"
 
 msgid "Failed to create folder:"
 msgstr "创建文件夹失败："

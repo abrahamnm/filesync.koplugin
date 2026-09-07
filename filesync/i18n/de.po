@@ -232,14 +232,17 @@ msgstr "Kleinste zuerst"
 msgid "Type"
 msgstr "Typ"
 
-msgid "Drag and drop files here, or"
-msgstr "Dateien hierher ziehen oder"
+msgid "Drag and drop files or folders here, or"
+msgstr "Dateien oder Ordner hierher ziehen oder"
 
 msgid "browse"
 msgstr "durchsuchen"
 
 msgid "Choose Files"
 msgstr "Dateien auswählen"
+
+msgid "Choose Folder"
+msgstr "Ordner auswählen"
 
 msgid "Loading..."
 msgstr "Laden..."
@@ -306,6 +309,9 @@ msgstr "Löschen fehlgeschlagen:"
 
 msgid "Upload failed:"
 msgstr "Hochladen fehlgeschlagen:"
+
+msgid "{n} of {m} files failed to upload"
+msgstr "{n} von {m} Dateien konnten nicht hochgeladen werden"
 
 msgid "Failed to create folder:"
 msgstr "Ordner konnte nicht erstellt werden:"
