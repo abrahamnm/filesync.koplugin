@@ -49,6 +49,16 @@ function _formatEditorBytes(bytes) {
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
 
+// Byte length of a JS string as UTF-8 (JS .length counts UTF-16 code units).
+function _utf8ByteLength(str) {
+    if (typeof TextEncoder !== 'undefined') {
+        return new TextEncoder().encode(str).length;
+    }
+    try { return new Blob([str]).size; } catch (e) { }
+    try { return unescape(encodeURIComponent(str)).length; } catch (e) { }
+    return str.length;
+}
+
 // Detect the icon type class from the file type maps already in state.js.
 function _editorTypeClass(name) {
     var cls = getTypeClassFromFilename(name);
@@ -93,7 +103,8 @@ function _editorUpdateFooter() {
         _editorEls.lines.textContent = lines + ' ' + t('lines');
     }
     if (_editorEls.size) {
-        _editorEls.size.textContent = _formatEditorBytes(content.length);
+        // Count UTF-8 bytes (not UTF-16 code units) so the label is accurate.
+        _editorEls.size.textContent = _formatEditorBytes(_utf8ByteLength(content));
     }
     if (_editorEls.dirty) {
         _editorEls.dirty.style.display = _editorState.dirty ? '' : 'none';
@@ -108,6 +119,15 @@ function _editorUpdateFooter() {
             status.textContent = '';
         }
     }
+}
+
+// Debounced footer refresh: avoids re-splitting the whole doc per keystroke.
+var _editorFooterDebounce = null;
+function _editorQueueFooter() {
+    clearTimeout(_editorFooterDebounce);
+    _editorFooterDebounce = setTimeout(function () {
+        if (_editorState.open) _editorUpdateFooter();
+    }, 80);
 }
 
 function _editorRefresh() {
@@ -252,6 +272,7 @@ function _editorHardClose() {
     _editorState.open = false;
     _editorState.path = null;
     clearTimeout(_editorDebounce);
+    clearTimeout(_editorFooterDebounce);
     if (_editorEls.view) {
         _editorEls.view.classList.remove('open');
         _editorEls.view.classList.remove('readonly');
@@ -302,7 +323,7 @@ function _editorOnInput() {
     if (!_editorState.open) return;
     _editorState.content = _editorEls.input.value;
     _editorState.dirty = _editorState.content !== _editorState.originalContent;
-    _editorUpdateFooter();
+    _editorQueueFooter();
     _editorResize();
     _editorQueueHighlight();
 }

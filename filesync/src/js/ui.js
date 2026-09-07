@@ -49,19 +49,14 @@
         return '';
     }
 
-    // Decide whether a file is worth offering the in-browser Edit button.
-    // We offer it for anything that is *not* a clearly-binary/reader format
-    // (ebooks, PDF, comics, images, audio, video, archives, office docs).
-    // Unknown extensions (e.g. .key, .lua.old, metadata.calibre, no extension)
-    // default to editable - the server content-sniffs text vs binary and will
-    // render the file read-only or reject it if it is actually binary.
-    var NON_EDITABLE_TYPE_CLASSES = {
-        ebook: true, reader: true, pdf: true, comic: true, image: true,
-        archive: true, audio: true, video: true, document: true,
+    // Allow-list: only files recognised as text/code/markdown get an Edit
+    // affordance, so binary/unknown files don't show buttons that error on tap.
+    var EDITABLE_TYPE_CLASSES = {
+        text: true, code: true, markdown: true,
     };
     function isPotentiallyEditableFile(name) {
         var cls = getTypeClassFromFilename(name);
-        return !NON_EDITABLE_TYPE_CLASSES[cls];
+        return EDITABLE_TYPE_CLASSES[cls] === true;
     }
 
     function getFileDisplayParts(name) {

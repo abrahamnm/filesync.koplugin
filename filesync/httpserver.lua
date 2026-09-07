@@ -208,7 +208,8 @@ function HttpServer:_handleClient(client)
     local body = nil
     if content_length and content_length > 0 then
         if content_length > MAX_JSON_BODY_SIZE then
-            self:_sendError(client, 413, "Payload Too Large")
+            -- JSON so API clients can parse the error body.
+            self:_sendJSON(client, 413, {error = "Payload too large (limit: 1 MB)"})
             return
         end
         body = self:_readBody(client, content_length)
