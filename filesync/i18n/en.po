@@ -233,13 +233,16 @@ msgstr ""
 msgid "Type"
 msgstr ""
 
-msgid "Drag and drop files here, or"
+msgid "Drag and drop files or folders here, or"
 msgstr ""
 
 msgid "browse"
 msgstr ""
 
 msgid "Choose Files"
+msgstr ""
+
+msgid "Choose Folder"
 msgstr ""
 
 msgid "Loading..."
@@ -306,6 +309,9 @@ msgid "Delete failed:"
 msgstr ""
 
 msgid "Upload failed:"
+msgstr ""
+
+msgid "{n} of {m} files failed to upload"
 msgstr ""
 
 msgid "Failed to create folder:"

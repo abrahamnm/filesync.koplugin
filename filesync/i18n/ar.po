@@ -232,14 +232,17 @@ msgstr "الأصغر أولًا"
 msgid "Type"
 msgstr "النوع"
 
-msgid "Drag and drop files here, or"
-msgstr "اسحب الملفات وأفلتها هنا، أو"
+msgid "Drag and drop files or folders here, or"
+msgstr "اسحب الملفات أو المجلدات وأفلتها هنا، أو"
 
 msgid "browse"
 msgstr "تصفّح"
 
 msgid "Choose Files"
 msgstr "اختيار الملفات"
+
+msgid "Choose Folder"
+msgstr "اختيار مجلد"
 
 msgid "Loading..."
 msgstr "جارٍ التحميل..."
@@ -306,6 +309,9 @@ msgstr "فشل الحذف:"
 
 msgid "Upload failed:"
 msgstr "فشل الرفع:"
+
+msgid "{n} of {m} files failed to upload"
+msgstr "فشل رفع {n} من أصل {m} ملفات"
 
 msgid "Failed to create folder:"
 msgstr "فشل إنشاء المجلد:"

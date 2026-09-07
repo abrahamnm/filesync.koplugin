@@ -21,7 +21,7 @@ Works on devices running KOReader (designed for **Kindle** and **Kobo**), includ
 
 - **QR Code Access** — Scan to connect instantly, no typing URLs
 - **File Browser** — Navigate your library with breadcrumb navigation
-- **Upload Files** — Drag-and-drop or tap to upload books from your phone
+- **Upload Files & Folders** — Drag-and-drop or tap to upload books, or a whole folder at once
 - **Download Files** — Save any file to your phone with one tap
 - **Create Folders** — Organize your library into directories
 - **Rename & Delete** — Limited file management with confirmation dialogs
@@ -131,7 +131,7 @@ If you see the menu entry, the plugin is installed correctly.
 Once connected, the web interface lets you:
 
 - **Browse** — Tap folders to navigate your library. Use the breadcrumb bar at the top to jump back to any parent directory.
-- **Upload** — Tap the **Upload** button in the header, then choose files or drag them into the drop zone. Multiple files can be uploaded at once.
+- **Upload** — Tap the **Upload** button in the header, then choose files or drag them into the drop zone. Multiple files can be uploaded at once. To upload a whole folder, use **Choose Folder** or drag the folder in — subfolders are recreated on the device.
 - **File details** — Tap any file to open its detail view, where you can **download**, **rename**, or **delete** it.
 - **Create folders** — Tap the **Folder** button in the header and enter a name.
 - **Search** — Use the search bar to filter the current directory by filename.
@@ -183,6 +183,7 @@ Safe mode is **enabled by default** and limits the web interface to only show fi
 - System files, configuration files, and other non-book files are hidden
 - Hidden files and folders (names starting with `.`) are hidden
 - KOReader metadata directories (`.sdr` folders) are hidden and automatically cleaned up when deleting a book
+- Folders you upload are stored in full, but any file inside them that isn't a book, document, or image (a plugin's `.lua` files, for example) stays hidden until you turn safe mode off
 
 To toggle safe mode, open the plugin menu and tap **Safe mode**. Disabling it will show every file on the device, including hidden files and folders, which are dimmed in the listing to set them apart.
 

@@ -477,11 +477,38 @@ function FileOps:handleUpload(rel_dir, body, boundary)
     end
 end
 
---- Create a directory
-function FileOps:createDirectory(rel_path)
+--- Create a directory.
+--- @param rel_path string: relative path from root_dir
+--- @param options table|nil: {recursive = boolean} — when recursive, missing
+---   parent directories are created too and an existing directory is not an
+---   error (mkdir -p semantics), which is what folder uploads need.
+--- @return boolean: true on success
+--- @return string|nil: error message on failure
+function FileOps:createDirectory(rel_path, options)
     local full_path, err = self:_resolvePath(rel_path)
     if not full_path then
         return false, err
+    end
+
+    local recursive = options and options.recursive
+
+    -- Refuse to create the root itself: there is nothing to make and the
+    -- segment walk below would have no name to validate.
+    if full_path == self._root_dir then
+        return false, "Path already exists"
+    end
+
+    -- Check if already exists
+    local attr = lfs.attributes(full_path)
+    if attr then
+        if recursive and attr.mode == "directory" then
+            return true
+        end
+        return false, "Path already exists"
+    end
+
+    if recursive then
+        return self:_createDirectoryRecursive(full_path)
     end
 
     -- Check parent directory exists
@@ -491,12 +518,6 @@ function FileOps:createDirectory(rel_path)
         if not parent_attr or parent_attr.mode ~= "directory" then
             return false, "Parent directory does not exist"
         end
-    end
-
-    -- Check if already exists
-    local attr = lfs.attributes(full_path)
-    if attr then
-        return false, "Path already exists"
     end
 
     -- Validate directory name
@@ -512,6 +533,38 @@ function FileOps:createDirectory(rel_path)
     end
 
     logger.info("FileSync: Created directory", full_path)
+    return true
+end
+
+--- Create every missing directory between root_dir and full_path (mkdir -p).
+--- full_path must already be resolved and known not to exist.
+--- @param full_path string: absolute path under root_dir
+--- @return boolean: true on success
+--- @return string|nil: error message on failure
+function FileOps:_createDirectoryRecursive(full_path)
+    local rel = full_path:sub(#self._root_dir + 1)
+    local current = self._root_dir
+
+    for segment in rel:gmatch("[^/]+") do
+        local valid, valid_err = self:_validateFilename(segment)
+        if not valid then
+            return false, valid_err
+        end
+        current = current .. "/" .. segment
+        local attr = lfs.attributes(current)
+        if attr then
+            if attr.mode ~= "directory" then
+                return false, "Path already exists"
+            end
+        else
+            local ok, mkdir_err = lfs.mkdir(current)
+            if not ok then
+                return false, "Cannot create directory: " .. tostring(mkdir_err)
+            end
+            logger.info("FileSync: Created directory", current)
+        end
+    end
+
     return true
 end
 
