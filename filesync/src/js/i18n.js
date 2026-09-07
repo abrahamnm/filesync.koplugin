@@ -41,9 +41,11 @@
         document.getElementById('btnFolder').setAttribute('aria-label', t('New folder'));
         document.getElementById('btnUploadFilesCta').title = t('Choose Files');
         document.getElementById('btnUploadFilesCta').setAttribute('aria-label', t('Choose Files'));
+        document.getElementById('btnUploadFolderCta').title = t('Choose Folder');
+        document.getElementById('btnUploadFolderCta').setAttribute('aria-label', t('Choose Folder'));
         // Dropzone text
         var dzText = document.getElementById('dropzoneText');
-        dzText.innerHTML = t('Drag and drop files here, or') + ' <strong onclick="document.getElementById(\'fileInput\').click()">' + t('browse') + '</strong>';
+        dzText.innerHTML = t('Drag and drop files or folders here, or') + ' <strong onclick="document.getElementById(\'fileInput\').click()">' + t('browse') + '</strong>';
         document.getElementById('modalCloseBtn').title = t('Cancel');
         document.getElementById('modalCloseBtn').setAttribute('aria-label', t('Cancel'));
         document.getElementById('confirmCloseBtn').title = t('Cancel');

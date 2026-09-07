@@ -232,14 +232,17 @@ msgstr "小さい順"
 msgid "Type"
 msgstr "種類"
 
-msgid "Drag and drop files here, or"
-msgstr "ここにファイルをドラッグ＆ドロップ、または"
+msgid "Drag and drop files or folders here, or"
+msgstr "ここにファイルやフォルダをドラッグ＆ドロップ、または"
 
 msgid "browse"
 msgstr "参照"
 
 msgid "Choose Files"
 msgstr "ファイルを選択"
+
+msgid "Choose Folder"
+msgstr "フォルダを選択"
 
 msgid "Loading..."
 msgstr "読み込み中..."
@@ -306,6 +309,9 @@ msgstr "削除に失敗:"
 
 msgid "Upload failed:"
 msgstr "アップロードに失敗:"
+
+msgid "{n} of {m} files failed to upload"
+msgstr "{m}個中{n}個のファイルのアップロードに失敗しました"
 
 msgid "Failed to create folder:"
 msgstr "フォルダの作成に失敗:"

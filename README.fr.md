@@ -21,7 +21,7 @@ Fonctionne sur les appareils sous KOReader (conçu pour **Kindle** et **Kobo**).
 
 - **Accès par QR code** — Scannez pour vous connecter instantanément, sans saisir d'URL
 - **Explorateur de fichiers** — Parcourez votre bibliothèque avec un fil d'Ariane
-- **Envoi de fichiers** — Glissez-déposez ou appuyez pour envoyer des livres depuis votre téléphone
+- **Envoi de fichiers et dossiers** — Glissez-déposez ou appuyez pour envoyer des livres, ou un dossier entier d'un coup
 - **Téléchargement de fichiers** — Enregistrez n'importe quel fichier sur votre téléphone en un clic
 - **Création de dossiers** — Organisez votre bibliothèque en répertoires
 - **Renommage et suppression** — Gestion de fichiers simplifiée avec boîtes de dialogue de confirmation
@@ -130,7 +130,7 @@ Si l'entrée de menu apparaît, le plugin est correctement installé.
 Une fois connecté, l'interface web vous permet de :
 
 - **Parcourir** — Appuyez sur les dossiers pour naviguer dans votre bibliothèque. Utilisez le fil d'Ariane en haut pour revenir à n'importe quel répertoire parent.
-- **Envoyer** — Appuyez sur le bouton **Upload** dans l'en-tête, puis choisissez des fichiers ou glissez-les dans la zone de dépôt. Plusieurs fichiers peuvent être envoyés simultanément.
+- **Envoyer** — Appuyez sur le bouton **Upload** dans l'en-tête, puis choisissez des fichiers ou glissez-les dans la zone de dépôt. Plusieurs fichiers peuvent être envoyés simultanément. Pour un dossier entier, utilisez **Choose Folder** ou glissez le dossier — les sous-dossiers sont recréés sur l'appareil.
 - **Détails du fichier** — Appuyez sur n'importe quel fichier pour ouvrir sa vue détaillée, où vous pouvez le **télécharger**, le **renommer** ou le **supprimer**.
 - **Créer des dossiers** — Appuyez sur le bouton **Folder** dans l'en-tête et saisissez un nom.
 - **Rechercher** — Utilisez la barre de recherche pour filtrer le répertoire actuel par nom de fichier.

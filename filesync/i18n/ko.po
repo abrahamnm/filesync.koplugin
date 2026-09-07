@@ -232,14 +232,17 @@ msgstr "작은 파일순"
 msgid "Type"
 msgstr "유형"
 
-msgid "Drag and drop files here, or"
-msgstr "파일을 여기에 끌어다 놓거나"
+msgid "Drag and drop files or folders here, or"
+msgstr "파일이나 폴더를 여기에 끌어다 놓거나"
 
 msgid "browse"
 msgstr "찾아보기"
 
 msgid "Choose Files"
 msgstr "파일 선택"
+
+msgid "Choose Folder"
+msgstr "폴더 선택"
 
 msgid "Loading..."
 msgstr "불러오는 중..."
@@ -306,6 +309,9 @@ msgstr "삭제 실패:"
 
 msgid "Upload failed:"
 msgstr "업로드 실패:"
+
+msgid "{n} of {m} files failed to upload"
+msgstr "{m}개 중 {n}개 파일 업로드에 실패했습니다"
 
 msgid "Failed to create folder:"
 msgstr "폴더 생성 실패:"

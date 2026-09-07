@@ -232,14 +232,17 @@ msgstr "M\u00e1s peque\u00f1os"
 msgid "Type"
 msgstr "Tipo"
 
-msgid "Drag and drop files here, or"
-msgstr "Arrastra archivos aqu\u00ed, o"
+msgid "Drag and drop files or folders here, or"
+msgstr "Arrastra archivos o carpetas aquí, o"
 
 msgid "browse"
 msgstr "busca"
 
 msgid "Choose Files"
 msgstr "Elegir archivos"
+
+msgid "Choose Folder"
+msgstr "Elegir carpeta"
 
 msgid "Loading..."
 msgstr "Cargando..."
@@ -306,6 +309,9 @@ msgstr "Error al eliminar:"
 
 msgid "Upload failed:"
 msgstr "Error al subir:"
+
+msgid "{n} of {m} files failed to upload"
+msgstr "No se pudieron subir {n} de {m} archivos"
 
 msgid "Failed to create folder:"
 msgstr "Error al crear carpeta:"

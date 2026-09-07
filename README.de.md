@@ -21,7 +21,7 @@ Funktioniert auf Geräten mit KOReader (entwickelt für **Kindle** und **Kobo**)
 
 - **QR-Code-Zugang** — Scannen und sofort verbinden, ohne URLs einzugeben
 - **Dateibrowser** — Navigieren Sie durch Ihre Bibliothek mit Breadcrumb-Navigation
-- **Dateien hochladen** — Per Drag-and-Drop oder Antippen Bücher von Ihrem Smartphone hochladen
+- **Dateien & Ordner hochladen** — Per Drag-and-Drop oder Antippen Bücher oder einen ganzen Ordner auf einmal hochladen
 - **Dateien herunterladen** — Jede Datei mit einem Fingertipp auf Ihr Smartphone speichern
 - **Ordner erstellen** — Organisieren Sie Ihre Bibliothek in Verzeichnissen
 - **Umbenennen und Löschen** — Einfache Dateiverwaltung mit Bestätigungsdialogen
@@ -130,7 +130,7 @@ Wenn der Menüeintrag angezeigt wird, ist das Plugin korrekt installiert.
 Nach der Verbindung können Sie über die Weboberfläche:
 
 - **Durchsuchen** — Tippen Sie auf Ordner, um durch Ihre Bibliothek zu navigieren. Verwenden Sie die Breadcrumb-Leiste oben, um zu einem übergeordneten Verzeichnis zurückzuspringen.
-- **Hochladen** — Tippen Sie auf die Schaltfläche **Upload** in der Kopfzeile, wählen Sie dann Dateien aus oder ziehen Sie sie in den Ablagebereich. Mehrere Dateien können gleichzeitig hochgeladen werden.
+- **Hochladen** — Tippen Sie auf die Schaltfläche **Upload** in der Kopfzeile, wählen Sie dann Dateien aus oder ziehen Sie sie in den Ablagebereich. Mehrere Dateien können gleichzeitig hochgeladen werden. Für einen ganzen Ordner verwenden Sie **Choose Folder** oder ziehen den Ordner hinein — Unterordner werden auf dem Gerät neu angelegt.
 - **Dateidetails** — Tippen Sie auf eine beliebige Datei, um die Detailansicht zu öffnen, in der Sie die Datei **herunterladen**, **umbenennen** oder **löschen** können.
 - **Ordner erstellen** — Tippen Sie auf die Schaltfläche **Folder** in der Kopfzeile und geben Sie einen Namen ein.
 - **Suchen** — Verwenden Sie die Suchleiste, um das aktuelle Verzeichnis nach Dateinamen zu filtern.

@@ -21,7 +21,7 @@ Funciona en dispositivos con KOReader instalado (diseñado para **Kindle** y **K
 
 - **Acceso por QR** — Escanea para conectarte al instante, sin escribir URLs
 - **Explorador de Archivos** — Navega tu biblioteca con migas de pan (breadcrumbs)
-- **Subir Archivos** — Arrastra y suelta o toca para subir libros desde tu teléfono
+- **Subir Archivos y Carpetas** — Arrastra y suelta o toca para subir libros, o una carpeta entera de una vez
 - **Descargar Archivos** — Guarda cualquier archivo en tu teléfono con un solo toque
 - **Crear Carpetas** — Organiza tu biblioteca en directorios
 - **Renombrar y Eliminar** — Gestión básica de archivos con diálogos de confirmación
@@ -130,7 +130,7 @@ Si ves la entrada en el menú, el plugin está correctamente instalado.
 Una vez conectado, la interfaz web te permite:
 
 - **Explorar** — Toca las carpetas para navegar por tu biblioteca. Usa la barra de migas de pan en la parte superior para volver a cualquier directorio anterior.
-- **Subir** — Toca el botón **Subir** en la barra superior, luego selecciona archivos o arrástralos a la zona de carga. Se pueden subir varios archivos a la vez.
+- **Subir** — Toca el botón **Subir** en la barra superior, luego selecciona archivos o arrástralos a la zona de carga. Se pueden subir varios archivos a la vez. Para subir una carpeta entera, usa **Choose Folder** o arrastra la carpeta — las subcarpetas se recrean en el dispositivo.
 - **Detalles del archivo** — Toca cualquier archivo para ver su detalle, donde puedes **descargarlo**, **renombrarlo** o **eliminarlo**.
 - **Crear carpetas** — Toca el botón **Carpeta** en la barra superior e ingresa un nombre.
 - **Buscar** — Usa la barra de búsqueda para filtrar el directorio actual por nombre de archivo.

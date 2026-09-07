@@ -5,6 +5,7 @@
 local lfs_stub = {
     attributes = function() return nil end,
     dir = function() return function() return nil end end,
+    mkdir = function() return nil, "not mounted" end,
 }
 package.loaded["lfs"] = lfs_stub
 
@@ -37,6 +38,25 @@ end
 local function unmountTree()
     lfs_stub.attributes = function() return nil end
     lfs_stub.dir = function() return function() return nil end end
+    lfs_stub.mkdir = function() return nil, "not mounted" end
+end
+
+--- Make lfs.mkdir write into a mounted tree, recording the creation order.
+--- Mirrors the real thing: it fails when the parent does not exist.
+--- @param tree table: the same table passed to mountTree()
+--- @return table: list of created paths, in creation order
+local function recordMkdir(tree)
+    local created = {}
+    lfs_stub.mkdir = function(path)
+        local parent = path:match("(.+)/[^/]+$")
+        if parent and not tree[parent] then
+            return nil, "No such file or directory"
+        end
+        tree[path] = {mode = "directory"}
+        table.insert(created, path)
+        return true
+    end
+    return created
 end
 
 --- Collect entry names from a listDirectory result into a lookup table.
@@ -467,6 +487,86 @@ describe("filesync.fileops", function()
             local unsafe = FileOps:listDirectory("/", "name", "asc", "", false)
             assert.are.equal(3, safe.count)
             assert.are.equal(8, unsafe.count)
+        end)
+    end)
+
+    describe("createDirectory", function()
+
+        local tree, created
+
+        before_each(function()
+            FileOps:setRootDir("/mnt/us")
+            tree = {
+                ["/mnt/us"] = {mode = "directory"},
+                ["/mnt/us/books"] = {mode = "directory"},
+                ["/mnt/us/notes.txt"] = {mode = "file", size = 10},
+            }
+            mountTree(tree)
+            created = recordMkdir(tree)
+        end)
+
+        after_each(function()
+            unmountTree()
+        end)
+
+        it("creates a single directory under an existing parent", function()
+            assert.is_true(FileOps:createDirectory("/books/scifi"))
+            assert.are.same({"/mnt/us/books/scifi"}, created)
+        end)
+
+        it("refuses a missing parent when not recursive", function()
+            local ok, err = FileOps:createDirectory("/plugins/deep/leaf")
+            assert.is_false(ok)
+            assert.are.equal("Parent directory does not exist", err)
+            assert.are.same({}, created)
+        end)
+
+        it("creates every missing parent when recursive", function()
+            assert.is_true(FileOps:createDirectory("/plugins/deep/leaf", {recursive = true}))
+            assert.are.same({
+                "/mnt/us/plugins",
+                "/mnt/us/plugins/deep",
+                "/mnt/us/plugins/deep/leaf",
+            }, created)
+        end)
+
+        it("skips parents that already exist when recursive", function()
+            assert.is_true(FileOps:createDirectory("/books/scifi/asimov", {recursive = true}))
+            assert.are.same({
+                "/mnt/us/books/scifi",
+                "/mnt/us/books/scifi/asimov",
+            }, created)
+        end)
+
+        it("treats an existing directory as success when recursive", function()
+            assert.is_true(FileOps:createDirectory("/books", {recursive = true}))
+            assert.are.same({}, created)
+        end)
+
+        it("still reports an existing directory as an error when not recursive", function()
+            local ok, err = FileOps:createDirectory("/books")
+            assert.is_false(ok)
+            assert.are.equal("Path already exists", err)
+        end)
+
+        it("refuses to overwrite a file that shadows a parent segment", function()
+            local ok, err = FileOps:createDirectory("/notes.txt/inner", {recursive = true})
+            assert.is_false(ok)
+            assert.are.equal("Path already exists", err)
+            assert.are.same({}, created)
+        end)
+
+        it("rejects path traversal in a recursive path", function()
+            local ok, err = FileOps:createDirectory("/plugins/../../etc", {recursive = true})
+            assert.is_false(ok)
+            assert.are.equal("Path traversal not allowed", err)
+            assert.are.same({}, created)
+        end)
+
+        it("refuses to create the root itself", function()
+            local ok, err = FileOps:createDirectory("/", {recursive = true})
+            assert.is_false(ok)
+            assert.are.equal("Path already exists", err)
         end)
     end)
 end)

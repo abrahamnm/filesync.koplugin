@@ -21,7 +21,7 @@ Works on devices running KOReader (designed for **Kindle** and **Kobo**), includ
 
 - **QR Code Access** — Scan to connect instantly, no typing URLs
 - **File Browser** — Navigate your library with breadcrumb navigation
-- **Upload Files** — Drag-and-drop or tap to upload books from your phone
+- **Upload Files & Folders** — Drag-and-drop or tap to upload books, or a whole folder at once
 - **Download Files** — Save any file to your phone with one tap
 - **Create Folders** — Organize your library into directories
 - **Rename & Delete** — Limited file management with confirmation dialogs
@@ -131,7 +131,7 @@ If you see the menu entry, the plugin is installed correctly.
 Once connected, the web interface lets you:
 
 - **Browse** — Tap folders to navigate your library. Use the breadcrumb bar at the top to jump back to any parent directory.
-- **Upload** — Tap the **Upload** button in the header, then choose files or drag them into the drop zone. Multiple files can be uploaded at once.
+- **Upload** — Tap the **Upload** button in the header, then choose files or drag them into the drop zone. Multiple files can be uploaded at once. To upload a whole folder, use **Choose Folder** or drag the folder in — subfolders are recreated on the device.
 - **File details** — Tap any file to open its detail view, where you can **download**, **rename**, or **delete** it.
 - **Create folders** — Tap the **Folder** button in the header and enter a name.
 - **Search** — Use the search bar to filter the current directory by filename.
