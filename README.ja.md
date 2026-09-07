@@ -2,6 +2,10 @@
 
 [English](README.md) | [Español](README.es.md) | [Português](README.pt_BR.md) | [中文](README.zh_CN.md) | [العربية](README.ar.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | **日本語** | [한국어](README.ko.md)
 
+<p align="center">
+  <a href="https://ko-fi.com/abrahamnm"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" height="36"></a>
+</p>
+
 KOReaderプラグインで、電子書籍リーダー上にローカルウェブサーバーを起動し、画面にQRコードを表示します。スマートフォンでコードをスキャンすると、ブラウザ上で書籍やファイルをワイヤレスで管理できる洗練されたウェブインターフェースが開きます。ケーブルも専用アプリも不要 -- ブラウザだけで利用できます。
 
 KOReaderがインストールされた**Kindle**および**Kobo**デバイスで動作します。
@@ -255,6 +259,20 @@ busted spec/json_spec.lua
 | `spec/httpserver_spec.lua` | URLデコード、クエリ文字列の解析 |
 
 新機能を追加する際は、純粋なロジック関数に対応するテストも追加してください。
+
+## コントリビューター
+
+<a href="https://github.com/abrahamnm/filesync.koplugin/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=abrahamnm/filesync.koplugin" />
+</a>
+
+## サポート
+
+FileSync が時間の節約になったら、コーヒーを一杯おごっていただけると嬉しいです。もちろん任意です。
+
+<a href="https://ko-fi.com/abrahamnm">
+  <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" />
+</a>
 
 ## ライセンス
 

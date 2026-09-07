@@ -2,6 +2,10 @@
 
 [English](README.md) | [Español](README.es.md) | [Português](README.pt_BR.md) | **中文** | [العربية](README.ar.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
 
+<p align="center">
+  <a href="https://ko-fi.com/abrahamnm"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" height="36"></a>
+</p>
+
 一款 KOReader 插件，可在电子阅读器上启动本地 Web 服务器并在屏幕上显示 QR 码。用手机扫描即可打开精美的 Web 界面，无线管理书籍和文件——无需数据线，无需安装应用，只需浏览器即可。
 
 支持运行 KOReader 的 **Kindle** 和 **Kobo** 设备。
@@ -255,6 +259,20 @@ busted spec/json_spec.lua
 | `spec/httpserver_spec.lua` | URL 解码、查询字符串解析 |
 
 添加新功能时，请为纯逻辑函数编写相应的测试。
+
+## 贡献者
+
+<a href="https://github.com/abrahamnm/filesync.koplugin/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=abrahamnm/filesync.koplugin" />
+</a>
+
+## 支持
+
+如果 FileSync 为你节省了时间，欢迎请我喝杯咖啡。心意随缘，绝不强求。
+
+<a href="https://ko-fi.com/abrahamnm">
+  <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" />
+</a>
 
 ## 许可证
 

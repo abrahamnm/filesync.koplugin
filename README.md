@@ -2,6 +2,10 @@
 
 [English](README.md) | [Español](README.es.md) | [Português](README.pt_BR.md) | [中文](README.zh_CN.md) | [العربية](README.ar.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
 
+<p align="center">
+  <a href="https://ko-fi.com/abrahamnm"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" height="36"></a>
+</p>
+
 A KOReader plugin that launches a local web server on your e-reader and displays a QR code on screen. Scan the code with your phone to open a polished web interface for managing books and files wirelessly — no cables, no apps, just your browser.
 
 Works on devices running KOReader (designed for **Kindle** and **Kobo**), including non-touch, keypad-only e-readers — the on-device screens are fully operable with the D-pad and physical keys.
@@ -263,6 +267,20 @@ busted spec/json_spec.lua
 | `spec/httpserver_spec.lua` | URL decoding, query string parsing |
 
 When adding new features, please add corresponding tests for any pure-logic functions.
+
+## Contributors
+
+<a href="https://github.com/abrahamnm/filesync.koplugin/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=abrahamnm/filesync.koplugin" />
+</a>
+
+## Support
+
+If FileSync saves you time, you can buy me a coffee. Always appreciated, never expected.
+
+<a href="https://ko-fi.com/abrahamnm">
+  <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" />
+</a>
 
 ## License
 
