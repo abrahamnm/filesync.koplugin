@@ -370,3 +370,24 @@ msgstr ""
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr ""
+
+msgid "Hostname"
+msgstr ""
+
+msgid "Hostname: %1"
+msgstr ""
+
+msgid "Hostname set to %1"
+msgstr ""
+
+msgid "Enter only the name, without \".local\"; it is added automatically."
+msgstr ""
+
+msgid "Invalid hostname. Use 1-63 characters: lowercase letters, digits and hyphens, not starting or ending with a hyphen."
+msgstr ""
+
+msgid "The server is also reachable at http://<hostname>.local on networks and devices that support mDNS. Enter only the name; \".local\" is added automatically."
+msgstr ""
+
+msgid "Name under which the server is reachable on the local network (e.g. http://filesync.local). Works out of the box on macOS, iOS and Windows; Linux needs avahi; most Android browsers cannot resolve .local names, so use the IP address or QR code there."
+msgstr ""

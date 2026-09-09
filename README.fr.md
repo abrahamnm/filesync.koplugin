@@ -172,6 +172,20 @@ Tous les paramètres sont restaurés à leurs valeurs précédentes lorsque le s
 
 > **Remarque :** Le port par défaut 80 permet d'accéder au serveur en saisissant uniquement l'adresse IP de l'appareil (`http://192.168.1.5`), sans suffixe `:port`. Les ports inférieurs à 1024 sont privilégiés et ne fonctionnent que si KOReader s'exécute en root (par exemple sur Kobo et Kindle). Sous Android et sur ordinateur, la liaison échoue et le serveur bascule automatiquement sur le port 8080, l'URL devient alors `http://192.168.1.5:8080`.
 
+### Accéder au serveur par son nom
+
+En plus de son adresse IP, le serveur s'annonce sur le réseau local via multicast DNS (mDNS/Bonjour), vous pouvez donc aussi l'ouvrir à l'adresse **`http://filesync.local`** (suivie de `:port` si le port n'est pas 80). L'écran du code QR affiche d'abord l'adresse `.local` puis l'adresse IP en dessous, en secours ; le code QR lui-même encode toujours l'adresse IP, que toute caméra de téléphone peut ouvrir.
+
+Prise en charge selon la plateforme :
+
+- **macOS, iOS et Windows 10+** résolvent les noms `.local` sans configuration.
+- **Linux** nécessite `avahi-daemon` et `libnss-mdns` (fournis par la plupart des distributions de bureau).
+- **Android** : la plupart des navigateurs Android ne résolvent pas les noms `.local` ; continuez d'y utiliser l'adresse IP ou le code QR.
+
+L'appareil apparaît aussi dans les navigateurs de services Bonjour/DNS-SD sous le nom **« FileSync on filesync »** (`_http._tcp`).
+
+Pour changer le nom, ouvrez le menu de l'extension et appuyez sur **Hostname** (Nom d'hôte). Saisissez uniquement le libellé (lettres minuscules, chiffres et tirets) ; `.local` est ajouté automatiquement. Si vous utilisez FileSync sur plusieurs appareils en même temps, donnez-leur des noms différents. Si mDNS ne peut pas démarrer (par exemple parce qu'une autre application occupe déjà le port 5353), le serveur continue de fonctionner par IP et la ligne `.local` n'est simplement pas affichée.
+
 ### Mode sécurisé
 
 Le mode sécurisé est **activé par défaut** et limite l'interface web à l'affichage des fichiers pertinents pour votre bibliothèque de lecture. Lorsqu'il est activé :

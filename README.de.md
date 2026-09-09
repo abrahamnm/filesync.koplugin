@@ -172,6 +172,20 @@ Alle Einstellungen werden auf ihre vorherigen Werte zurückgesetzt, wenn der Ser
 
 > **Hinweis:** Mit dem Standardport 80 erreichen Sie den Server, indem Sie nur die Geräte-IP eingeben (`http://192.168.1.5`) — ohne `:Port`-Suffix. Ports unter 1024 sind privilegiert und funktionieren nur, wenn KOReader als root läuft (z. B. auf Kobo und Kindle). Unter Android und auf dem Desktop schlägt die Bindung fehl und der Server wechselt automatisch auf Port 8080, die URL lautet dann `http://192.168.1.5:8080`.
 
+### Server über den Namen erreichen
+
+Neben seiner IP-Adresse kündigt sich der Server im lokalen Netzwerk per Multicast-DNS (mDNS/Bonjour) an, sodass Sie ihn auch als **`http://filesync.local`** öffnen können (plus `:Port`, falls der Port nicht 80 ist). Der QR-Bildschirm zeigt zuerst die `.local`-Adresse und darunter die IP-Adresse als Ausweichmöglichkeit; der QR-Code selbst enthält weiterhin die IP-Adresse, die jede Handykamera öffnen kann.
+
+Plattformunterstützung:
+
+- **macOS, iOS und Windows 10+** lösen `.local`-Namen ohne weitere Einrichtung auf.
+- **Linux** benötigt `avahi-daemon` und `libnss-mdns` (bei den meisten Desktop-Distributionen vorinstalliert).
+- **Android**: Die meisten Android-Browser können `.local`-Namen nicht auflösen; verwenden Sie dort weiterhin die IP-Adresse oder den QR-Code.
+
+Das Gerät erscheint außerdem in Bonjour-/DNS-SD-Dienstbrowsern als **„FileSync on filesync“** (`_http._tcp`).
+
+Um den Namen zu ändern, öffnen Sie das Plugin-Menü und tippen Sie auf **Hostname**. Geben Sie nur den Namen ein (Kleinbuchstaben, Ziffern und Bindestriche); `.local` wird automatisch angehängt. Wenn FileSync gleichzeitig auf mehreren Geräten läuft, geben Sie jedem einen anderen Hostnamen. Kann mDNS nicht gestartet werden (z. B. weil eine andere App bereits Port 5353 belegt), funktioniert der Server weiterhin über die IP und die `.local`-Zeile wird einfach nicht angezeigt.
+
 ### Sicherer Modus
 
 Der sichere Modus ist **standardmäßig aktiviert** und beschränkt die Weboberfläche auf die Anzeige von Dateien, die für Ihre Lesebibliothek relevant sind. Wenn aktiviert:

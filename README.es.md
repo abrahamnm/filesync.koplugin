@@ -172,6 +172,20 @@ Todos los ajustes se restauran a sus valores anteriores cuando se detiene el ser
 
 > **Nota:** El puerto predeterminado 80 te permite acceder al servidor escribiendo solo la IP del dispositivo (`http://192.168.1.5`), sin el sufijo `:puerto`. Los puertos por debajo de 1024 son privilegiados y solo funcionan cuando KOReader se ejecuta como root (por ejemplo, en Kobo y Kindle). En Android y escritorio el enlace falla y el servidor cambia automáticamente al puerto 8080, por lo que la URL será `http://192.168.1.5:8080`.
 
+### Acceder al servidor por nombre
+
+Además de su dirección IP, el servidor se anuncia en la red local mediante multicast DNS (mDNS/Bonjour), de modo que también puedes abrirlo como **`http://filesync.local`** (más `:puerto` si el puerto no es el 80). La pantalla del código QR muestra primero la dirección `.local` y debajo la dirección IP como alternativa; el código QR sigue codificando la IP, que cualquier cámara de teléfono puede abrir.
+
+Compatibilidad por plataforma:
+
+- **macOS, iOS y Windows 10+** resuelven nombres `.local` sin configuración adicional.
+- **Linux** necesita `avahi-daemon` y `libnss-mdns` (la mayoría de distribuciones de escritorio los incluyen).
+- **Android**: la mayoría de navegadores Android no resuelven nombres `.local`, así que allí sigue usando la IP o escanea el código QR.
+
+El dispositivo también aparece en los exploradores de servicios Bonjour/DNS-SD como **"FileSync on filesync"** (`_http._tcp`).
+
+Para cambiar el nombre, abre el menú del complemento y toca **Hostname** (Nombre de host). Introduce solo la etiqueta (letras minúsculas, dígitos y guiones); `.local` se añade automáticamente. Si usas FileSync en varios dispositivos a la vez, asigna a cada uno un nombre distinto. Si mDNS no puede iniciarse (por ejemplo, porque otra aplicación ya usa el puerto 5353), el servidor sigue funcionando por IP y simplemente no se muestra la línea `.local`.
+
 ### Modo Seguro
 
 El modo seguro está **activado por defecto** y limita la interfaz web para mostrar solo archivos relevantes para tu biblioteca de lectura. Cuando está activado:
