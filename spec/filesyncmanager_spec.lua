@@ -59,6 +59,7 @@ stub_koreader_modules()
 local FileSyncManager = require("filesync.filesyncmanager")
 
 local MIGRATION_KEY = "filesync_port_migrated_to_80"
+local FALLBACK_NOTICE_KEY = "filesync_port_fallback_notified_for"
 
 describe("FileSyncManager settings migration", function()
     local previous_settings
@@ -126,6 +127,26 @@ describe("FileSyncManager settings migration", function()
         assert.are.equal("http://filesync.local", FileSyncManager:getServerHostnameURL())
     end)
 
+    it("shows the privileged-port notice once per configured port", function()
+        local settings = fake_settings({})
+        _G.G_reader_settings = settings
+
+        assert.is_true(FileSyncManager:shouldNotifyPortFallback(80))
+        assert.is_false(FileSyncManager:shouldNotifyPortFallback(80))
+        assert.is_false(FileSyncManager:shouldNotifyPortFallback(80))
+    end)
+
+    it("arms the notice again when a different port is configured", function()
+        local settings = fake_settings({})
+        _G.G_reader_settings = settings
+
+        assert.is_true(FileSyncManager:shouldNotifyPortFallback(80))
+        assert.is_true(FileSyncManager:shouldNotifyPortFallback(443))
+        assert.is_false(FileSyncManager:shouldNotifyPortFallback(443))
+        -- Only the last port is remembered, so switching back reports again.
+        assert.is_true(FileSyncManager:shouldNotifyPortFallback(80))
+    end)
+
     it("clears the migration flag with the rest of the settings", function()
         local settings = fake_settings({ filesync_port = 8080 })
         _G.G_reader_settings = settings
@@ -135,5 +156,16 @@ describe("FileSyncManager settings migration", function()
 
         assert.is_nil(settings.store[MIGRATION_KEY])
         assert.is_nil(settings.store.filesync_port)
+    end)
+
+    it("clears the fallback notice flag with the rest of the settings", function()
+        local settings = fake_settings({})
+        _G.G_reader_settings = settings
+
+        FileSyncManager:shouldNotifyPortFallback(80)
+        assert.are.equal(80, settings.store[FALLBACK_NOTICE_KEY])
+
+        FileSyncManager:deleteSettings()
+        assert.is_nil(settings.store[FALLBACK_NOTICE_KEY])
     end)
 end)
