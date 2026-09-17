@@ -176,9 +176,74 @@ function FileSyncManager:setSafeMode(enabled)
     G_reader_settings:flush()
 end
 
+--- Marks that the one-time 8080 -> 80 port migration has already run.
+local PORT_MIGRATION_KEY = "filesync_port_migrated_to_80"
+
+--- Records the last configured port the privileged-bind notice was shown for.
+local PORT_FALLBACK_NOTICE_KEY = "filesync_port_fallback_notified_for"
+
 --- Settings this plugin persists in G_reader_settings. Kept in one place so
 --- deleteSettings() cannot drift from the readers/writers above.
-local SETTINGS_KEYS = { "filesync_port", "filesync_safe_mode", "filesync_hostname" }
+local SETTINGS_KEYS = {
+    "filesync_port",
+    "filesync_safe_mode",
+    "filesync_hostname",
+    PORT_MIGRATION_KEY,
+    PORT_FALLBACK_NOTICE_KEY,
+}
+
+--- One-time migration of the saved port from 8080 to 80.
+---
+--- Installs that predate the port-80 default (v1.7.0) kept their saved 8080,
+--- because that release deliberately left existing ports alone. Since v1.9.0
+--- the server also answers to <hostname>.local, and a saved 8080 turns that
+--- into "http://filesync.local:8080" -- the port suffix this name exists to
+--- avoid. Move those installs to port 80 once.
+---
+--- Only the exact value 8080 is touched: any other custom port was chosen
+--- deliberately and is left alone. The flag is written on the first run
+--- whether or not a port was migrated, so a user who sets 8080 again
+--- afterwards keeps it. Devices that cannot bind a privileged port are
+--- covered by the fallback in startServer(), which returns them to 8080 at
+--- run time without touching the setting.
+---
+--- @return boolean: true when a saved 8080 was rewritten to 80
+function FileSyncManager:migrateSettings()
+    if G_reader_settings:readSetting(PORT_MIGRATION_KEY) then return false end
+    G_reader_settings:saveSetting(PORT_MIGRATION_KEY, true)
+
+    local migrated = false
+    if G_reader_settings:readSetting("filesync_port") == FALLBACK_PORT then
+        G_reader_settings:saveSetting("filesync_port", DEFAULT_PORT)
+        -- Keep the lazily cached value coherent with what was just written.
+        self._port = DEFAULT_PORT
+        migrated = true
+        logger.info("FileSync: migrated saved port", FALLBACK_PORT, "to", DEFAULT_PORT)
+    end
+
+    G_reader_settings:flush()
+    return migrated
+end
+
+--- Whether the "needs root access" notice should be shown for `port`.
+---
+--- Binding a privileged port fails on every start on Android and desktop, so
+--- an unconditional notice reappears each time the server comes up. Show it
+--- once per configured port instead: enough to explain the ":8080" in the
+--- URL, without nagging devices that can never bind a low port. Choosing a
+--- different port arms the notice again, since that is a new setting whose
+--- outcome the user has not been told about yet. Only the last port is
+--- remembered, so switching back to an earlier one reports again.
+---
+--- @return boolean: true when the notice has not yet been shown for this port
+function FileSyncManager:shouldNotifyPortFallback(port)
+    if G_reader_settings:readSetting(PORT_FALLBACK_NOTICE_KEY) == port then
+        return false
+    end
+    G_reader_settings:saveSetting(PORT_FALLBACK_NOTICE_KEY, port)
+    G_reader_settings:flush()
+    return true
+end
 
 --- Remove every setting this plugin owns, restoring first-run defaults.
 --- Called by KOReader's plugin manager through FileSync:deletePluginSettings().
@@ -427,7 +492,7 @@ function FileSyncManager:start(silent)
             local fb_ok, fb_err = tryStart(FALLBACK_PORT)
             if fb_ok then
                 ok = true
-                if not silent then
+                if not silent and self:shouldNotifyPortFallback(port) then
                     UIManager:show(InfoMessage:new{
                         text = T(_("Port %1 needs root access and isn't available on this device. Using port %2 instead."), port, FALLBACK_PORT),
                         timeout = 5,
