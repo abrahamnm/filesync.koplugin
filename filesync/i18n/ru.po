@@ -369,3 +369,24 @@ msgstr "Новая папка"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "Также удалить метаданные чтения (.sdr)"
+
+msgid "Hostname"
+msgstr "Имя хоста"
+
+msgid "Hostname: %1"
+msgstr "Имя хоста: %1"
+
+msgid "Hostname set to %1"
+msgstr "Имя хоста установлено: %1"
+
+msgid "Enter only the name, without \".local\"; it is added automatically."
+msgstr "Введите только имя, без \".local\" — оно добавляется автоматически."
+
+msgid "Invalid hostname. Use 1-63 characters: lowercase letters, digits and hyphens, not starting or ending with a hyphen."
+msgstr "Недопустимое имя хоста. Используйте от 1 до 63 символов: строчные латинские буквы, цифры и дефисы, не начиная и не заканчивая дефисом."
+
+msgid "The server is also reachable at http://<hostname>.local on networks and devices that support mDNS. Enter only the name; \".local\" is added automatically."
+msgstr "Сервер также доступен по адресу http://<имя>.local в сетях и на устройствах с поддержкой mDNS. Введите только имя; \".local\" добавляется автоматически."
+
+msgid "Name under which the server is reachable on the local network (e.g. http://filesync.local). Works out of the box on macOS, iOS and Windows; Linux needs avahi; most Android browsers cannot resolve .local names, so use the IP address or QR code there."
+msgstr "Имя, по которому сервер доступен в локальной сети (например, http://filesync.local). Работает сразу на macOS, iOS и Windows; в Linux нужен avahi; большинство браузеров Android не разрешают имена .local — используйте там IP-адрес или QR-код."

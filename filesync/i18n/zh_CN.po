@@ -369,3 +369,24 @@ msgstr "新建文件夹"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "同时删除阅读元数据（.sdr）"
+
+msgid "Hostname"
+msgstr "主机名"
+
+msgid "Hostname: %1"
+msgstr "主机名：%1"
+
+msgid "Hostname set to %1"
+msgstr "主机名已设置为 %1"
+
+msgid "Enter only the name, without \".local\"; it is added automatically."
+msgstr "只需输入名称，不要带 \".local\"，它会自动添加。"
+
+msgid "Invalid hostname. Use 1-63 characters: lowercase letters, digits and hyphens, not starting or ending with a hyphen."
+msgstr "主机名无效。请使用 1 到 63 个字符：小写字母、数字和连字符，且不能以连字符开头或结尾。"
+
+msgid "The server is also reachable at http://<hostname>.local on networks and devices that support mDNS. Enter only the name; \".local\" is added automatically."
+msgstr "在支持 mDNS 的网络和设备上，也可以通过 http://<主机名>.local 访问服务器。只需输入名称，\".local\" 会自动添加。"
+
+msgid "Name under which the server is reachable on the local network (e.g. http://filesync.local). Works out of the box on macOS, iOS and Windows; Linux needs avahi; most Android browsers cannot resolve .local names, so use the IP address or QR code there."
+msgstr "服务器在局域网中的访问名称（例如 http://filesync.local）。在 macOS、iOS 和 Windows 上开箱即用；Linux 需要 avahi；大多数 Android 浏览器无法解析 .local 名称，请在其上使用 IP 地址或二维码。"

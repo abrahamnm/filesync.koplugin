@@ -369,3 +369,24 @@ msgstr "새 폴더"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "읽기 메타데이터(.sdr)도 함께 삭제"
+
+msgid "Hostname"
+msgstr "호스트 이름"
+
+msgid "Hostname: %1"
+msgstr "호스트 이름: %1"
+
+msgid "Hostname set to %1"
+msgstr "호스트 이름이 %1(으)로 설정되었습니다"
+
+msgid "Enter only the name, without \".local\"; it is added automatically."
+msgstr "\".local\" 없이 이름만 입력하세요. 자동으로 추가됩니다."
+
+msgid "Invalid hostname. Use 1-63 characters: lowercase letters, digits and hyphens, not starting or ending with a hyphen."
+msgstr "잘못된 호스트 이름입니다. 1~63자의 소문자, 숫자, 하이픈만 사용할 수 있으며 하이픈으로 시작하거나 끝날 수 없습니다."
+
+msgid "The server is also reachable at http://<hostname>.local on networks and devices that support mDNS. Enter only the name; \".local\" is added automatically."
+msgstr "mDNS를 지원하는 네트워크와 기기에서는 서버에 http://<호스트 이름>.local 로도 접속할 수 있습니다. 이름만 입력하세요. \".local\" 은 자동으로 추가됩니다."
+
+msgid "Name under which the server is reachable on the local network (e.g. http://filesync.local). Works out of the box on macOS, iOS and Windows; Linux needs avahi; most Android browsers cannot resolve .local names, so use the IP address or QR code there."
+msgstr "로컬 네트워크에서 서버에 접속할 때 사용하는 이름입니다(예: http://filesync.local). macOS, iOS, Windows에서는 바로 작동합니다. Linux는 avahi가 필요합니다. 대부분의 Android 브라우저는 .local 이름을 해석하지 못하므로 IP 주소나 QR 코드를 사용하세요."

@@ -369,3 +369,24 @@ msgstr "新しいフォルダ"
 
 msgid "Also delete reading metadata (.sdr)"
 msgstr "読書メタデータ (.sdr) も削除する"
+
+msgid "Hostname"
+msgstr "ホスト名"
+
+msgid "Hostname: %1"
+msgstr "ホスト名: %1"
+
+msgid "Hostname set to %1"
+msgstr "ホスト名を %1 に設定しました"
+
+msgid "Enter only the name, without \".local\"; it is added automatically."
+msgstr "\".local\" を除いた名前のみを入力してください。自動的に追加されます。"
+
+msgid "Invalid hostname. Use 1-63 characters: lowercase letters, digits and hyphens, not starting or ending with a hyphen."
+msgstr "無効なホスト名です。1〜63文字の小文字英字、数字、ハイフンを使用し、先頭と末尾にハイフンは使えません。"
+
+msgid "The server is also reachable at http://<hostname>.local on networks and devices that support mDNS. Enter only the name; \".local\" is added automatically."
+msgstr "mDNSに対応したネットワークと端末では、サーバーは http://<ホスト名>.local でもアクセスできます。名前のみを入力してください。\".local\" は自動的に追加されます。"
+
+msgid "Name under which the server is reachable on the local network (e.g. http://filesync.local). Works out of the box on macOS, iOS and Windows; Linux needs avahi; most Android browsers cannot resolve .local names, so use the IP address or QR code there."
+msgstr "ローカルネットワークでサーバーにアクセスするための名前です（例: http://filesync.local）。macOS、iOS、Windowsではそのまま動作します。Linuxではavahiが必要です。多くのAndroidブラウザは .local 名を解決できないため、IPアドレスまたはQRコードを使用してください。"
