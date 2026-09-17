@@ -2,6 +2,10 @@
 
 [English](README.md) | [Español](README.es.md) | [Português](README.pt_BR.md) | [中文](README.zh_CN.md) | [العربية](README.ar.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | **日本語** | [한국어](README.ko.md)
 
+<p align="center">
+  <a href="https://ko-fi.com/abrahamnm"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" height="36"></a>
+</p>
+
 KOReaderプラグインで、電子書籍リーダー上にローカルウェブサーバーを起動し、画面にQRコードを表示します。スマートフォンでコードをスキャンすると、ブラウザ上で書籍やファイルをワイヤレスで管理できる洗練されたウェブインターフェースが開きます。ケーブルも専用アプリも不要 -- ブラウザだけで利用できます。
 
 KOReaderがインストールされた**Kindle**および**Kobo**デバイスで動作します。
@@ -168,6 +172,20 @@ KOReaderの再起動後、上部メニューを開いて以下に移動します
 
 > **注意:** デフォルトのポート80では、`:ポート`を付けずにデバイスのIPアドレスだけ（`http://192.168.1.5`）でサーバーにアクセスできます。1024未満のポートは特権ポートで、KOReaderがroot権限で動作している場合（KoboやKindleなど）にのみ使用できます。Androidやデスクトップではバインドに失敗し、サーバーは自動的にポート8080にフォールバックするため、URLは`http://192.168.1.5:8080`になります。
 
+### 名前でサーバーにアクセスする
+
+サーバーはIPアドレスに加えて、マルチキャストDNS（mDNS/Bonjour）でローカルネットワークに自身を通知するため、**`http://filesync.local`**（ポートが80以外の場合は`:ポート`を付加）でも開けます。QRコード画面では`.local`アドレスが先に、その下に代替としてIPアドレスが表示されます。QRコード自体には引き続きIPアドレスが含まれており、どのスマートフォンのカメラでも開けます。
+
+プラットフォームの対応状況:
+
+- **macOS、iOS、Windows 10以降**は追加設定なしで`.local`名を解決できます。
+- **Linux**では`avahi-daemon`と`libnss-mdns`が必要です（多くのデスクトップ向けディストリビューションには同梱されています）。
+- **Android**: 多くのAndroidブラウザは`.local`名を解決できないため、引き続きIPアドレスを使うかQRコードを読み取ってください。
+
+デバイスはBonjour/DNS-SDサービスブラウザにも**「FileSync on filesync」**（`_http._tcp`）として表示されます。
+
+名前を変更するには、プラグインメニューを開いて**Hostname**（ホスト名）をタップします。ラベルのみ（小文字英字、数字、ハイフン）を入力してください。`.local`は自動的に追加されます。複数のデバイスで同時にFileSyncを実行する場合は、それぞれ異なるホスト名を設定してください。mDNSを開始できない場合（たとえば別のアプリがすでにポート5353を使用している場合）でも、サーバーはIPアドレスで引き続き動作し、`.local`の行が表示されないだけです。
+
 ### セーフモード
 
 セーフモードは**デフォルトで有効**になっており、ウェブインターフェースに読書ライブラリに関連するファイルのみを表示します。有効時:
@@ -255,6 +273,20 @@ busted spec/json_spec.lua
 | `spec/httpserver_spec.lua` | URLデコード、クエリ文字列の解析 |
 
 新機能を追加する際は、純粋なロジック関数に対応するテストも追加してください。
+
+## コントリビューター
+
+<a href="https://github.com/abrahamnm/filesync.koplugin/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=abrahamnm/filesync.koplugin" />
+</a>
+
+## サポート
+
+FileSync が時間の節約になったら、コーヒーを一杯おごっていただけると嬉しいです。もちろん任意です。
+
+<a href="https://ko-fi.com/abrahamnm">
+  <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" />
+</a>
 
 ## ライセンス
 

@@ -2,6 +2,10 @@
 
 [English](README.md) | [Español](README.es.md) | [Português](README.pt_BR.md) | **中文** | [العربية](README.ar.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
 
+<p align="center">
+  <a href="https://ko-fi.com/abrahamnm"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" height="36"></a>
+</p>
+
 一款 KOReader 插件，可在电子阅读器上启动本地 Web 服务器并在屏幕上显示 QR 码。用手机扫描即可打开精美的 Web 界面，无线管理书籍和文件——无需数据线，无需安装应用，只需浏览器即可。
 
 支持运行 KOReader 的 **Kindle** 和 **Kobo** 设备。
@@ -168,6 +172,20 @@
 
 > **注意：** 默认端口 80 让你只需输入设备 IP（`http://192.168.1.5`）即可访问服务器，无需 `:端口` 后缀。低于 1024 的端口是特权端口，仅在 KOReader 以 root 身份运行时（如 Kobo 和 Kindle）可用。在 Android 和桌面端绑定会失败，服务器会自动回退到端口 8080，此时地址为 `http://192.168.1.5:8080`。
 
+### 通过名称访问服务器
+
+除 IP 地址外，服务器还会通过多播 DNS（mDNS/Bonjour）在局域网中公告自己，因此你也可以用 **`http://filesync.local`** 打开它（端口不是 80 时加上 `:端口`）。二维码页面会先显示 `.local` 地址，其下方显示 IP 地址作为备用；二维码本身仍然编码 IP 地址，任何手机相机都能打开。
+
+平台支持：
+
+- **macOS、iOS 和 Windows 10+** 无需额外设置即可解析 `.local` 名称。
+- **Linux** 需要安装 `avahi-daemon` 和 `libnss-mdns`（大多数桌面发行版已自带）。
+- **Android**：大多数 Android 浏览器无法解析 `.local` 名称，请继续使用 IP 地址或扫描二维码。
+
+设备还会以 **"FileSync on filesync"**（`_http._tcp`）的名称出现在 Bonjour/DNS-SD 服务浏览器中。
+
+要更改名称，打开插件菜单并点击 **Hostname**（主机名）。只需输入名称部分（小写字母、数字和连字符），`.local` 会自动添加。如果同时在多台设备上运行 FileSync，请为每台设备设置不同的主机名。如果 mDNS 无法启动（例如其他应用已占用端口 5353），服务器仍可通过 IP 正常工作，只是不会显示 `.local` 这一行。
+
 ### 安全模式
 
 安全模式**默认开启**，会限制 Web 界面仅显示与阅读相关的文件。启用后：
@@ -255,6 +273,20 @@ busted spec/json_spec.lua
 | `spec/httpserver_spec.lua` | URL 解码、查询字符串解析 |
 
 添加新功能时，请为纯逻辑函数编写相应的测试。
+
+## 贡献者
+
+<a href="https://github.com/abrahamnm/filesync.koplugin/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=abrahamnm/filesync.koplugin" />
+</a>
+
+## 支持
+
+如果 FileSync 为你节省了时间，欢迎请我喝杯咖啡。心意随缘，绝不强求。
+
+<a href="https://ko-fi.com/abrahamnm">
+  <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" />
+</a>
 
 ## 许可证
 

@@ -57,6 +57,19 @@ function FileSync:addToMainMenu(menu_items)
                 keep_menu_open = true,
             },
             {
+                text_func = function()
+                    local FileSyncManager = require("filesync/filesyncmanager")
+                    local T = require("ffi/util").template
+                    return T(_("Hostname: %1"), FileSyncManager:getHostname() .. ".local")
+                end,
+                help_text = _("Name under which the server is reachable on the local network (e.g. http://filesync.local). Works out of the box on macOS, iOS and Windows; Linux needs avahi; most Android browsers cannot resolve .local names, so use the IP address or QR code there."),
+                callback = function()
+                    local FileSyncManager = require("filesync/filesyncmanager")
+                    FileSyncManager:configureHostname()
+                end,
+                keep_menu_open = true,
+            },
+            {
                 text = _("Safe mode"),
                 help_text = _([[When enabled, the web interface only lists document and image formats KOReader can open, and hides sidecar metadata folders and hidden files.
 

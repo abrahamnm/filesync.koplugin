@@ -406,3 +406,23 @@ msgstr "فشل الحفظ:"
 msgid "Failed to open file"
 msgstr "تعذّر فتح الملف"
 
+msgid "Hostname"
+msgstr "اسم المضيف"
+
+msgid "Hostname: %1"
+msgstr "اسم المضيف: %1"
+
+msgid "Hostname set to %1"
+msgstr "تم تعيين اسم المضيف إلى %1"
+
+msgid "Enter only the name, without \".local\"; it is added automatically."
+msgstr "أدخل الاسم فقط بدون \".local\"؛ تتم إضافته تلقائيًا."
+
+msgid "Invalid hostname. Use 1-63 characters: lowercase letters, digits and hyphens, not starting or ending with a hyphen."
+msgstr "اسم مضيف غير صالح. استخدم من 1 إلى 63 حرفًا: أحرف لاتينية صغيرة وأرقام وشرطات، دون أن يبدأ أو ينتهي بشرطة."
+
+msgid "The server is also reachable at http://<hostname>.local on networks and devices that support mDNS. Enter only the name; \".local\" is added automatically."
+msgstr "يمكن الوصول إلى الخادم أيضًا عبر http://<hostname>.local على الشبكات والأجهزة التي تدعم mDNS. أدخل الاسم فقط؛ تتم إضافة \".local\" تلقائيًا."
+
+msgid "Name under which the server is reachable on the local network (e.g. http://filesync.local). Works out of the box on macOS, iOS and Windows; Linux needs avahi; most Android browsers cannot resolve .local names, so use the IP address or QR code there."
+msgstr "الاسم الذي يمكن من خلاله الوصول إلى الخادم على الشبكة المحلية (مثل http://filesync.local). يعمل مباشرة على macOS وiOS وWindows؛ يحتاج Linux إلى avahi؛ معظم متصفحات Android لا تستطيع حل أسماء .local، لذا استخدم عنوان IP أو رمز QR هناك."

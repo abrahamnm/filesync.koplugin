@@ -2,6 +2,10 @@
 
 [English](README.md) | [Español](README.es.md) | **Português** | [中文](README.zh_CN.md) | [العربية](README.ar.md) | [Français](README.fr.md) | [Deutsch](README.de.md) | [Русский](README.ru.md) | [日本語](README.ja.md) | [한국어](README.ko.md)
 
+<p align="center">
+  <a href="https://ko-fi.com/abrahamnm"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" height="36"></a>
+</p>
+
 Um plugin para KOReader que inicia um servidor web local no seu leitor eletrônico e exibe um código QR na tela. Escaneie o código com seu celular para abrir uma interface web completa que permite gerenciar livros e arquivos sem fio — sem cabos, sem aplicativos, apenas o seu navegador.
 
 Funciona em dispositivos com KOReader instalado (projetado para **Kindle** e **Kobo**).
@@ -168,6 +172,20 @@ Todas as configurações são restauradas aos valores anteriores quando o servid
 
 > **Nota:** A porta padrão 80 permite acessar o servidor digitando apenas o IP do dispositivo (`http://192.168.1.5`), sem o sufixo `:porta`. Portas abaixo de 1024 são privilegiadas e só funcionam quando o KOReader roda como root (por exemplo, em Kobo e Kindle). No Android e no desktop a vinculação falha e o servidor volta automaticamente para a porta 8080, então a URL fica `http://192.168.1.5:8080`.
 
+### Acessando o servidor pelo nome
+
+Além do endereço IP, o servidor se anuncia na rede local via multicast DNS (mDNS/Bonjour), então você também pode abri-lo como **`http://filesync.local`** (mais `:porta` se a porta não for 80). A tela do QR code mostra primeiro o endereço `.local` e, abaixo, o endereço IP como alternativa; o QR code em si continua codificando o IP, que qualquer câmera de celular consegue abrir.
+
+Suporte por plataforma:
+
+- **macOS, iOS e Windows 10+** resolvem nomes `.local` sem configuração extra.
+- **Linux** precisa de `avahi-daemon` e `libnss-mdns` (a maioria das distribuições desktop já os inclui).
+- **Android**: a maioria dos navegadores Android não resolve nomes `.local`, então continue usando o IP ou escaneie o QR code.
+
+O dispositivo também aparece em navegadores de serviços Bonjour/DNS-SD como **"FileSync on filesync"** (`_http._tcp`).
+
+Para mudar o nome, abra o menu do plugin e toque em **Hostname** (Nome do host). Digite apenas o rótulo (letras minúsculas, dígitos e hífens); `.local` é adicionado automaticamente. Se você usar o FileSync em mais de um dispositivo ao mesmo tempo, dê um nome diferente a cada um. Se o mDNS não puder iniciar (por exemplo, porque outro aplicativo já usa a porta 5353), o servidor continua funcionando pelo IP e a linha `.local` simplesmente não é exibida.
+
 ### Modo Seguro
 
 O modo seguro está **ativado por padrão** e limita a interface web para exibir apenas arquivos relevantes para sua biblioteca de leitura. Quando ativado:
@@ -255,6 +273,20 @@ busted spec/json_spec.lua
 | `spec/httpserver_spec.lua` | Decodificação de URLs, análise de query strings |
 
 Ao adicionar novas funcionalidades, inclua testes correspondentes para as funções de lógica pura.
+
+## Colaboradores
+
+<a href="https://github.com/abrahamnm/filesync.koplugin/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=abrahamnm/filesync.koplugin" />
+</a>
+
+## Apoie
+
+Se o FileSync te poupa tempo, você pode me pagar um café. Sempre bem-vindo, nunca esperado.
+
+<a href="https://ko-fi.com/abrahamnm">
+  <img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-fi" />
+</a>
 
 ## Licença
 

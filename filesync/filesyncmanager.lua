@@ -2,7 +2,8 @@
 --- Handles starting/stopping the HTTP server, WiFi/IP detection, battery checks,
 --- QR code display, standby prevention, and Kindle firewall rules.
 ---
---- Key dependencies: device (KOReader), UIManager (KOReader), filesync/httpserver
+--- Key dependencies: device (KOReader), UIManager (KOReader), filesync/httpserver,
+--- filesync/mdns
 
 local BD = require("ui/bidi")
 local Blitbuffer = require("ffi/blitbuffer")
@@ -39,7 +40,9 @@ local T = require("ffi/util").template
 local FileSyncManager = {
     _running = false,
     _server = nil,
+    _mdns = nil,
     _port = nil,
+    _hostname = nil,
     _ip = nil,
     _was_running_before_suspend = false,
     _standby_prevented = false,
@@ -60,6 +63,9 @@ end
 local DEFAULT_PORT = 80
 -- Port used when binding a privileged port (<1024) fails.
 local FALLBACK_PORT = 8080
+-- mDNS hostname label used by a fresh install: the server answers at
+-- http://filesync.local. The ".local" suffix is always appended by the plugin.
+local DEFAULT_HOSTNAME = "filesync"
 
 function FileSyncManager:getPort()
     if self._port then return self._port end
@@ -67,20 +73,98 @@ function FileSyncManager:getPort()
     return self._port
 end
 
---- Build the URL users type or scan. Port 80 is the HTTP default, so it is
+--- Build "http://<host>[:port]". Port 80 is the HTTP default, so it is
 --- omitted from the URL: "http://192.168.1.5" instead of ":80".
-function FileSyncManager:getServerURL()
-    local url = "http://" .. self._ip
+function FileSyncManager:_buildURL(host)
+    local url = "http://" .. host
     if self._port ~= 80 then
         url = url .. ":" .. self._port
     end
     return url
 end
 
+--- Build the URL users type or scan, based on the device IP.
+function FileSyncManager:getServerURL()
+    return self:_buildURL(self._ip)
+end
+
+--- Build the mDNS URL (e.g. "http://filesync.local"). Only meaningful while
+--- the responder is running; see isMdnsRunning().
+function FileSyncManager:getServerHostnameURL()
+    return self:_buildURL(self:getHostname() .. ".local")
+end
+
 function FileSyncManager:setPort(port)
     self._port = port
     G_reader_settings:saveSetting("filesync_port", port)
     G_reader_settings:flush()
+end
+
+function FileSyncManager:getHostname()
+    if self._hostname then return self._hostname end
+    self._hostname = G_reader_settings:readSetting("filesync_hostname", DEFAULT_HOSTNAME)
+    return self._hostname
+end
+
+--- Persist a new hostname label and, if the server is running, restart the
+--- mDNS responder so the new name takes effect immediately. The HTTP server
+--- is untouched. The caller is responsible for validation.
+function FileSyncManager:setHostname(hostname)
+    self._hostname = hostname
+    G_reader_settings:saveSetting("filesync_hostname", hostname)
+    G_reader_settings:flush()
+    if self._running then
+        self:stopMdns()
+        self:startMdns()
+    end
+end
+
+--- Whether the mDNS responder is up, i.e. whether the .local URL can be
+--- expected to work.
+function FileSyncManager:isMdnsRunning()
+    return self._mdns ~= nil and self._mdns:isRunning()
+end
+
+--- Start the mDNS responder for the running server. Failure is logged and
+--- otherwise ignored: the HTTP server keeps working by IP.
+--- @return boolean: true when the responder started
+function FileSyncManager:startMdns()
+    if self._mdns then return self._mdns:isRunning() end
+    local ok, result = pcall(function()
+        local Mdns = require("filesync/mdns")
+        local mdns = Mdns:new{
+            hostname = self:getHostname(),
+            port = self._port,
+            ip = self._ip,
+        }
+        if not mdns:start() then
+            return nil
+        end
+        return mdns
+    end)
+    if not ok then
+        logger.warn("FileSync: mDNS responder failed to start:", result)
+        return false
+    end
+    if not result then
+        -- Mdns:start() already logged the reason.
+        return false
+    end
+    self._mdns = result
+    if Device:isKindle() then
+        self:openKindleFirewall(require("filesync/mdns").MDNS_PORT, "udp")
+    end
+    return true
+end
+
+--- Stop the mDNS responder (sends the goodbye packet), if running.
+function FileSyncManager:stopMdns()
+    if not self._mdns then return end
+    pcall(function() self._mdns:stop() end)
+    self._mdns = nil
+    if Device:isKindle() then
+        self:closeKindleFirewall(require("filesync/mdns").MDNS_PORT, "udp")
+    end
 end
 
 function FileSyncManager:getSafeMode()
@@ -94,7 +178,7 @@ end
 
 --- Settings this plugin persists in G_reader_settings. Kept in one place so
 --- deleteSettings() cannot drift from the readers/writers above.
-local SETTINGS_KEYS = { "filesync_port", "filesync_safe_mode" }
+local SETTINGS_KEYS = { "filesync_port", "filesync_safe_mode", "filesync_hostname" }
 
 --- Remove every setting this plugin owns, restoring first-run defaults.
 --- Called by KOReader's plugin manager through FileSync:deletePluginSettings().
@@ -103,8 +187,67 @@ function FileSyncManager:deleteSettings()
         G_reader_settings:delSetting(key)
     end
     G_reader_settings:flush()
-    -- Drop the cached port so a still-loaded instance re-reads the default.
+    -- Drop the cached values so a still-loaded instance re-reads the defaults.
     self._port = nil
+    self._hostname = nil
+end
+
+--- Normalize and validate a hostname label typed by the user.
+--- @return string|nil: the lowercased label, or nil plus an error message
+function FileSyncManager:validateHostname(input)
+    local Mdns = require("filesync/mdns")
+    local label = (input or ""):gsub("^%s+", ""):gsub("%s+$", ""):lower()
+    if label:match("%.local$") then
+        return nil, _("Enter only the name, without \".local\"; it is added automatically.")
+    end
+    if not Mdns.isValidHostname(label) then
+        return nil, _("Invalid hostname. Use 1-63 characters: lowercase letters, digits and hyphens, not starting or ending with a hyphen.")
+    end
+    return label
+end
+
+function FileSyncManager:configureHostname()
+    local InputDialog = require("ui/widget/inputdialog")
+    local hostname_dialog
+    hostname_dialog = InputDialog:new{
+        title = _("Hostname"),
+        description = _("The server is also reachable at http://<hostname>.local on networks and devices that support mDNS. Enter only the name; \".local\" is added automatically."),
+        input = self:getHostname(),
+        input_hint = DEFAULT_HOSTNAME,
+        buttons = {
+            {
+                {
+                    text = _("Cancel"),
+                    id = "close",
+                    callback = function()
+                        UIManager:close(hostname_dialog)
+                    end,
+                },
+                {
+                    text = _("Save"),
+                    is_enter_default = true,
+                    callback = function()
+                        local label, err = self:validateHostname(hostname_dialog:getInputText())
+                        if not label then
+                            UIManager:show(InfoMessage:new{
+                                text = err,
+                                timeout = 4,
+                            })
+                            return
+                        end
+                        self:setHostname(label)
+                        UIManager:close(hostname_dialog)
+                        UIManager:show(InfoMessage:new{
+                            text = T(_("Hostname set to %1"), label .. ".local"),
+                            timeout = 3,
+                        })
+                    end,
+                },
+            },
+        },
+    }
+    UIManager:show(hostname_dialog)
+    hostname_dialog:onShowKeyboard()
 end
 
 function FileSyncManager:configurePort()
@@ -318,6 +461,10 @@ function FileSyncManager:start(silent)
         self:preventStandby()
         logger.info("FileSync: Server started on", ip .. ":" .. port)
 
+        -- Advertise <hostname>.local now that the effective port is known.
+        -- Any failure here is logged and ignored; the IP URL keeps working.
+        self:startMdns()
+
         if not silent then
             self:showQRCode()
         end
@@ -350,6 +497,9 @@ function FileSyncManager:stop(silent)
 
     -- Close QR screen if open
     self:closeQRScreen()
+
+    -- Say goodbye on mDNS before the HTTP server goes away
+    self:stopMdns()
 
     if self._server then
         pcall(function()
@@ -535,13 +685,37 @@ function FileSyncManager:showQRCode()
         title_text,
     }
 
-    -- URL text
-    local url_widget = TextWidget:new{
-        text = url,
-        face = Font:getFace("infofont", 22),
-        fgcolor = Blitbuffer.COLOR_BLACK,
-        max_width = screen_width - Screen:scaleBySize(40),
-    }
+    -- URL text. When the mDNS responder is up, the memorable .local URL comes
+    -- first and the IP URL beneath it as a fallback; the QR payload stays the
+    -- IP URL because .local resolution depends on the client OS.
+    local url_font = Font:getFace("infofont", 22)
+    local url_max_width = screen_width - Screen:scaleBySize(40)
+    local url_widget
+    if self:isMdnsRunning() then
+        url_widget = VerticalGroup:new{
+            align = "center",
+            TextWidget:new{
+                text = self:getServerHostnameURL(),
+                face = url_font,
+                fgcolor = Blitbuffer.COLOR_BLACK,
+                max_width = url_max_width,
+            },
+            VerticalSpan:new{ width = Screen:scaleBySize(6) },
+            TextWidget:new{
+                text = url,
+                face = Font:getFace("infofont", 18),
+                fgcolor = Blitbuffer.COLOR_BLACK,
+                max_width = url_max_width,
+            },
+        }
+    else
+        url_widget = TextWidget:new{
+            text = url,
+            face = url_font,
+            fgcolor = Blitbuffer.COLOR_BLACK,
+            max_width = url_max_width,
+        }
+    end
 
     -- Instructions text. On devices with physical keys we append a hint about
     -- how to drive this screen without a touchscreen.
@@ -727,28 +901,35 @@ function FileSyncManager:showQRCode()
     UIManager:show(widget, "full")
 end
 
-function FileSyncManager:openKindleFirewall(port)
-    -- Defensive: ensure port is a valid number before passing to shell command
+--- Only these protocols may reach the shell command below.
+local FIREWALL_PROTOCOLS = { tcp = true, udp = true }
+
+--- Add an iptables rule allowing incoming traffic on a port.
+--- @param port number
+--- @param protocol string|nil: "tcp" (default, HTTP) or "udp" (mDNS)
+function FileSyncManager:openKindleFirewall(port, protocol)
+    -- Defensive: ensure port and protocol are safe before passing to a shell command
     port = tonumber(port)
-    if not port then return end
-    -- Add iptables rule to allow incoming connections on the server port
+    protocol = protocol or "tcp"
+    if not port or not FIREWALL_PROTOCOLS[protocol] then return end
     os.execute(string.format(
-        "iptables -A INPUT -p tcp --dport %d -j ACCEPT 2>/dev/null",
-        port
+        "iptables -A INPUT -p %s --dport %d -j ACCEPT 2>/dev/null",
+        protocol, port
     ))
-    logger.info("FileSync: Kindle firewall rule added for port", port)
+    logger.info("FileSync: Kindle firewall rule added for", protocol, "port", port)
 end
 
-function FileSyncManager:closeKindleFirewall(port)
-    -- Defensive: ensure port is a valid number before passing to shell command
+--- Remove the iptables rule added by openKindleFirewall.
+function FileSyncManager:closeKindleFirewall(port, protocol)
+    -- Defensive: ensure port and protocol are safe before passing to a shell command
     port = tonumber(port)
-    if not port then return end
-    -- Remove the iptables rule
+    protocol = protocol or "tcp"
+    if not port or not FIREWALL_PROTOCOLS[protocol] then return end
     os.execute(string.format(
-        "iptables -D INPUT -p tcp --dport %d -j ACCEPT 2>/dev/null",
-        port
+        "iptables -D INPUT -p %s --dport %d -j ACCEPT 2>/dev/null",
+        protocol, port
     ))
-    logger.info("FileSync: Kindle firewall rule removed for port", port)
+    logger.info("FileSync: Kindle firewall rule removed for", protocol, "port", port)
 end
 
 return FileSyncManager

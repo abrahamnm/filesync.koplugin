@@ -406,3 +406,23 @@ msgstr "Falha ao salvar:"
 msgid "Failed to open file"
 msgstr "Não foi possível abrir o arquivo"
 
+msgid "Hostname"
+msgstr "Nome do host"
+
+msgid "Hostname: %1"
+msgstr "Nome do host: %1"
+
+msgid "Hostname set to %1"
+msgstr "Nome do host definido como %1"
+
+msgid "Enter only the name, without \".local\"; it is added automatically."
+msgstr "Digite apenas o nome, sem \".local\"; ele é adicionado automaticamente."
+
+msgid "Invalid hostname. Use 1-63 characters: lowercase letters, digits and hyphens, not starting or ending with a hyphen."
+msgstr "Nome de host inválido. Use de 1 a 63 caracteres: letras minúsculas, dígitos e hífens, sem começar ou terminar com hífen."
+
+msgid "The server is also reachable at http://<hostname>.local on networks and devices that support mDNS. Enter only the name; \".local\" is added automatically."
+msgstr "O servidor também pode ser acessado em http://<nome>.local em redes e dispositivos com suporte a mDNS. Digite apenas o nome; \".local\" é adicionado automaticamente."
+
+msgid "Name under which the server is reachable on the local network (e.g. http://filesync.local). Works out of the box on macOS, iOS and Windows; Linux needs avahi; most Android browsers cannot resolve .local names, so use the IP address or QR code there."
+msgstr "Nome pelo qual o servidor é acessível na rede local (ex.: http://filesync.local). Funciona diretamente no macOS, iOS e Windows; o Linux precisa do avahi; a maioria dos navegadores Android não resolve nomes .local, então use o endereço IP ou o código QR."

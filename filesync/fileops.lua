@@ -51,8 +51,11 @@ function FileOps:_resolvePath(rel_path)
         rel_path = "/"
     end
 
-    -- Normalize: remove double slashes, trim whitespace
-    rel_path = rel_path:gsub("//+", "/"):gsub("^%s+", ""):gsub("%s+$", "")
+    -- Normalize: collapse double slashes. Whitespace is deliberately kept:
+    -- on case-sensitive filesystems (ext4 on 2024+ Kindles) a folder named
+    -- "Books " is distinct from "Books", and trimming here would make a
+    -- folder that appears in a listing impossible to open (#46).
+    rel_path = rel_path:gsub("//+", "/")
 
     -- Block path traversal
     if rel_path:match("%.%.") then
@@ -80,6 +83,30 @@ function FileOps:_resolvePath(rel_path)
     end
 
     return full_path
+end
+
+--- Check that a resolved path exists and is a directory.
+--- Reports the underlying reason on failure (missing path, stat error, or a
+--- file where a directory was expected) instead of a generic message.
+--- @param full_path string: absolute path from _resolvePath
+--- @param rel_path string: path as the caller supplied it, used in messages
+--- @return boolean: true when full_path is a directory
+--- @return string|nil: error message on failure
+function FileOps:_checkDirectory(full_path, rel_path)
+    local attr, attr_err = lfs.attributes(full_path)
+    if not attr then
+        -- lfs phrases errors as "cannot obtain information from file `<abs>': <reason>";
+        -- keep only the reason so the absolute root path is not echoed to clients.
+        local reason = attr_err and tostring(attr_err):match(":%s*([^:]+)$") or attr_err
+        if reason and reason ~= "" then
+            return false, "Cannot open " .. rel_path .. ": " .. reason
+        end
+        return false, "Cannot open " .. rel_path .. ": path does not exist"
+    end
+    if attr.mode ~= "directory" then
+        return false, "Not a directory: " .. rel_path
+    end
+    return true
 end
 
 --- Validate a filename (no slashes, no dots-only, no null bytes)
@@ -340,9 +367,9 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
         return nil, err
     end
 
-    local attr = lfs.attributes(full_path)
-    if not attr or attr.mode ~= "directory" then
-        return nil, "Not a directory"
+    local is_dir, dir_err = self:_checkDirectory(full_path, rel_path)
+    if not is_dir then
+        return nil, dir_err
     end
 
     local entries = {}
@@ -469,9 +496,9 @@ function FileOps:getDirInfo(rel_path)
         return nil, err
     end
 
-    local attr = lfs.attributes(full_path)
-    if not attr or attr.mode ~= "directory" then
-        return nil, "Not a directory"
+    local is_dir, dir_err = self:_checkDirectory(full_path, rel_path)
+    if not is_dir then
+        return nil, dir_err
     end
 
     local file_count = self:_countFilesRecursive(full_path)
