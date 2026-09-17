@@ -110,16 +110,8 @@ end
 function FileSync:onToggleFileSyncServer()
     local FileSyncManager = require("filesync/filesyncmanager")
     if FileSyncManager:isRunning() then
-        local InfoMessage = require("ui/widget/infomessage")
-        local UIManager = require("ui/uimanager")
-        UIManager:show(InfoMessage:new{
-            text = _("Stopping server..."),
-            timeout = 2,
-        })
-        UIManager:scheduleIn(0.5, function()
-            FileSyncManager:stop(true)
-            require("filesync/utils").restartKOReader()
-        end)
+        -- A non-silent stop refreshes the file list and reports back itself.
+        FileSyncManager:stop()
     else
         FileSyncManager:checkBatteryAndStart()
     end
@@ -167,7 +159,7 @@ function FileSync:stopPlugin(force)
         return true
     end
     local ok, err = pcall(function()
-        FileSyncManager:stop(true) -- silent: no restart, the caller handles it
+        FileSyncManager:stop(true) -- silent: no UI, the caller restarts KOReader
     end)
     if not ok and force then
         return true

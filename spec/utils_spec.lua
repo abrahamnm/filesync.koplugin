@@ -63,35 +63,81 @@ describe("filesync.utils", function()
 
         local calls
 
-        -- Install minimal `device` / `ui/uimanager` stubs for the duration of
-        -- a test, recording which UIManager method the helper reached for.
+        -- Install minimal `device` / `ui/uimanager` / `ui/event` stubs for the
+        -- duration of a test, recording what the helper reached for.
         local function stub_koreader(can_restart)
             calls = {}
             package.loaded["device"] = {
                 canRestart = function() return can_restart end,
             }
             package.loaded["ui/uimanager"] = {
-                restartKOReader = function() calls[#calls + 1] = "restart" end,
+                broadcastEvent = function(_, event)
+                    calls[#calls + 1] = "broadcast:" .. tostring(event.name)
+                end,
                 setDirty = function(_, widget, refresh)
                     calls[#calls + 1] = "setDirty:" .. tostring(widget) .. ":" .. tostring(refresh)
                 end,
+            }
+            package.loaded["ui/event"] = {
+                new = function(_, name) return { name = name } end,
             }
         end
 
         after_each(function()
             package.loaded["device"] = nil
             package.loaded["ui/uimanager"] = nil
+            package.loaded["ui/event"] = nil
         end)
 
-        it("restarts KOReader when the device supports it", function()
+        -- Going through the Restart event (rather than calling
+        -- UIManager:restartKOReader() directly) is what makes KOReader close
+        -- the active ReaderUI/FileManager before it quits; see issue #49.
+        it("broadcasts a Restart event when the device supports it", function()
             stub_koreader(true)
             assert.is_true(Utils.restartKOReader())
-            assert.are.same({ "restart" }, calls)
+            assert.are.same({ "broadcast:Restart" }, calls)
         end)
 
         it("forces a full refresh instead of restarting on Android", function()
             stub_koreader(false)
             assert.is_false(Utils.restartKOReader())
+            assert.are.same({ "setDirty:all:full" }, calls)
+        end)
+    end)
+
+    describe("refreshFileList", function()
+
+        local calls
+
+        -- Stub `ui/uimanager` plus the FileManager singleton the helper pokes.
+        local function stub_koreader(has_instance)
+            calls = {}
+            package.loaded["ui/uimanager"] = {
+                setDirty = function(_, widget, refresh)
+                    calls[#calls + 1] = "setDirty:" .. tostring(widget) .. ":" .. tostring(refresh)
+                end,
+            }
+            package.loaded["apps/filemanager/filemanager"] = {
+                instance = has_instance and {
+                    onRefresh = function() calls[#calls + 1] = "refresh" end,
+                } or nil,
+            }
+        end
+
+        after_each(function()
+            package.loaded["ui/uimanager"] = nil
+            package.loaded["apps/filemanager/filemanager"] = nil
+        end)
+
+        it("refreshes the file manager and repaints", function()
+            stub_koreader(true)
+            Utils.refreshFileList()
+            assert.are.same({ "refresh", "setDirty:all:full" }, calls)
+        end)
+
+        it("only repaints when a book is open instead of the file manager", function()
+            stub_koreader(false)
+            Utils.refreshFileList()
             assert.are.same({ "setDirty:all:full" }, calls)
         end)
     end)
