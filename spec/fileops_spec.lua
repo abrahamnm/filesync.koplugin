@@ -120,10 +120,12 @@ describe("filesync.fileops", function()
             assert.are.equal("/mnt/us/books/test", path)
         end)
 
-        it("strips leading and trailing whitespace", function()
-            local path, err = FileOps:_resolvePath("  /books  ")
+        it("preserves leading and trailing whitespace in names", function()
+            -- ext4 keeps "Books " and "Books" as distinct entries; the path
+            -- must round-trip exactly as listed (#46)
+            local path, err = FileOps:_resolvePath("/koreader/Books ")
             assert.is_nil(err)
-            assert.are.equal("/mnt/us/books", path)
+            assert.are.equal("/mnt/us/koreader/Books ", path)
         end)
 
         it("prepends slash if missing", function()
@@ -409,6 +411,65 @@ describe("filesync.fileops", function()
             assert.is_false(FileOps:isExtensionSafe(nil))
         end)
     end)
+    describe("listDirectory error reporting", function()
+
+        local TREE = {
+            ["/mnt/us"]                = {mode = "directory", size = 4096, modification = 100},
+            ["/mnt/us/koreader"]       = {mode = "directory", size = 4096, modification = 100},
+            ["/mnt/us/koreader/Books "] = {mode = "directory", size = 4096, modification = 100},
+            ["/mnt/us/koreader/Books /a.epub"] = {mode = "file", size = 10, modification = 100},
+            ["/mnt/us/notes.txt"]      = {mode = "file",      size = 78,   modification = 100},
+        }
+
+        before_each(function()
+            FileOps:setRootDir("/mnt/us")
+            mountTree(TREE)
+        end)
+
+        after_each(function()
+            unmountTree()
+        end)
+
+        it("opens a folder whose name ends in a space, as listed", function()
+            local listing = FileOps:listDirectory("/koreader", "name", "asc", "", true)
+            assert.are.equal("Books ", listing.entries[1].name)
+            local result, err = FileOps:listDirectory(listing.entries[1].path, "name", "asc", "", true)
+            assert.is_nil(err)
+            assert.are.equal(1, result.count)
+            assert.are.equal("a.epub", result.entries[1].name)
+        end)
+
+        it("reports a missing path instead of 'Not a directory'", function()
+            local result, err = FileOps:listDirectory("/koreader/Books", "name", "asc", "", true)
+            assert.is_nil(result)
+            assert.are.equal("Cannot open /koreader/Books: path does not exist", err)
+        end)
+
+        it("passes through the reason lfs gives for a failed stat", function()
+            lfs_stub.attributes = function(path)
+                return nil, "cannot obtain information from file `" .. path .. "': Value too large for defined data type", 75
+            end
+            local result, err = FileOps:listDirectory("/koreader", "name", "asc", "", true)
+            assert.is_nil(result)
+            assert.are.equal("Cannot open /koreader: Value too large for defined data type", err)
+        end)
+
+        it("names the path when it is a file", function()
+            local result, err = FileOps:listDirectory("/notes.txt", "name", "asc", "", true)
+            assert.is_nil(result)
+            assert.are.equal("Not a directory: /notes.txt", err)
+        end)
+
+        it("getDirInfo reports the same errors", function()
+            local count, err = FileOps:getDirInfo("/missing")
+            assert.is_nil(count)
+            assert.are.equal("Cannot open /missing: path does not exist", err)
+            count, err = FileOps:getDirInfo("/notes.txt")
+            assert.is_nil(count)
+            assert.are.equal("Not a directory: /notes.txt", err)
+        end)
+    end)
+
     describe("listDirectory hidden entries", function()
 
         -- A root holding every interesting category: hidden dir, hidden dotfile
