@@ -3,6 +3,7 @@
 ---   - getPluginDir(): returns the absolute path to the plugin root directory
 ---   - shellEscape(s): escapes a string for safe use in shell commands
 ---   - restartKOReader(): restarts KOReader only on platforms that support it
+---   - refreshFileList(): refreshes the file manager after files change on disk
 
 local Utils = {}
 
@@ -37,18 +38,30 @@ function Utils.shellEscape(s)
 end
 
 --- Restart KOReader, but only on platforms where a restart actually works.
---- UIManager:restartKOReader() simply exits with code 85 and relies on the
---- launcher shell script to relaunch the process.  Android has no such
---- wrapper (it runs as a NativeActivity), so calling it there just quits the
---- app -- which is why KOReader gates its own "Restart KOReader" menu entry
---- on Device:canRestart().  Where a restart is unavailable, force a full
---- screen refresh instead, which is all the restart was buying us.
+--- Broadcasting a "Restart" event is how KOReader restarts itself (it is what
+--- both its own menu entry and the dispatcher action do): DeviceListener picks
+--- it up and hands it to ReaderMenu/FileManagerMenu:exitOrRestart(), which
+--- closes the active ReaderUI/FileManager *before* quitting with exit code 85,
+--- the magic number the launcher script watches for.
+---
+--- That teardown is not optional.  UIManager:restartKOReader() is only
+--- `quit(85)`: it drops the window stack and the task queue on the floor
+--- without closing a single widget, so KOReader exits -- and closes its Lua
+--- state -- with the document still open and every plugin still live.  Calling
+--- it directly is what left devices wedged on a frozen screen instead of
+--- restarting (issue #49).
+---
+--- Android has no launcher wrapper (KOReader runs as a NativeActivity), which
+--- is why KOReader gates its own "Restart KOReader" menu entry on
+--- Device:canRestart().  Where a restart is unavailable, force a full screen
+--- refresh instead.
 --- @return boolean: true if a restart was requested, false if it was skipped
 function Utils.restartKOReader()
     local Device = require("device")
     local UIManager = require("ui/uimanager")
     if Device:canRestart() then
-        UIManager:restartKOReader()
+        local Event = require("ui/event")
+        UIManager:broadcastEvent(Event:new("Restart"))
         return true
     end
     UIManager:setDirty("all", "full")
@@ -60,6 +73,20 @@ end
 function Utils.canRestartKOReader()
     local Device = require("device")
     return Device:canRestart() and true or false
+end
+
+--- Refresh the file manager so files added over the network show up, and
+--- repaint the screen.  This is the same thing KOReader's own download-to-disk
+--- plugins do once they are done writing files; when a book is open instead
+--- there is no FileManager to refresh, and the next trip Home builds a fresh
+--- one anyway.
+function Utils.refreshFileList()
+    local UIManager = require("ui/uimanager")
+    local FileManager = require("apps/filemanager/filemanager")
+    if FileManager.instance then
+        FileManager.instance:onRefresh()
+    end
+    UIManager:setDirty("all", "full")
 end
 
 return Utils

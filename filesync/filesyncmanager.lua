@@ -554,7 +554,7 @@ function FileSyncManager:start(silent)
 end
 
 --- Stop the FileSync server: close QR screen, stop HttpServer, remove firewall rules.
---- @param silent boolean|nil: when true, suppress UI messages and skip the KOReader restart
+--- @param silent boolean|nil: when true, suppress UI messages and skip the file list refresh
 function FileSyncManager:stop(silent)
     if not self._running then
         return
@@ -583,11 +583,15 @@ function FileSyncManager:stop(silent)
     logger.info("FileSync: Server stopped")
 
     if not silent then
+        -- Pick up whatever was uploaded while the server was running, then say
+        -- so. KOReader is deliberately *not* restarted here: a restart costs
+        -- the user half a minute of blank screen, and refreshing the file list
+        -- is all it ever bought us.
+        Utils.refreshFileList()
         UIManager:show(InfoMessage:new{
             text = _("FileSync server stopped."),
             timeout = 2,
         })
-        Utils.restartKOReader()
     end
 end
 
@@ -656,21 +660,12 @@ function FileSyncManager:closeQRScreen()
     end
 end
 
---- Stop the server from the QR screen: close it, show feedback, then stop and
---- restart (or refresh, on devices that cannot restart).
+--- Stop the server from the QR screen.
 --- Shared by the "Stop Server" button and the confirmation dialog.
+--- stop() closes the QR screen, refreshes the file list and reports back, so
+--- there is nothing left to do here.
 function FileSyncManager:stopFromQRScreen()
-    self:closeQRScreen()
-    UIManager:show(InfoMessage:new{
-        text = _("Stopping server..."),
-        timeout = 2,
-    })
-    -- Schedule the actual stop+restart after a brief moment so the
-    -- InfoMessage renders on the e-ink screen before the restart
-    UIManager:scheduleIn(0.5, function()
-        self:stop(true)
-        Utils.restartKOReader()
-    end)
+    self:stop()
 end
 
 --- Ask the user what to do when leaving the QR screen while the server runs.
