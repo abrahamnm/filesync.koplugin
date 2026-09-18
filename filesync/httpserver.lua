@@ -32,6 +32,12 @@ local CONNECTION_TIMEOUT = 2
 local UPLOAD_CHUNK_TIMEOUT = 10
 -- Read buffer size for the streaming multipart parser (64 KB).
 local STREAM_CHUNK_SIZE = 65536
+-- Maximum wall-clock time (seconds) _sendAll may keep retrying without a
+-- single byte leaving the socket.  Only reached by a peer that is still open
+-- but wedged: a peer that is gone reports "closed"/"unreachable" and is
+-- dropped at once.  Must exceed CONNECTION_TIMEOUT so one slow-WiFi timeout
+-- does not abort an otherwise healthy transfer.
+local SEND_IDLE_TIMEOUT = 15
 -- Maximum wall-clock time (seconds) the poll loop may spend handling
 -- connections before yielding back to the UIManager event loop.  This
 -- prevents N slow clients from blocking the UI for N * CONNECTION_TIMEOUT.
@@ -237,6 +243,27 @@ function HttpServer:_readBody(client, length)
         end
     end
     return table.concat(parts)
+end
+
+--- Discard up to `leftover` bytes still pending on the socket.
+--- Used after a multipart upload to clear trailing framing bytes.
+---
+--- receive() reports errors as (nil, err, partial) where `partial` is a
+--- *possibly empty* string -- it is never nil.  Testing it for truthiness
+--- alone would therefore always take the "we made progress" branch and
+--- subtract zero, spinning forever once the peer stops sending (2s per
+--- iteration on "timeout", or a tight 100% CPU loop on "closed").  Only a
+--- non-empty read counts as progress; anything else ends the drain.
+--- @param client table: connected LuaSocket TCP client
+--- @param leftover number: bytes still expected on the socket
+function HttpServer:_drainBody(client, leftover)
+    while leftover > 0 do
+        local drain_size = math.min(STREAM_CHUNK_SIZE, leftover)
+        local data, _, partial = client:receive(drain_size)
+        local got = data or partial
+        if not got or #got == 0 then break end
+        leftover = leftover - #got
+    end
 end
 
 --- Route an HTTP request to the appropriate handler.
@@ -863,20 +890,12 @@ function HttpServer:_handleStreamingUpload(client, content_length, content_type,
     client:settimeout(original_timeout)
 
     -- Drain any remaining body data from the socket that we haven't read
-    -- (e.g. trailing whitespace after the closing boundary).
-    if bytes_read < content_length then
-        local leftover = content_length - bytes_read
-        while leftover > 0 do
-            local drain_size = math.min(STREAM_CHUNK_SIZE, leftover)
-            local data, _, partial = client:receive(drain_size)
-            if data then
-                leftover = leftover - #data
-            elseif partial then
-                leftover = leftover - #partial
-            else
-                break
-            end
-        end
+    -- (e.g. trailing whitespace after the closing boundary), so the socket is
+    -- clean before the response goes out.  Skipped when the parse already
+    -- failed: in that case the peer is gone or the framing is broken, and
+    -- there is nothing left to drain.
+    if not parse_error then
+        self:_drainBody(client, content_length - bytes_read)
     end
 
     -- Release the buffer and force garbage collection to reclaim memory
@@ -931,18 +950,37 @@ function HttpServer:_getPluginDir()
     return Utils.getPluginDir() .. "/filesync"
 end
 
---- Send all data on a socket, handling partial sends
+--- Send all data on a socket, handling partial sends.
+---
+--- send(data, i) reports failure as (nil, err, last_byte_sent_within[i, j]).
+--- With i = sent + 1, a call that pushes nothing returns `sent` itself -- not
+--- zero -- so treating any positive value as progress re-assigns the same
+--- number and spins forever once the peer goes away (issue #54): 2s per
+--- iteration on "timeout", or a tight 100% CPU loop on "closed".  Only a
+--- strictly larger index counts as progress, non-timeout errors end the send
+--- immediately, and a stalled-but-open peer is cut off by an idle deadline.
+--- @param client table: connected LuaSocket TCP client
+--- @param data string: bytes to write
+--- @return number|nil: index of the last byte sent, or nil plus an error
 function HttpServer:_sendAll(client, data)
     local total = #data
     local sent = 0
+    local idle_deadline = socket.gettime() + SEND_IDLE_TIMEOUT
     while sent < total do
         local bytes, err, partial = client:send(data, sent + 1)
         if bytes then
             sent = bytes
-        elseif partial and partial > 0 then
-            sent = partial
         else
-            return nil, err
+            if partial and partial > sent then
+                sent = partial
+                idle_deadline = socket.gettime() + SEND_IDLE_TIMEOUT
+            end
+            if err ~= "timeout" then
+                return nil, err or "send failed"
+            end
+            if socket.gettime() >= idle_deadline then
+                return nil, "timeout"
+            end
         end
     end
     return sent
