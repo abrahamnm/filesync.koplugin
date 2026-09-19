@@ -22,6 +22,10 @@
         return months[d.getMonth()] + ' ' + d.getDate() + (d.getFullYear() !== now.getFullYear() ? ', ' + d.getFullYear() : '');
     }
 
+    // Backup suffixes ignored when classifying a filename, so a file like
+    // "settings.lua.old" is still recognised as code (lua).
+    var BACKUP_SUFFIX_RE = /\.(old|bak|orig|backup|copy|save|new)$/;
+
     function getTypeClassFromFilename(name) {
         var lowerName = String(name || '').toLowerCase();
         if (!lowerName) return '';
@@ -34,7 +38,25 @@
         }
         var extMatch = lowerName.match(/\.([^.]+)$/);
         if (!extMatch) return '';
-        return FILE_TYPE_BY_EXTENSION[extMatch[1]] || '';
+        var direct = FILE_TYPE_BY_EXTENSION[extMatch[1]] || '';
+        if (direct) return direct;
+        // Unknown trailing extension: if it is a backup suffix, retry on the
+        // trimmed name so "book.lua.old" resolves via "book.lua".
+        if (BACKUP_SUFFIX_RE.test(lowerName)) {
+            var trimmed = lowerName.replace(BACKUP_SUFFIX_RE, '');
+            if (trimmed) return getTypeClassFromFilename(trimmed);
+        }
+        return '';
+    }
+
+    // Allow-list: only files recognised as text/code/markdown get an Edit
+    // affordance, so binary/unknown files don't show buttons that error on tap.
+    var EDITABLE_TYPE_CLASSES = {
+        text: true, code: true, markdown: true,
+    };
+    function isPotentiallyEditableFile(name) {
+        var cls = getTypeClassFromFilename(name);
+        return EDITABLE_TYPE_CLASSES[cls] === true;
     }
 
     function getFileDisplayParts(name) {

@@ -1,0 +1,246 @@
+/* ===== In-browser Text Editor ===== */
+/* Full-screen editor overlay used to view/edit text-like files.
+ *
+ * Architecture: a single scroll container (.editor-scroll) holds both the
+ * highlighted <pre> (behind) and a transparent <textarea> (in front). The
+ * textarea is auto-grown in JS to the content box, so both layers share the
+ * exact same origin, font metrics and scroll position — no scroll-sync code.
+ */
+
+.editor-view {
+    position: fixed;
+    inset: 0;
+    background: var(--editor-bg);
+    /* Above the file-detail view (150) but below modal/confirm overlays (200)
+       so that dialogs raised from the editor (e.g. the discard confirmation)
+       appear on top of it. */
+    z-index: 175;
+    display: none;
+    flex-direction: column;
+    color: var(--editor-fg);
+}
+
+.editor-view.open {
+    display: flex;
+}
+
+/* ---- Header ---- */
+.editor-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    min-height: 52px;
+}
+
+.editor-header .btn {
+    flex: 0 0 auto;
+}
+
+.editor-file {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.editor-file .file-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    flex: 0 0 auto;
+}
+
+.editor-file .file-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.editor-filename {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    direction: ltr;
+    unicode-bidi: embed;
+    text-align: start;
+}
+
+.editor-badge {
+    flex: 0 0 auto;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--primary-light);
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.editor-badge.readonly {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.editor-status {
+    flex: 0 0 auto;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    max-width: 30%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---- Body: shared scroll container ---- */
+.editor-body {
+    flex: 1 1 auto;
+    position: relative;
+    overflow: hidden;
+    background: var(--editor-bg);
+}
+
+.editor-scroll {
+    position: absolute;
+    inset: 0;
+    overflow: auto;
+    background: var(--editor-bg);
+}
+
+/* Identical typography & padding on both layers so characters line up. */
+.editor-code,
+.editor-input {
+    margin: 0;
+    padding: 12px 16px;
+    font-family: "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas,
+        "Liberation Mono", monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    white-space: pre;
+    word-wrap: normal;
+    overflow-wrap: normal;
+    letter-spacing: normal;
+    font-variant-ligatures: none;
+}
+
+/* The layer wrapper is in normal flow inside the scroll container. It is
+   inline-block so it grows to fit the highlighted <pre> (both horizontally for
+   long lines and vertically for tall files). The absolutely-positioned
+   textarea covering it shares identical geometry and scrolls together with it,
+   so the two layers always stay pixel-aligned. */
+.editor-layer {
+    position: relative;
+    display: inline-block;
+    min-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Highlight layer (behind). Defines the natural size of the layer. */
+.editor-highlight {
+    margin: 0;
+    color: var(--editor-fg);
+    pointer-events: none;
+    direction: ltr;
+    text-align: left;
+    unicode-bidi: embed;
+    white-space: pre;
+}
+
+/* The editable textarea (in front, filling the layer). */
+.editor-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    display: block;
+    background: transparent;
+    color: transparent;
+    caret-color: var(--editor-caret);
+    -webkit-text-fill-color: transparent;
+    resize: none;
+    outline: none;
+    border: 0;
+    overflow: hidden;
+    z-index: 2;
+    direction: ltr;
+    text-align: left;
+}
+
+.editor-input::selection {
+    background: var(--editor-selection);
+    -webkit-text-fill-color: transparent;
+}
+
+.editor-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+.editor-scroll::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+.editor-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* ---- Token colours ---- */
+.tok-kw   { color: var(--editor-tok-kw); font-weight: 600; }
+.tok-str  { color: var(--editor-tok-str); }
+.tok-num  { color: var(--editor-tok-num); }
+.tok-com  { color: var(--editor-tok-com); font-style: italic; }
+.tok-fn   { color: var(--editor-tok-fn); }
+.tok-type { color: var(--editor-tok-type); }
+.tok-op   { color: var(--editor-tok-op); }
+.tok-tag  { color: var(--editor-tok-tag); }
+.tok-attr { color: var(--editor-tok-attr); }
+.tok-prop { color: var(--editor-tok-prop); }
+.tok-meta { color: var(--editor-tok-meta); }
+
+/* ---- Footer / status bar ---- */
+.editor-footer {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 6px 14px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.editor-footer .editor-fs {
+    margin-inline-start: auto;
+    direction: ltr;
+}
+
+/* Unsaved changes indicator */
+.editor-dirty {
+    color: var(--warning);
+    font-weight: 600;
+}
+
+/* Read-only mode: hide textarea, show plain highlighted pre */
+.editor-view.readonly .editor-input {
+    display: none;
+}
+
+/* Responsive: smaller chrome on narrow phones */
+@media (max-width: 560px) {
+    .editor-header { padding: 8px 10px; }
+    .editor-file .file-icon { display: none; }
+    .editor-badge { display: none; }
+    .editor-filename { font-size: 13px; }
+    .editor-footer .editor-lines { display: none; }
+}
