@@ -345,6 +345,11 @@ var EditorHighlight = (function () {
         var lower = String(filename).toLowerCase();
         if (LANG_BY_FILENAME[lower]) return LANG_BY_FILENAME[lower];
 
+        // Emacs-style backups ("notes.lua~") resolve as their base name.
+        if (lower.charAt(lower.length - 1) === '~') {
+            return detectLanguage(lower.slice(0, -1));
+        }
+
         var parts = lower.split('.');
         if (parts.length >= 2) {
             // Try the deepest known extension first (e.g. "foo.bar.lua" -> lua)

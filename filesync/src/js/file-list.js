@@ -133,10 +133,10 @@
                 html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\', true, false, ' + (entry.is_empty ? 'true' : 'false') + ')" title="' + escapeHtml(t('Delete')) + '">' + icons.trash + '</button>';
                 html += '</div>';
             } else {
-                // Offer a one-tap edit shortcut for files that could be text
-                // (anything that isn't a known binary/reader format). The server
-                // content-sniffs and shows unknown/binary files read-only.
-                var rowIsEditable = isPotentiallyEditableFile(entry.name);
+                // Row list keeps the strict allow-list (known text type + size
+                // cap); unknown or oversized files are still editable from the
+                // detail view. The server content-sniffs as a backstop.
+                var rowIsEditable = isPotentiallyEditableFile(entry.name, entry.size);
                 html += '<div class="file-actions' + (rowIsEditable ? '' : ' file-actions-chevron') + '">';
                 if (rowIsEditable) {
                     html += '<button class="btn-icon" onclick="event.stopPropagation(); openEditor(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\')" title="' + escapeHtml(t('Edit')) + '">' + icons.edit + '</button>';

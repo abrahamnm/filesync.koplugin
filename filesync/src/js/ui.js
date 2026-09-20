@@ -29,6 +29,10 @@
     function getTypeClassFromFilename(name) {
         var lowerName = String(name || '').toLowerCase();
         if (!lowerName) return '';
+        // "notes.txt~" classifies as "notes.txt".
+        if (lowerName.charAt(lowerName.length - 1) === '~') {
+            return getTypeClassFromFilename(lowerName.slice(0, -1));
+        }
         if (FILE_TYPE_BY_FILENAME[lowerName]) {
             return FILE_TYPE_BY_FILENAME[lowerName];
         }
@@ -54,9 +58,34 @@
     var EDITABLE_TYPE_CLASSES = {
         text: true, code: true, markdown: true,
     };
-    function isPotentiallyEditableFile(name) {
+
+    // Mirrors MAX_EDIT_SIZE in fileops.lua: larger files can be read but never saved.
+    var MAX_EDIT_SIZE = 256 * 1024;
+
+    // Row list: known text type and within the size cap.
+    function isPotentiallyEditableFile(name, size) {
         var cls = getTypeClassFromFilename(name);
-        return EDITABLE_TYPE_CLASSES[cls] === true;
+        if (EDITABLE_TYPE_CLASSES[cls] !== true) return false;
+        return isWithinEditSizeLimit(size);
+    }
+
+    // A missing size is allowed through; the server content-sniffs anyway.
+    function isWithinEditSizeLimit(size) {
+        if (typeof size !== 'number') return true;
+        return size <= MAX_EDIT_SIZE;
+    }
+
+    function isUnknownTypeFile(name) {
+        return getTypeClassFromFilename(name) === '';
+    }
+
+    // Detail view: also offers Edit for unrecognised files (extensionless or
+    // unknown extension). The server content-sniffs, so binaries just fail on tap
+    // instead of showing a broken editor.
+    function isEditableFromDetailView(name, size) {
+        if (!isWithinEditSizeLimit(size)) return false;
+        if (isUnknownTypeFile(name)) return true;
+        return EDITABLE_TYPE_CLASSES[getTypeClassFromFilename(name)] === true;
     }
 
     function getFileDisplayParts(name) {

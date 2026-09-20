@@ -155,10 +155,9 @@
 
         // Build action buttons
         var actHtml = '';
-        // Files that aren't a known binary/reader format get an Edit / View button
-        // that opens the in-browser editor. The server content-sniffs the file and
-        // shows it editable (normal mode) or read-only (safe mode / binary content).
-        var isPotentiallyEditable = isPotentiallyEditableFile(entry.name);
+        // Detail view: Edit for text types plus unrecognised files (extensionless
+        // / unknown extension), subject to the size cap.
+        var isPotentiallyEditable = isEditableFromDetailView(entry.name, entry.size);
         if (isPotentiallyEditable) {
             actHtml += '<button class="btn btn-primary" onclick="detailEdit()">' + icons.edit + '<span>' + escapeHtml(t('Edit')) + '</span></button>';
             actHtml += '<button class="btn btn-secondary" onclick="detailDownload()">' + icons.download + '<span>' + escapeHtml(t('Download')) + '</span></button>';

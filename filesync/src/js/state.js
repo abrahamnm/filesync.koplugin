@@ -153,5 +153,6 @@
         scss: 'code',
         sass: 'code',
         less: 'code',
-        sql: 'code'
+        sql: 'code',
+        calibre: 'code'
     };

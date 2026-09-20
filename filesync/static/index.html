@@ -2793,7 +2793,8 @@ html, body {
         scss: 'code',
         sass: 'code',
         less: 'code',
-        sql: 'code'
+        sql: 'code',
+        calibre: 'code'
     };
     // ===== API =====
     async function api(method, url, body) {
@@ -2848,6 +2849,10 @@ html, body {
     function getTypeClassFromFilename(name) {
         var lowerName = String(name || '').toLowerCase();
         if (!lowerName) return '';
+        // "notes.txt~" classifies as "notes.txt".
+        if (lowerName.charAt(lowerName.length - 1) === '~') {
+            return getTypeClassFromFilename(lowerName.slice(0, -1));
+        }
         if (FILE_TYPE_BY_FILENAME[lowerName]) {
             return FILE_TYPE_BY_FILENAME[lowerName];
         }
@@ -2873,9 +2878,34 @@ html, body {
     var EDITABLE_TYPE_CLASSES = {
         text: true, code: true, markdown: true,
     };
-    function isPotentiallyEditableFile(name) {
+
+    // Mirrors MAX_EDIT_SIZE in fileops.lua: larger files can be read but never saved.
+    var MAX_EDIT_SIZE = 256 * 1024;
+
+    // Row list: known text type and within the size cap.
+    function isPotentiallyEditableFile(name, size) {
         var cls = getTypeClassFromFilename(name);
-        return EDITABLE_TYPE_CLASSES[cls] === true;
+        if (EDITABLE_TYPE_CLASSES[cls] !== true) return false;
+        return isWithinEditSizeLimit(size);
+    }
+
+    // A missing size is allowed through; the server content-sniffs anyway.
+    function isWithinEditSizeLimit(size) {
+        if (typeof size !== 'number') return true;
+        return size <= MAX_EDIT_SIZE;
+    }
+
+    function isUnknownTypeFile(name) {
+        return getTypeClassFromFilename(name) === '';
+    }
+
+    // Detail view: also offers Edit for unrecognised files (extensionless or
+    // unknown extension). The server content-sniffs, so binaries just fail on tap
+    // instead of showing a broken editor.
+    function isEditableFromDetailView(name, size) {
+        if (!isWithinEditSizeLimit(size)) return false;
+        if (isUnknownTypeFile(name)) return true;
+        return EDITABLE_TYPE_CLASSES[getTypeClassFromFilename(name)] === true;
     }
 
     function getFileDisplayParts(name) {
@@ -3509,6 +3539,11 @@ var EditorHighlight = (function () {
         if (!filename) return null;
         var lower = String(filename).toLowerCase();
         if (LANG_BY_FILENAME[lower]) return LANG_BY_FILENAME[lower];
+
+        // Emacs-style backups ("notes.lua~") resolve as their base name.
+        if (lower.charAt(lower.length - 1) === '~') {
+            return detectLanguage(lower.slice(0, -1));
+        }
 
         var parts = lower.split('.');
         if (parts.length >= 2) {
@@ -4181,10 +4216,10 @@ function initEditor() {
                 html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\', true, false, ' + (entry.is_empty ? 'true' : 'false') + ')" title="' + escapeHtml(t('Delete')) + '">' + icons.trash + '</button>';
                 html += '</div>';
             } else {
-                // Offer a one-tap edit shortcut for files that could be text
-                // (anything that isn't a known binary/reader format). The server
-                // content-sniffs and shows unknown/binary files read-only.
-                var rowIsEditable = isPotentiallyEditableFile(entry.name);
+                // Row list keeps the strict allow-list (known text type + size
+                // cap); unknown or oversized files are still editable from the
+                // detail view. The server content-sniffs as a backstop.
+                var rowIsEditable = isPotentiallyEditableFile(entry.name, entry.size);
                 html += '<div class="file-actions' + (rowIsEditable ? '' : ' file-actions-chevron') + '">';
                 if (rowIsEditable) {
                     html += '<button class="btn-icon" onclick="event.stopPropagation(); openEditor(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\')" title="' + escapeHtml(t('Edit')) + '">' + icons.edit + '</button>';
@@ -4379,10 +4414,9 @@ function initEditor() {
 
         // Build action buttons
         var actHtml = '';
-        // Files that aren't a known binary/reader format get an Edit / View button
-        // that opens the in-browser editor. The server content-sniffs the file and
-        // shows it editable (normal mode) or read-only (safe mode / binary content).
-        var isPotentiallyEditable = isPotentiallyEditableFile(entry.name);
+        // Detail view: Edit for text types plus unrecognised files (extensionless
+        // / unknown extension), subject to the size cap.
+        var isPotentiallyEditable = isEditableFromDetailView(entry.name, entry.size);
         if (isPotentiallyEditable) {
             actHtml += '<button class="btn btn-primary" onclick="detailEdit()">' + icons.edit + '<span>' + escapeHtml(t('Edit')) + '</span></button>';
             actHtml += '<button class="btn btn-secondary" onclick="detailDownload()">' + icons.download + '<span>' + escapeHtml(t('Download')) + '</span></button>';
