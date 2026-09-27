@@ -133,7 +133,16 @@
                 html += '<button class="btn-icon" onclick="event.stopPropagation(); deleteItem(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\', true, false, ' + (entry.is_empty ? 'true' : 'false') + ')" title="' + escapeHtml(t('Delete')) + '">' + icons.trash + '</button>';
                 html += '</div>';
             } else {
-                html += '<div class="file-actions file-actions-chevron"><span class="file-chevron"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span></div>';
+                // Row list keeps the strict allow-list (known text type + size
+                // cap); unknown or oversized files are still editable from the
+                // detail view. The server content-sniffs as a backstop.
+                var rowIsEditable = isPotentiallyEditableFile(entry.name, entry.size);
+                html += '<div class="file-actions' + (rowIsEditable ? '' : ' file-actions-chevron') + '">';
+                if (rowIsEditable) {
+                    html += '<button class="btn-icon" onclick="event.stopPropagation(); openEditor(\'' + escapeAttr(entry.path) + '\', \'' + escapeAttr(entry.name) + '\')" title="' + escapeHtml(t('Edit')) + '">' + icons.edit + '</button>';
+                }
+                html += '<span class="file-chevron"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>';
+                html += '</div>';
             }
             html += '</div>';
         }

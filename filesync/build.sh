@@ -29,6 +29,7 @@ CSS_FILES="
   $SRC_DIR/css/components.css
   $SRC_DIR/css/file-list.css
   $SRC_DIR/css/modals.css
+  $SRC_DIR/css/editor.css
 "
 
 # ===== JS file order =====
@@ -38,6 +39,8 @@ JS_FILES="
   $SRC_DIR/js/state.js
   $SRC_DIR/js/api.js
   $SRC_DIR/js/ui.js
+  $SRC_DIR/js/editor-highlight.js
+  $SRC_DIR/js/editor.js
   $SRC_DIR/js/file-list.js
   $SRC_DIR/js/file-ops.js
   $SRC_DIR/js/drag-drop.js

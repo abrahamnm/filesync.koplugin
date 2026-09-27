@@ -74,6 +74,24 @@
     --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
     --shadow-lg: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
     --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --editor-bg: #ffffff;
+    --editor-fg: #1a1d23;
+    --editor-tok-kw: #cf222e;      /* keyword */
+    --editor-tok-str: #0a3069;     /* string */
+    --editor-tok-num: #0550ae;     /* number */
+    --editor-tok-com: #6e7781;     /* comment */
+    --editor-tok-fn: #8250df;      /* function / builtin */
+    --editor-tok-type: #953800;    /* type */
+    --editor-tok-op: #1a1d23;      /* operator */
+    --editor-tok-tag: #116329;     /* html tag */
+    --editor-tok-attr: #953800;    /* html attr */
+    --editor-tok-prop: #0550ae;    /* css/ini property */
+    --editor-tok-meta: #57606a;    /* meta/punctuation */
+    --editor-gutter: #f6f8fa;
+    --editor-gutter-border: #e2e5e9;
+    --editor-caret: #1a1d23;
+    --editor-selection: rgba(59, 130, 246, 0.2);
+    --editor-line-active: rgba(59, 130, 246, 0.06);
 }
 
 html, body {

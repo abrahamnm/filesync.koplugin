@@ -22,9 +22,17 @@
         return months[d.getMonth()] + ' ' + d.getDate() + (d.getFullYear() !== now.getFullYear() ? ', ' + d.getFullYear() : '');
     }
 
+    // Backup suffixes ignored when classifying a filename, so a file like
+    // "settings.lua.old" is still recognised as code (lua).
+    var BACKUP_SUFFIX_RE = /\.(old|bak|orig|backup|copy|save|new)$/;
+
     function getTypeClassFromFilename(name) {
         var lowerName = String(name || '').toLowerCase();
         if (!lowerName) return '';
+        // "notes.txt~" classifies as "notes.txt".
+        if (lowerName.charAt(lowerName.length - 1) === '~') {
+            return getTypeClassFromFilename(lowerName.slice(0, -1));
+        }
         if (FILE_TYPE_BY_FILENAME[lowerName]) {
             return FILE_TYPE_BY_FILENAME[lowerName];
         }
@@ -34,7 +42,50 @@
         }
         var extMatch = lowerName.match(/\.([^.]+)$/);
         if (!extMatch) return '';
-        return FILE_TYPE_BY_EXTENSION[extMatch[1]] || '';
+        var direct = FILE_TYPE_BY_EXTENSION[extMatch[1]] || '';
+        if (direct) return direct;
+        // Unknown trailing extension: if it is a backup suffix, retry on the
+        // trimmed name so "book.lua.old" resolves via "book.lua".
+        if (BACKUP_SUFFIX_RE.test(lowerName)) {
+            var trimmed = lowerName.replace(BACKUP_SUFFIX_RE, '');
+            if (trimmed) return getTypeClassFromFilename(trimmed);
+        }
+        return '';
+    }
+
+    // Allow-list: only files recognised as text/code/markdown get an Edit
+    // affordance, so binary/unknown files don't show buttons that error on tap.
+    var EDITABLE_TYPE_CLASSES = {
+        text: true, code: true, markdown: true,
+    };
+
+    // Mirrors MAX_EDIT_SIZE in fileops.lua: larger files can be read but never saved.
+    var MAX_EDIT_SIZE = 256 * 1024;
+
+    // Row list: known text type and within the size cap.
+    function isPotentiallyEditableFile(name, size) {
+        var cls = getTypeClassFromFilename(name);
+        if (EDITABLE_TYPE_CLASSES[cls] !== true) return false;
+        return isWithinEditSizeLimit(size);
+    }
+
+    // A missing size is allowed through; the server content-sniffs anyway.
+    function isWithinEditSizeLimit(size) {
+        if (typeof size !== 'number') return true;
+        return size <= MAX_EDIT_SIZE;
+    }
+
+    function isUnknownTypeFile(name) {
+        return getTypeClassFromFilename(name) === '';
+    }
+
+    // Detail view: also offers Edit for unrecognised files (extensionless or
+    // unknown extension). The server content-sniffs, so binaries just fail on tap
+    // instead of showing a broken editor.
+    function isEditableFromDetailView(name, size) {
+        if (!isWithinEditSizeLimit(size)) return false;
+        if (isUnknownTypeFile(name)) return true;
+        return EDITABLE_TYPE_CLASSES[getTypeClassFromFilename(name)] === true;
     }
 
     function getFileDisplayParts(name) {

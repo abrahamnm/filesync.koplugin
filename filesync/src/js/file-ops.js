@@ -155,7 +155,15 @@
 
         // Build action buttons
         var actHtml = '';
-        actHtml += '<button class="btn btn-primary" onclick="detailDownload()">' + icons.download + '<span>' + escapeHtml(t('Download')) + '</span></button>';
+        // Detail view: Edit for text types plus unrecognised files (extensionless
+        // / unknown extension), subject to the size cap.
+        var isPotentiallyEditable = isEditableFromDetailView(entry.name, entry.size);
+        if (isPotentiallyEditable) {
+            actHtml += '<button class="btn btn-primary" onclick="detailEdit()">' + icons.edit + '<span>' + escapeHtml(t('Edit')) + '</span></button>';
+            actHtml += '<button class="btn btn-secondary" onclick="detailDownload()">' + icons.download + '<span>' + escapeHtml(t('Download')) + '</span></button>';
+        } else {
+            actHtml += '<button class="btn btn-primary" onclick="detailDownload()">' + icons.download + '<span>' + escapeHtml(t('Download')) + '</span></button>';
+        }
         actHtml += '<button class="btn btn-secondary" onclick="detailRename()">' + icons.rename + '<span>' + escapeHtml(t('Rename')) + '</span></button>';
         actHtml += '<button class="btn btn-danger" onclick="detailDelete()">' + icons.trash + '<span>' + escapeHtml(t('Delete')) + '</span></button>';
         actionsEl.innerHTML = actHtml;
@@ -244,6 +252,13 @@
         if (currentDetailEntry) {
             showToast(t('Downloading') + ' ' + currentDetailEntry.name, 'info');
             downloadFile(currentDetailEntry.path);
+        }
+    };
+
+    // Open the current detail file in the in-browser editor.
+    window.detailEdit = function() {
+        if (currentDetailEntry) {
+            openEditor(currentDetailEntry.path, currentDetailEntry.name);
         }
     };
 
