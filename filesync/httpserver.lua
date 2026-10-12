@@ -44,6 +44,10 @@ local HttpServer = {
     _running = false,
     _static_cache = {},
     _fileops = nil,
+    -- Optional function returning the /api/health `device` table (see
+    -- filesync/deviceinfo.lua). Injected by FileSyncManager so this module
+    -- doesn't need KOReader's Device and stays testable; nil omits the block.
+    device_info_provider = nil,
 }
 
 function HttpServer:new(o)
@@ -243,7 +247,13 @@ end
 --- Route an HTTP request to the appropriate handler.
 --- API endpoints:
 ---   GET  /api/lang       - returns {lang: string} (KOReader UI language)
----   GET  /api/health     - returns {status, root_dir, fileops_loaded}
+---   GET  /api/health     - returns {status, root_dir, fileops_loaded, device}
+---                          device (read-only, answered in every mode, may be absent):
+---                            {model, platform, screen = {width, height, dpi},
+---                             color_screen, color_enabled, koreader_version}
+---                          screen is the native panel size in portrait (width <= height);
+---                          any field KOReader can't provide is left out.
+---                          See filesync/deviceinfo.lua.
 ---   GET  /api/home       - returns {home: string|null} (KOReader home_dir, relative to root_dir)
 ---   GET  /api/files      - list directory (query: path, sort, order, filter)
 ---   GET  /api/dirinfo    - recursive file count (query: path)
@@ -304,6 +314,7 @@ function HttpServer:_route(client, method, path, query, headers, body)
                 status = "ok",
                 root_dir = self.root_dir,
                 fileops_loaded = FileOps ~= nil,
+                device = self:_deviceInfo(),
             })
             return
         end
@@ -992,6 +1003,21 @@ function HttpServer:_sendAll(client, data)
         end
     end
     return sent
+end
+
+--- The `device` block for /api/health, or nil. Never raises: a failing or
+--- missing provider, or anything that isn't a non-empty table, just leaves
+--- the block out so the health response itself always goes through.
+function HttpServer:_deviceInfo()
+    local provider = self.device_info_provider
+    if type(provider) ~= "function" then return nil end
+    local ok, info = pcall(provider)
+    if not ok then
+        logger.warn("FileSync HTTP: device info unavailable:", info)
+        return nil
+    end
+    if type(info) ~= "table" or next(info) == nil then return nil end
+    return info
 end
 
 function HttpServer:_sendJSON(client, status, data)
