@@ -141,6 +141,7 @@
                 if (xhr.status >= 200 && xhr.status < 300) {
                     resolve();
                 } else {
+                    checkSdCard();
                     try {
                         var d = JSON.parse(xhr.responseText);
                         reject(new Error(d.error || t('Upload failed:')));

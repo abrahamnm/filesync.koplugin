@@ -319,6 +319,15 @@ msgstr "فشل إنشاء المجلد:"
 msgid "Home"
 msgstr "الرئيسية"
 
+msgid "Internal storage"
+msgstr "التخزين الداخلي"
+
+msgid "SD card"
+msgstr "بطاقة SD"
+
+msgid "Storage location"
+msgstr "موقع التخزين"
+
 msgid "Done"
 msgstr "تم"
 

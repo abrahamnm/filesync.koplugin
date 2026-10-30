@@ -319,6 +319,15 @@ msgstr "Erro ao criar pasta:"
 msgid "Home"
 msgstr "In\u00edcio"
 
+msgid "Internal storage"
+msgstr "Armazenamento interno"
+
+msgid "SD card"
+msgstr "Cartão SD"
+
+msgid "Storage location"
+msgstr "Local de armazenamento"
+
 msgid "Done"
 msgstr "Conclu\u00eddo"
 

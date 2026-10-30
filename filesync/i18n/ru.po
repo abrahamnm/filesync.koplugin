@@ -319,6 +319,15 @@ msgstr "Не удалось создать папку:"
 msgid "Home"
 msgstr "Главная"
 
+msgid "Internal storage"
+msgstr "Внутренняя память"
+
+msgid "SD card"
+msgstr "SD-карта"
+
+msgid "Storage location"
+msgstr "Место хранения"
+
 msgid "Done"
 msgstr "Готово"
 

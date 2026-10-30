@@ -36,6 +36,7 @@ Works on devices running KOReader (designed for **Kindle** and **Kobo**), includ
 - **RTL Layout Support** — Full right-to-left layout for Arabic
 - **Sleep Prevention** — Keeps device awake and WiFi alive while the server runs
 - **Safe Mode** — Show only books and images, hiding system files
+- **SD Card Support** — Browse the SD card next to the internal storage on readers that have one
 - **Responsive UI** — Designed for smartphones, works on any screen
 - **Touch and Key Navigation** — On-device screens work with taps or with the D-pad/physical keys on non-touch readers
 
@@ -204,6 +205,19 @@ Safe mode is **enabled by default** and limits the web interface to only show fi
 - Folders you upload are stored in full, but any file inside them that isn't a book, document, or image (a plugin's `.lua` files, for example) stays hidden until you turn safe mode off
 
 To toggle safe mode, open the plugin menu and tap **Safe mode**. Disabling it will show every file on the device, including hidden files and folders, which are dimmed in the listing to set them apart.
+
+### SD Card
+
+On readers with an SD card slot, FileSync can browse the card as well as the internal storage. When a card is inserted, the first item of the breadcrumb bar becomes a selector that switches between **Internal storage** and **SD card**. If KOReader's home folder is on the card, the web interface opens there. Without a card nothing changes: the selector does not appear and the interface behaves as before.
+
+- Cards are detected on **Kobo** (`/mnt/sd`) and **PocketBook** (`/mnt/ext2`). Other devices behave as before.
+- The card is detected on every request, so you can insert or remove it while the server is running.
+- In the address bar the card lives under `/@sd/`, for example `http://filesync.local/#/@sd/Books`. Internal storage keeps its plain paths; `/@internal/` is accepted as an explicit spelling of it.
+- While the card is out, `/@sd/` addresses show an error instead of opening the internal storage.
+- A file can be renamed or moved within a storage location, but not from the internal storage to the card or back.
+- Safe mode applies to both locations.
+
+For developers: `GET /api/health` keeps `root_dir` (the internal storage) and adds a `root_dirs` list only when more than one location is present, and `GET /api/home` returns a `/@sd/...` path when KOReader's home folder is on the card.
 
 ## Troubleshooting
 

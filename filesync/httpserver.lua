@@ -48,6 +48,10 @@ local HttpServer = {
     -- filesync/deviceinfo.lua). Injected by FileSyncManager so this module
     -- doesn't need KOReader's Device and stays testable; nil omits the block.
     device_info_provider = nil,
+    -- Optional function returning the extra storage locations present right
+    -- now, e.g. {{id = "sd", path = "/mnt/sd"}} (see filesync/storage.lua).
+    -- Injected by FileSyncManager; nil means the internal storage only.
+    extra_roots_provider = nil,
 }
 
 function HttpServer:new(o)
@@ -72,6 +76,7 @@ function HttpServer:start()
     end
     self._fileops = result
     self._fileops:setRootDir(self.root_dir)
+    self._fileops:setExtraRootsProvider(self.extra_roots_provider)
     logger.info("FileSync HTTP: fileops module loaded, root_dir =", self.root_dir)
 
     local server, err = socket.bind("*", self.port)
@@ -313,29 +318,23 @@ function HttpServer:_route(client, method, path, query, headers, body)
             self:_sendJSON(client, 200, {
                 status = "ok",
                 root_dir = self.root_dir,
+                -- Present only when there is more than one storage location
+                -- (an SD card is inserted); absent means "just root_dir".
+                root_dirs = FileOps and FileOps.describeRoots and FileOps:describeRoots() or nil,
                 fileops_loaded = FileOps ~= nil,
                 device = self:_deviceInfo(),
             })
             return
         end
 
-        -- KOReader home folder, returned as a path relative to root_dir.
-        -- Returns null if home_dir is unset or lies outside root_dir, so the
-        -- frontend can decide its own fallback (currently: open at root).
+        -- KOReader home folder, returned as a path relative to its storage
+        -- location: unprefixed on the internal storage (as ever), "/@sd/..."
+        -- on an SD card. Returns null if home_dir is unset or lies outside
+        -- every storage location, so the frontend can decide its own
+        -- fallback (currently: open at root).
         if method == "GET" and path == "/api/home" then
             local home_dir = G_reader_settings:readSetting("home_dir")
-            local home_rel = nil
-            if home_dir and home_dir ~= "" and self.root_dir then
-                local root = self.root_dir
-                if home_dir == root then
-                    home_rel = "/"
-                elseif home_dir:sub(1, #root) == root
-                    and (home_dir:sub(#root + 1, #root + 1) == "/" or #home_dir == #root) then
-                    home_rel = home_dir:sub(#root + 1)
-                    if home_rel == "" then home_rel = "/" end
-                end
-            end
-            self:_sendJSON(client, 200, {home = home_rel})
+            self:_sendJSON(client, 200, {home = self:_homePath(home_dir)})
             return
         end
 
@@ -1018,6 +1017,18 @@ function HttpServer:_deviceInfo()
     end
     if type(info) ~= "table" or next(info) == nil then return nil end
     return info
+end
+
+--- Express KOReader's home_dir as a path clients can open: relative to the
+--- storage location that holds it, with its "/@<id>" prefix when that is not
+--- the internal storage (see FileOps:clientPath).
+--- @param home_dir string|nil
+--- @return string|nil: nil when home_dir is unset or outside every location
+function HttpServer:_homePath(home_dir)
+    if not home_dir or home_dir == "" or not (self._fileops and self._fileops.clientPath) then
+        return nil
+    end
+    return self._fileops:clientPath(home_dir)
 end
 
 function HttpServer:_sendJSON(client, status, data)

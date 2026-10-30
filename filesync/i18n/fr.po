@@ -319,6 +319,15 @@ msgstr "Échec de la création du dossier :"
 msgid "Home"
 msgstr "Accueil"
 
+msgid "Internal storage"
+msgstr "Mémoire interne"
+
+msgid "SD card"
+msgstr "Carte SD"
+
+msgid "Storage location"
+msgstr "Emplacement de stockage"
+
 msgid "Done"
 msgstr "Terminé"
 

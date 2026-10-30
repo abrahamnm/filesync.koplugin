@@ -480,12 +480,19 @@ function FileSyncManager:start(silent)
             logger.warn("FileSync: device info disabled:", device_info_provider)
             device_info_provider = nil
         end
+        -- SD card detection, re-evaluated on every request so a card inserted
+        -- or removed while the server runs is noticed. FileOps guards the
+        -- call: a failure only means "no card", never a broken internal storage.
+        local function extra_roots_provider()
+            return require("filesync/storage").extraRoots(Device, root_dir)
+        end
         local function tryStart(p)
             return pcall(function()
                 self._server = HttpServer:new{
                     port = p,
                     root_dir = root_dir,
                     device_info_provider = device_info_provider,
+                    extra_roots_provider = extra_roots_provider,
                 }
                 self._server:start()
             end)

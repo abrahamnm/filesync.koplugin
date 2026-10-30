@@ -7,11 +7,28 @@
         loadFiles();
     }
 
+    // Root of a path: "/" for the internal storage, "/@<id>" for another storage
+    // location the server reported (and "/@internal" for the internal one when
+    // spelled out). Paths under an unknown "@name" are ordinary folders.
+    function getRootOf(path) {
+        var match = /^\/(@[^\/]+)(?=\/|$)/.exec(path || '');
+        if (match) {
+            for (var i = 0; i < availableRoots.length; i++) {
+                if ('@' + availableRoots[i].id === match[1]) return '/' + match[1];
+            }
+        }
+        return '/';
+    }
+
+    function isRootPath(path) {
+        var normalized = (path || '/').replace(/\/+$/, '') || '/';
+        return normalized === '/' || normalized === getRootOf(normalized);
+    }
+
     function getParentPath(path) {
         path = path || '/';
-        if (path === '/') return '/';
         var normalized = path.replace(/\/+$/, '') || '/';
-        if (normalized === '/') return '/';
+        if (isRootPath(normalized)) return normalized;
         var lastSlash = normalized.lastIndexOf('/');
         return lastSlash > 0 ? normalized.substring(0, lastSlash) : '/';
     }
@@ -19,13 +36,13 @@
     function updateParentNav() {
         var btn = document.getElementById('btnParentNav');
         if (!btn) return;
-        var atRoot = currentPath === '/';
+        var atRoot = isRootPath(currentPath);
         btn.classList.toggle('hidden', atRoot);
         btn.disabled = atRoot;
     }
 
     window.navigateUp = function() {
-        if (currentPath === '/') return;
+        if (isRootPath(currentPath)) return;
         navigate(getParentPath(currentPath));
     };
 
@@ -41,6 +58,40 @@
         }
     };
 
+    // A request failed while an SD card folder is shown: if the server no
+    // longer lists the card (it was removed), go back to the internal storage.
+    // The caller still shows its own error notification. replaceState so that
+    // "back" does not return to the missing card.
+    var _sdCheckRunning = false;
+    window.checkSdCard = function() {
+        if (_sdCheckRunning || !/^\/@sd(\/|$)/.test(currentPath || '')) return;
+        _sdCheckRunning = true;
+        fetch('/api/files?' + new URLSearchParams({path: '/'}))
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                var roots = (data && data.roots) || [];
+                for (var i = 0; i < roots.length; i++) {
+                    if (roots[i].id === 'sd') return;
+                }
+                history.replaceState({path: '/'}, '', '#/');
+                _navigateInternal('/');
+            })
+            .catch(function() { /* keep the error as shown */ })
+            .then(function() { _sdCheckRunning = false; });
+    };
+
+    // Title link: open KOReader's home folder (which may be on the SD card),
+    // like loading the bare URL does; the internal root when home is unset,
+    // outside every storage location, or the request fails.
+    window.goHome = function() {
+        fetch('/api/home')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                navigate(data && typeof data.home === 'string' && data.home ? data.home : '/');
+            })
+            .catch(function() { navigate('/'); });
+    };
+
     async function loadFiles() {
         var list = document.getElementById('fileList');
         list.innerHTML = '<div class="loading"><div class="spinner"></div><div class="loading-text">' + escapeHtml(t('Loading...')) + '</div></div>';
@@ -53,7 +104,7 @@
                 filter: currentFilter
             });
             var data = await api('GET', '/api/files?' + params);
-            renderBreadcrumbs(data.breadcrumbs);
+            renderBreadcrumbs(data.breadcrumbs, data.roots);
             renderFiles(data.entries);
             updateParentNav();
         } catch (err) {
@@ -67,11 +118,47 @@
         }
     }
 
-    function renderBreadcrumbs(crumbs) {
+    function rootLabel(id) {
+        if (id === 'internal') return t('Internal storage');
+        if (id === 'sd') return t('SD card');
+        return id;
+    }
+
+    // With several storage locations the first breadcrumb is split in two:
+    // the storage icon with an arrow opens a selector that switches location,
+    // and the location name next to it is an ordinary breadcrumb that leads
+    // back to the root of the current location. With a single location it
+    // stays the plain "Home" item.
+    function renderRootSelector(crumb, isLast) {
+        var currentRoot = crumb.root;
+        var options = '';
+        for (var i = 0; i < availableRoots.length; i++) {
+            var root = availableRoots[i];
+            options += '<option value="' + escapeAttr(root.path) + '"' +
+                (root.id === currentRoot ? ' selected' : '') + '>' +
+                escapeHtml(rootLabel(root.id)) + '</option>';
+        }
+        var label = escapeHtml(t('Storage location'));
+        var switcher = '<span class="root-switch">' +
+            (currentRoot === 'sd' ? icons.sdcard : icons.home) +
+            '<select class="root-select" onchange="navigate(this.value)" title="' +
+            label + '" aria-label="' + label + '">' + options + '</select></span>';
+        var name = '<span class="breadcrumb-item' + (isLast ? ' active' : '') + '"' +
+            (isLast ? '' : ' onclick="navigate(\'' + escapeAttr(crumb.path) + '\')"') + '>' +
+            escapeHtml(rootLabel(currentRoot)) + '</span>';
+        return switcher + name;
+    }
+
+    function renderBreadcrumbs(crumbs, roots) {
         var el = document.getElementById('breadcrumbs');
+        availableRoots = roots || [];
         if (!crumbs || !crumbs.length) { el.innerHTML = ''; return; }
         var html = '';
         for (var i = 0; i < crumbs.length; i++) {
+            if (i === 0 && crumbs[0].root && availableRoots.length > 1) {
+                html += renderRootSelector(crumbs[0], crumbs.length === 1);
+                continue;
+            }
             if (i > 0) html += '<span class="breadcrumb-sep">/</span>';
             var isLast = i === crumbs.length - 1;
             var displayName = crumbs[i].name;

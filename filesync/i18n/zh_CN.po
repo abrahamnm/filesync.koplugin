@@ -319,6 +319,15 @@ msgstr "创建文件夹失败："
 msgid "Home"
 msgstr "首页"
 
+msgid "Internal storage"
+msgstr "内部存储"
+
+msgid "SD card"
+msgstr "SD 卡"
+
+msgid "Storage location"
+msgstr "存储位置"
+
 msgid "Done"
 msgstr "完成"
 

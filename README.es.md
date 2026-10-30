@@ -36,6 +36,7 @@ Funciona en dispositivos con KOReader instalado (diseñado para **Kindle** y **K
 - **Soporte para RTL** — Diseño completo de derecha a izquierda para árabe
 - **Prevención de Suspensión** — Mantiene el dispositivo activo y el WiFi conectado mientras el servidor está en ejecución
 - **Modo Seguro** — Muestra solo libros e imágenes, ocultando archivos del sistema
+- **Soporte para tarjeta SD** — Explora la tarjeta SD junto al almacenamiento interno en los lectores que la incluyen
 - **Interfaz Adaptable** — Diseñada para smartphones, funciona en cualquier pantalla
 
 ## Cómo Funciona
@@ -196,6 +197,19 @@ El modo seguro está **activado por defecto** y limita la interfaz web para most
 - Las carpetas que subas se guardan completas, pero los archivos que contienen y que no son libros, documentos ni imágenes (por ejemplo, los archivos `.lua` de un plugin) permanecen ocultos hasta que desactives el modo seguro
 
 Para alternar el modo seguro, abre el menú del plugin y toca **Modo seguro**. Desactivarlo mostrará todos los archivos del dispositivo.
+
+### Tarjeta SD
+
+En los lectores con ranura para tarjeta SD, FileSync puede explorar la tarjeta además del almacenamiento interno. Cuando hay una tarjeta insertada, el primer elemento de la barra de breadcrumbs se convierte en un selector que alterna entre **Almacenamiento interno** y **Tarjeta SD**. Si la carpeta de inicio de KOReader está en la tarjeta, la interfaz web se abre allí. Sin tarjeta no cambia nada: el selector no aparece y la interfaz se comporta como antes.
+
+- Las tarjetas se detectan en **Kobo** (`/mnt/sd`) y **PocketBook** (`/mnt/ext2`). Los demás dispositivos se comportan como antes.
+- La tarjeta se detecta en cada petición, así que puedes insertarla o retirarla con el servidor en marcha.
+- En la barra de direcciones, la tarjeta está bajo `/@sd/`, por ejemplo `http://filesync.local/#/@sd/Books`. El almacenamiento interno conserva sus rutas habituales; `/@internal/` se acepta como forma explícita.
+- Mientras la tarjeta no está insertada, las direcciones `/@sd/` muestran un error en lugar de abrir el almacenamiento interno.
+- Un archivo se puede renombrar o mover dentro de una misma ubicación, pero no del almacenamiento interno a la tarjeta ni al revés.
+- El modo seguro se aplica a ambas ubicaciones.
+
+Para desarrolladores: `GET /api/health` conserva `root_dir` (el almacenamiento interno) y añade una lista `root_dirs` solo cuando hay más de una ubicación; `GET /api/home` devuelve una ruta `/@sd/...` cuando la carpeta de inicio de KOReader está en la tarjeta.
 
 ## Solución de problemas
 

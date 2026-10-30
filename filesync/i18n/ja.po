@@ -319,6 +319,15 @@ msgstr "フォルダの作成に失敗:"
 msgid "Home"
 msgstr "ホーム"
 
+msgid "Internal storage"
+msgstr "内部ストレージ"
+
+msgid "SD card"
+msgstr "SDカード"
+
+msgid "Storage location"
+msgstr "保存場所"
+
 msgid "Done"
 msgstr "完了"
 

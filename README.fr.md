@@ -36,6 +36,7 @@ Fonctionne sur les appareils sous KOReader (conçu pour **Kindle** et **Kobo**).
 - **Support de la mise en page RTL** — Mise en page complète de droite à gauche pour l'arabe
 - **Prévention de la veille** — Maintient l'appareil éveillé et le WiFi actif pendant l'exécution du serveur
 - **Mode sécurisé** — Affiche uniquement les livres et images, en masquant les fichiers système
+- **Carte SD** — Parcourez la carte SD à côté de la mémoire interne sur les liseuses qui en ont une
 - **Interface adaptative** — Conçue pour les smartphones, fonctionne sur tout écran
 
 ## Comment ça marche
@@ -196,6 +197,19 @@ Le mode sécurisé est **activé par défaut** et limite l'interface web à l'af
 - Les dossiers que vous téléversez sont enregistrés intégralement, mais les fichiers qu'ils contiennent et qui ne sont ni des livres, ni des documents, ni des images (les fichiers `.lua` d'un plugin, par exemple) restent masqués tant que le mode sécurisé n'est pas désactivé
 
 Pour activer ou désactiver le mode sécurisé, ouvrez le menu du plugin et appuyez sur **Safe mode**. Le désactiver affichera tous les fichiers présents sur l'appareil.
+
+### Carte SD
+
+Sur les liseuses équipées d'une carte SD, FileSync peut parcourir la carte en plus de la mémoire interne. Quand une carte est insérée, le premier élément du fil d'Ariane devient un sélecteur qui permet de passer de la **Mémoire interne** à la **Carte SD**. Si le dossier d'accueil de KOReader est sur la carte, l'interface web s'ouvre directement dedans. Sans carte, rien ne change : le sélecteur n'apparaît pas et l'interface se comporte comme avant.
+
+- La carte est détectée sur **Kobo** (`/mnt/sd`) et **PocketBook** (`/mnt/ext2`). Les autres appareils se comportent comme avant.
+- La détection a lieu à chaque requête : vous pouvez insérer ou retirer la carte pendant que le serveur tourne.
+- Dans la barre d'adresse, la carte se trouve sous `/@sd/`, par exemple `http://filesync.local/#/@sd/Books`. La mémoire interne garde ses chemins habituels ; `/@internal/` est accepté comme écriture explicite.
+- Tant que la carte est retirée, les adresses en `/@sd/` affichent une erreur au lieu d'ouvrir la mémoire interne.
+- Un fichier peut être renommé ou déplacé dans un même emplacement, mais pas de la mémoire interne vers la carte, ni l'inverse.
+- Le mode sécurisé s'applique aux deux emplacements.
+
+Pour les développeurs : `GET /api/health` conserve `root_dir` (la mémoire interne) et ajoute une liste `root_dirs` uniquement quand plusieurs emplacements sont présents, et `GET /api/home` renvoie un chemin `/@sd/...` quand le dossier d'accueil de KOReader est sur la carte.
 
 ## Dépannage
 

@@ -319,6 +319,15 @@ msgstr "폴더 생성 실패:"
 msgid "Home"
 msgstr "홈"
 
+msgid "Internal storage"
+msgstr "내장 저장소"
+
+msgid "SD card"
+msgstr "SD 카드"
+
+msgid "Storage location"
+msgstr "저장 위치"
+
 msgid "Done"
 msgstr "완료"
 

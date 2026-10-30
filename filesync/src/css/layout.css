@@ -236,6 +236,120 @@
     color: var(--text);
 }
 
+/* Storage selector: the storage icon and an arrow, apart from the location
+   name that follows it (an ordinary breadcrumb). The <select> covers the whole
+   switch, so its clickable area, hover background and focus ring match; its
+   own text is hidden, the name is shown by the breadcrumb next to it. */
+.root-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-inline-end: 2px;
+    color: var(--text);
+    border-radius: var(--radius-xs);
+    transition: all var(--transition);
+}
+
+.root-switch:hover {
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.root-switch > svg {
+    position: absolute;
+    inset-inline-start: 8px;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.root-select {
+    inline-size: 48px;
+    block-size: 28px;
+    border: none;
+    border-radius: var(--radius-xs);
+    background-color: transparent;
+    color: transparent;
+    font: inherit;
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+}
+
+[dir="rtl"] .root-select {
+    background-position: left 8px center;
+}
+
+.root-select:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 0;
+}
+
+.root-select option {
+    color: var(--text);
+    background: var(--surface);
+    font-weight: 600;
+    padding: 8px 12px;
+}
+
+/* Browsers with a stylable dropdown (recent Chrome/Edge) get a list that
+   matches the interface; the others keep their native one. */
+@supports (appearance: base-select) {
+    .root-select,
+    .root-select::picker(select) {
+        appearance: base-select;
+    }
+
+    .root-select::picker-icon {
+        display: none;
+    }
+
+    /* Size the list to its options, not to the button: equal margins on both
+       sides, and no change of width when the pointer enters it. The browser's
+       own position fallbacks may resize the list to the button and win over
+       normal author rules, hence no fallbacks and !important on the sizes
+       (the selector sits at the top of the page, the list always fits below). */
+    .root-select::picker(select) {
+        position-try-fallbacks: none;
+        inline-size: max-content !important;
+        min-inline-size: 0 !important;
+        margin-block-start: 4px;
+        padding: 4px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        box-shadow: var(--shadow-md);
+    }
+
+    .root-select option {
+        border-radius: var(--radius-xs);
+        cursor: pointer;
+    }
+
+    .root-select option:hover,
+    .root-select option:focus-visible {
+        color: var(--primary);
+        background: var(--primary-light);
+        outline: none;
+    }
+
+    .root-select option:checked {
+        font-weight: 700;
+    }
+
+    .root-select option::checkmark {
+        display: none;
+    }
+}
+
 .breadcrumb-sep {
     color: var(--text-tertiary);
     font-size: 11px;

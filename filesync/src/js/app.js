@@ -33,7 +33,7 @@
                     filter: currentFilter
                 });
                 api('GET', '/api/files?' + params).then(function(data) {
-                    renderBreadcrumbs(data.breadcrumbs);
+                    renderBreadcrumbs(data.breadcrumbs, data.roots);
                     renderFiles(data.entries);
                     _showDetailInternal(state.path);
                 }).catch(function() {
@@ -55,6 +55,8 @@
     // ===== Init =====
     // Read hash to determine initial state before loading
     var initState = _parseHash();
+    // Keep the hash as typed: replaceState below turns a bare URL into "#/".
+    var _initialHash = window.location.hash;
     if (initState.detail) {
         // For detail view, start at the parent directory
         var initParent = initState.path.substring(0, initState.path.lastIndexOf('/')) || '/';
@@ -71,10 +73,12 @@
 
     // Fetch language setting from server, then apply translations and load files
     var _initDetailPath = initState.detail ? initState.path : null;
-    // When the user lands on the bare URL (no hash deep-link), prefer KOReader's
-    // configured home folder over filesystem root. Single attempt; on failure or
-    // when home is unset/outside root, keep currentPath ("/") as the fallback.
-    var _hasDeepLink = !!window.location.hash && window.location.hash !== '#' && window.location.hash !== '#/';
+    // When the user lands on the bare URL (no path after "#"), prefer KOReader's
+    // configured home folder over filesystem root. "#/" is a path: the root of
+    // the internal storage, so refreshing there stays there. Single attempt; on
+    // failure or when home is unset/outside root, keep currentPath ("/") as the
+    // fallback.
+    var _hasDeepLink = !!_initialHash && _initialHash !== '#';
     var _homeFetch = (_hasDeepLink || _initDetailPath)
         ? Promise.resolve()
         : fetch('/api/home')

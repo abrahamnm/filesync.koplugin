@@ -16,6 +16,7 @@
             throw new Error(res.ok ? 'Invalid server response' : 'Server error (' + res.status + ')');
         }
         if (!res.ok || data.error) {
+            checkSdCard();
             throw new Error(data.error || 'Request failed (' + res.status + ')');
         }
         return data;

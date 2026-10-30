@@ -320,6 +320,15 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
+msgid "Internal storage"
+msgstr ""
+
+msgid "SD card"
+msgstr ""
+
+msgid "Storage location"
+msgstr ""
+
 msgid "Done"
 msgstr ""
 

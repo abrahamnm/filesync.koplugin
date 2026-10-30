@@ -44,9 +44,79 @@ function FileOps:setRootDir(dir)
     self._root_dir = dir
 end
 
+--- Register a function returning the extra storage locations of this device
+--- (an SD card, say). It is called once per request, so a card inserted or
+--- removed while the server runs is picked up. Each item looks like
+--- {id = "sd", name = "SD card", path = "/mnt/sd"} and is reached by clients
+--- under "/@<id>"; `path` is nil while the location is absent (card removed).
+--- The internal root is always available and is not part of this list.
+--- @param provider function|nil
+function FileOps:setExtraRootsProvider(provider)
+    self._extra_roots_provider = provider
+end
+
+-- Drop trailing slashes, keeping a lone "/".
+local function trimSlashes(path)
+    path = path:gsub("/+$", "")
+    if path == "" then return "/" end
+    return path
+end
+
+--- Storage locations of this device, as they are right now.
+--- `prefix` is the root as clients see it: "/" for the internal root (paths
+--- are unprefixed, as they always were) and "/@<id>" for the others.
+--- @return table: available locations, the internal one first: list of
+---   {id = string, path = string, prefix = string, name = string|nil}
+--- @return table: locations this device has but that are absent right now,
+---   as {[id] = name or false}
+function FileOps:getRoots()
+    local internal_path = self._root_dir and trimSlashes(self._root_dir)
+    local roots = {{id = "internal", path = internal_path, prefix = "/"}}
+    local absent = {}
+    if self._extra_roots_provider then
+        local ok, extra = pcall(self._extra_roots_provider)
+        if ok and type(extra) == "table" then
+            for _, r in ipairs(extra) do
+                if type(r) == "table" and type(r.id) == "string" and r.id ~= ""
+                    and r.id ~= "internal" and not r.id:find("/", 1, true) then
+                    local name = type(r.name) == "string" and r.name or nil
+                    if type(r.path) == "string" and r.path ~= "" then
+                        table.insert(roots, {id = r.id, path = trimSlashes(r.path),
+                            prefix = "/@" .. r.id, name = name})
+                    else
+                        absent[r.id] = name or false
+                    end
+                end
+            end
+        end
+    end
+    return roots, absent
+end
+
+--- Public description of the roots, or nil when there is only one. Only a
+--- device with an extra storage location present sees this, so everything
+--- else keeps the exact responses it always had.
+--- @param roots table|nil: result of getRoots(), to reuse within a request
+--- @return table|nil: list of {id = string, path = string}
+function FileOps:describeRoots(roots)
+    roots = roots or self:getRoots()
+    if #roots < 2 then return nil end
+    local out = {}
+    for _, r in ipairs(roots) do
+        table.insert(out, {id = r.id, path = r.prefix})
+    end
+    return out
+end
+
 --- Resolve and validate a path, preventing path traversal.
---- Returns the full absolute path, or nil and an error message.
-function FileOps:_resolvePath(rel_path)
+--- A path starting with "/@<id>" (for example "/@sd") lives on that extra
+--- storage location, and is refused while the location is absent;
+--- "/@internal" names the internal storage explicitly, and any other path is
+--- on the internal storage.
+--- @return string|nil: the full absolute path, or nil on error
+--- @return table|string: the root it belongs to (see getRoots), or the error message
+--- @return table|nil: every available root, so the caller does not detect them again
+function FileOps:_resolve(rel_path)
     if not rel_path or rel_path == "" then
         rel_path = "/"
     end
@@ -67,7 +137,29 @@ function FileOps:_resolvePath(rel_path)
         rel_path = "/" .. rel_path
     end
 
-    local full_path = self._root_dir .. rel_path
+    -- Pick the root: a reserved "@<id>" first segment selects that storage
+    -- location; anything else is internal storage.
+    local roots, absent = self:getRoots()
+    local root = roots[1]
+    local inner = rel_path
+    local id = rel_path:match("^/@([^/]+)")
+    if id then
+        if absent[id] ~= nil then
+            -- Never fall back to the internal storage here: a request meant
+            -- for a removed card would otherwise write there (mkdir -p).
+            return nil, (absent[id] or ("@" .. id)) .. " not available"
+        end
+        for _, candidate in ipairs(roots) do
+            if candidate.id == id then
+                root = candidate
+                inner = rel_path:sub(#id + 3)
+                if inner == "" then inner = "/" end
+                break
+            end
+        end
+    end
+
+    local full_path = root.path .. inner
 
     -- Normalize again after combining
     full_path = full_path:gsub("//+", "/")
@@ -77,11 +169,21 @@ function FileOps:_resolvePath(rel_path)
         full_path = full_path:sub(1, -2)
     end
 
-    -- Verify the resolved path is under root_dir
-    if full_path:sub(1, #self._root_dir) ~= self._root_dir then
+    -- Verify the resolved path is under the root
+    if full_path:sub(1, #root.path) ~= root.path then
         return nil, "Access denied: path outside root directory"
     end
 
+    return full_path, root, roots
+end
+
+--- Same as _resolve, for callers that only need the absolute path.
+--- Returns the full absolute path, or nil and an error message.
+function FileOps:_resolvePath(rel_path)
+    local full_path, root_or_err = self:_resolve(rel_path)
+    if not full_path then
+        return nil, root_or_err
+    end
     return full_path
 end
 
@@ -126,14 +228,28 @@ function FileOps:_validateFilename(name)
     return true
 end
 
---- Get the relative path from root_dir
-function FileOps:_getRelativePath(full_path)
-    if full_path:sub(1, #self._root_dir) == self._root_dir then
-        local rel = full_path:sub(#self._root_dir + 1)
-        if rel == "" then rel = "/" end
+--- Path clients use for an absolute path: relative to the storage location
+--- holding it (the most specific one wins), with its "/@<id>" prefix when
+--- that is not the internal storage.
+--- @param full_path string: absolute path
+--- @param roots table|nil: result of getRoots() (or a subset), to reuse within a request
+--- @return string|nil: nil when full_path is outside every location
+function FileOps:clientPath(full_path, roots)
+    if type(full_path) ~= "string" or full_path == "" then return nil end
+    local best = nil
+    for _, r in ipairs(roots or self:getRoots()) do
+        local p = r.path
+        if p and (p == "/" or full_path == p or full_path:sub(1, #p + 1) == p .. "/") then
+            if not best or #p > #best.path then best = r end
+        end
+    end
+    if not best then return nil end
+    local rel = best.path == "/" and full_path or full_path:sub(#best.path + 1)
+    if rel == "" then rel = "/" end
+    if best.id == "internal" then
         return rel
     end
-    return full_path
+    return best.prefix .. (rel == "/" and "" or rel)
 end
 
 --- Format file size for display
@@ -362,9 +478,9 @@ end
 --- @return table|nil: {path, entries, breadcrumbs, count} on success
 --- @return string|nil: error message on failure
 function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
-    local full_path, err = self:_resolvePath(rel_path)
+    local full_path, root, roots = self:_resolve(rel_path)
     if not full_path then
-        return nil, err
+        return nil, root
     end
 
     local is_dir, dir_err = self:_checkDirectory(full_path, rel_path)
@@ -397,7 +513,7 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
                             else
                                 local entry = {
                                     name = name,
-                                    path = self:_getRelativePath(entry_path),
+                                    path = self:clientPath(entry_path, {root}),
                                     is_dir = is_dir,
                                     size = entry_attr.size or 0,
                                     size_formatted = self:_formatSize(entry_attr.size or 0),
@@ -467,26 +583,38 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
         end
     end)
 
-    -- Build breadcrumbs
-    local breadcrumbs = {{name = "Home", path = "/"}}
-    if rel_path and rel_path ~= "/" then
-        local parts = {}
-        for part in rel_path:gmatch("[^/]+") do
-            table.insert(parts, part)
-        end
-        local cumulative = ""
-        for _, part in ipairs(parts) do
-            cumulative = cumulative .. "/" .. part
-            table.insert(breadcrumbs, {name = part, path = cumulative})
-        end
+    -- Build breadcrumbs: the first item is the root itself, then one item
+    -- per folder below it. Paths carry the root's "/@<id>" prefix when it has one.
+    local roots_info = self:describeRoots(roots)
+    local base = root.id == "internal" and "" or root.prefix
+    local breadcrumbs = {{name = root.name or "Home", path = root.prefix}}
+    if roots_info then
+        breadcrumbs[1].root = root.id
+    end
+    local inner = full_path:sub(#root.path + 1)
+    local cumulative = base
+    for part in inner:gmatch("[^/]+") do
+        cumulative = cumulative .. "/" .. part
+        table.insert(breadcrumbs, {name = part, path = cumulative})
     end
 
-    return {
-        path = rel_path or "/",
+    -- "/@internal" is accepted as input only: answer with the plain path.
+    local path = rel_path or "/"
+    if root.id == "internal" then
+        path = path:gsub("^/*@internal/", "/"):gsub("^/*@internal$", "/")
+    end
+
+    local result = {
+        path = path,
         entries = entries,
         breadcrumbs = breadcrumbs,
         count = #entries,
     }
+    if roots_info then
+        result.roots = roots_info
+        result.root = root.id
+    end
+    return result
 end
 
 --- Get recursive file count for a directory
@@ -640,16 +768,16 @@ end
 --- @return boolean: true on success
 --- @return string|nil: error message on failure
 function FileOps:createDirectory(rel_path, options)
-    local full_path, err = self:_resolvePath(rel_path)
+    local full_path, root = self:_resolve(rel_path)
     if not full_path then
-        return false, err
+        return false, root
     end
 
     local recursive = options and options.recursive
 
     -- Refuse to create the root itself: there is nothing to make and the
     -- segment walk below would have no name to validate.
-    if full_path == self._root_dir then
+    if full_path == root.path then
         return false, "Path already exists"
     end
 
@@ -663,7 +791,7 @@ function FileOps:createDirectory(rel_path, options)
     end
 
     if recursive then
-        return self:_createDirectoryRecursive(full_path)
+        return self:_createDirectoryRecursive(full_path, root.path)
     end
 
     -- Check parent directory exists
@@ -691,14 +819,16 @@ function FileOps:createDirectory(rel_path, options)
     return true
 end
 
---- Create every missing directory between root_dir and full_path (mkdir -p).
+--- Create every missing directory between the root and full_path (mkdir -p).
 --- full_path must already be resolved and known not to exist.
---- @param full_path string: absolute path under root_dir
+--- @param full_path string: absolute path under the root
+--- @param root_path string|nil: absolute path of that root (defaults to the internal root)
 --- @return boolean: true on success
 --- @return string|nil: error message on failure
-function FileOps:_createDirectoryRecursive(full_path)
-    local rel = full_path:sub(#self._root_dir + 1)
-    local current = self._root_dir
+function FileOps:_createDirectoryRecursive(full_path, root_path)
+    root_path = root_path or self._root_dir
+    local rel = full_path:sub(#root_path + 1)
+    local current = root_path
 
     for segment in rel:gmatch("[^/]+") do
         local valid, valid_err = self:_validateFilename(segment)
@@ -725,14 +855,19 @@ end
 
 --- Rename a file or directory
 function FileOps:rename(old_rel_path, new_rel_path)
-    local old_path, err1 = self:_resolvePath(old_rel_path)
+    local old_path, old_root = self:_resolve(old_rel_path)
     if not old_path then
-        return false, err1
+        return false, old_root
     end
 
-    local new_path, err2 = self:_resolvePath(new_rel_path)
+    local new_path, new_root = self:_resolve(new_rel_path)
     if not new_path then
-        return false, err2
+        return false, new_root
+    end
+
+    -- Storage locations are separate filesystems: a rename cannot cross them.
+    if old_root.id ~= new_root.id then
+        return false, "Cannot rename across storage locations"
     end
 
     -- Check source exists
@@ -769,13 +904,13 @@ end
 ---   - safe_mode (bool): when true, auto-delete associated .sdr directory for book files
 ---   - delete_sdr (bool): when true (and not safe_mode), delete associated .sdr directory
 function FileOps:delete(rel_path, options)
-    local full_path, err = self:_resolvePath(rel_path)
+    local full_path, root = self:_resolve(rel_path)
     if not full_path then
-        return false, err
+        return false, root
     end
 
     -- Prevent deleting the root directory
-    if full_path == self._root_dir then
+    if full_path == root.path then
         return false, "Cannot delete root directory"
     end
 

@@ -36,6 +36,7 @@ Funktioniert auf Geräten mit KOReader (entwickelt für **Kindle** und **Kobo**)
 - **RTL-Layout-Unterstützung** — Vollständiges Rechts-nach-Links-Layout für Arabisch
 - **Schlafsperre** — Hält das Gerät wach und die WiFi-Verbindung aktiv, solange der Server läuft
 - **Sicherer Modus** — Zeigt nur Bücher und Bilder an, Systemdateien werden ausgeblendet
+- **SD-Karten-Unterstützung** — Durchsuchen Sie auf Readern mit Kartenslot die SD-Karte neben dem internen Speicher
 - **Responsive Oberfläche** — Für Smartphones gestaltet, funktioniert auf jedem Bildschirm
 
 ## So funktioniert es
@@ -196,6 +197,19 @@ Der sichere Modus ist **standardmäßig aktiviert** und beschränkt die Weboberf
 - Hochgeladene Ordner werden vollständig gespeichert, aber darin enthaltene Dateien, die keine Bücher, Dokumente oder Bilder sind (z. B. die `.lua`-Dateien eines Plugins), bleiben ausgeblendet, bis Sie den sicheren Modus deaktivieren
 
 Um den sicheren Modus umzuschalten, öffnen Sie das Plugin-Menü und tippen Sie auf **Safe mode**. Durch Deaktivierung werden alle Dateien auf dem Gerät angezeigt.
+
+### SD-Karte
+
+Auf Readern mit SD-Kartenslot kann FileSync neben dem internen Speicher auch die Karte durchsuchen. Ist eine Karte eingesetzt, wird das erste Element der Breadcrumb-Leiste zu einer Auswahl, mit der Sie zwischen **Interner Speicher** und **SD-Karte** wechseln. Liegt der Startordner von KOReader auf der Karte, öffnet sich die Weboberfläche dort. Ohne Karte ändert sich nichts: Die Auswahl erscheint nicht, und die Oberfläche verhält sich wie zuvor.
+
+- Karten werden auf **Kobo** (`/mnt/sd`) und **PocketBook** (`/mnt/ext2`) erkannt. Andere Geräte verhalten sich wie zuvor.
+- Die Karte wird bei jeder Anfrage erkannt; Sie können sie also einsetzen oder entfernen, während der Server läuft.
+- In der Adressleiste liegt die Karte unter `/@sd/`, zum Beispiel `http://filesync.local/#/@sd/Books`. Der interne Speicher behält seine gewohnten Pfade; `/@internal/` wird als ausdrückliche Schreibweise akzeptiert.
+- Solange die Karte entnommen ist, zeigen `/@sd/`-Adressen einen Fehler, statt den internen Speicher zu öffnen.
+- Eine Datei kann innerhalb eines Speicherorts umbenannt oder verschoben werden, aber nicht vom internen Speicher auf die Karte oder umgekehrt.
+- Der sichere Modus gilt für beide Speicherorte.
+
+Für Entwickler: `GET /api/health` behält `root_dir` (den internen Speicher) und fügt eine Liste `root_dirs` nur hinzu, wenn mehr als ein Speicherort vorhanden ist; `GET /api/home` liefert einen Pfad `/@sd/...`, wenn der Startordner von KOReader auf der Karte liegt.
 
 ## Fehlerbehebung
 

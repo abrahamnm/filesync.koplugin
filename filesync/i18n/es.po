@@ -319,6 +319,15 @@ msgstr "Error al crear carpeta:"
 msgid "Home"
 msgstr "Inicio"
 
+msgid "Internal storage"
+msgstr "Almacenamiento interno"
+
+msgid "SD card"
+msgstr "Tarjeta SD"
+
+msgid "Storage location"
+msgstr "Ubicación de almacenamiento"
+
 msgid "Done"
 msgstr "Listo"
 

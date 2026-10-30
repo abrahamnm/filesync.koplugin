@@ -313,6 +313,21 @@ describe("filesync.httpserver", function()
             end
         end)
 
+        it("adds root_dirs only when there is more than one storage location", function()
+            local server = HttpServer:new{ root_dir = "/mnt/onboard" }
+            server._fileops = { describeRoots = function() return nil end }
+            local _, body = get_health(server)
+            assert.is_nil(body.root_dirs)
+            assert.are.equal("/mnt/onboard", body.root_dir)
+
+            server._fileops = { describeRoots = function()
+                return { { id = "internal", path = "/" }, { id = "sd", path = "/@sd" } }
+            end }
+            _, body = get_health(server)
+            assert.are.equal("/mnt/onboard", body.root_dir)
+            assert.are.same({ { id = "internal", path = "/" }, { id = "sd", path = "/@sd" } }, body.root_dirs)
+        end)
+
         it("omits the device block when no provider is set", function()
             local server = HttpServer:new{ root_dir = "/mnt/us" }
             local status_line, body = get_health(server)
@@ -361,6 +376,24 @@ describe("filesync.httpserver", function()
             }
             local _, body = get_health(server)
             assert.is_nil(body.device)
+        end)
+    end)
+
+    describe("_homePath", function()
+        -- The mapping itself is FileOps:clientPath, covered in fileops_spec.
+        it("asks the file operations module for the client path", function()
+            local server = HttpServer:new{ root_dir = "/mnt/onboard" }
+            local asked
+            server._fileops = { clientPath = function(_, p) asked = p; return "/@sd/Livres" end }
+            assert.are.equal("/@sd/Livres", server:_homePath("/mnt/sd/Livres"))
+            assert.are.equal("/mnt/sd/Livres", asked)
+        end)
+
+        it("returns nil when home_dir is unset", function()
+            local server = HttpServer:new{ root_dir = "/mnt/onboard" }
+            server._fileops = { clientPath = function() error("must not be called") end }
+            assert.is_nil(server:_homePath(nil))
+            assert.is_nil(server:_homePath(""))
         end)
     end)
 end)

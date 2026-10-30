@@ -319,6 +319,15 @@ msgstr "Ordner konnte nicht erstellt werden:"
 msgid "Home"
 msgstr "Startseite"
 
+msgid "Internal storage"
+msgstr "Interner Speicher"
+
+msgid "SD card"
+msgstr "SD-Karte"
+
+msgid "Storage location"
+msgstr "Speicherort"
+
 msgid "Done"
 msgstr "Fertig"
 

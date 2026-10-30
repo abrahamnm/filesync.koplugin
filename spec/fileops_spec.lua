@@ -742,4 +742,230 @@ describe("filesync.fileops", function()
             assert.are.equal("Path already exists", err)
         end)
     end)
+
+    describe("storage locations (SD card)", function()
+
+        local card_present, provider_calls
+
+        local TREE = {
+            ["/mnt/onboard"]               = {mode = "directory", size = 4096, modification = 100},
+            ["/mnt/onboard/Books"]         = {mode = "directory", size = 4096, modification = 100},
+            ["/mnt/onboard/Books/a.epub"]  = {mode = "file", size = 10, modification = 100},
+            ["/mnt/onboard/@sd"]           = {mode = "directory", size = 4096, modification = 100},
+            ["/mnt/onboard/@sd/real.epub"] = {mode = "file", size = 10, modification = 100},
+            ["/mnt/sd"]                    = {mode = "directory", size = 4096, modification = 100},
+            ["/mnt/sd/Library"]            = {mode = "directory", size = 4096, modification = 100},
+            ["/mnt/sd/Library/b.epub"]     = {mode = "file", size = 10, modification = 100},
+        }
+
+        before_each(function()
+            FileOps:setRootDir("/mnt/onboard")
+            card_present = true
+            provider_calls = 0
+            -- Same shape as Storage.extraRoots on a Kobo: the card is always
+            -- listed, with a path only while it is inserted.
+            FileOps:setExtraRootsProvider(function()
+                provider_calls = provider_calls + 1
+                return {{id = "sd", name = "SD card", path = card_present and "/mnt/sd" or nil}}
+            end)
+            mountTree(TREE)
+        end)
+
+        after_each(function()
+            FileOps:setExtraRootsProvider(nil)
+            unmountTree()
+        end)
+
+        it("keeps unprefixed paths on the internal storage, card or not", function()
+            assert.are.equal("/mnt/onboard/Books", FileOps:_resolvePath("/Books"))
+            card_present = false
+            assert.are.equal("/mnt/onboard/Books", FileOps:_resolvePath("/Books"))
+        end)
+
+        it("accepts /@internal as an explicit spelling of the internal storage", function()
+            assert.are.equal("/mnt/onboard/Books", FileOps:_resolvePath("/@internal/Books"))
+            assert.are.equal("/mnt/onboard", FileOps:_resolvePath("/@internal"))
+        end)
+
+        it("resolves /@sd paths onto the card", function()
+            assert.are.equal("/mnt/sd/Library", FileOps:_resolvePath("/@sd/Library"))
+            assert.are.equal("/mnt/sd", FileOps:_resolvePath("/@sd"))
+            assert.are.equal("/mnt/sd", FileOps:_resolvePath("/@sd/"))
+        end)
+
+        it("refuses /@sd paths while the card is out, instead of using the internal storage", function()
+            card_present = false
+            local path, err = FileOps:_resolvePath("/@sd/Library")
+            assert.is_nil(path)
+            assert.are.equal("SD card not available", err)
+
+            local created = recordMkdir(TREE)
+            local ok, mkdir_err = FileOps:createDirectory("/@sd/Library/new", {recursive = true})
+            assert.is_false(ok)
+            assert.are.equal("SD card not available", mkdir_err)
+            assert.are.same({}, created)
+        end)
+
+        it("treats /@sd as an ordinary folder on a device without a card slot", function()
+            FileOps:setExtraRootsProvider(function() return {} end)
+            assert.are.equal("/mnt/onboard/@sd/real.epub", FileOps:_resolvePath("/@sd/real.epub"))
+        end)
+
+        it("keeps a real @sd folder reachable through /@internal, card or not", function()
+            assert.are.equal("/mnt/sd/real.epub", FileOps:_resolvePath("/@sd/real.epub"))
+            assert.are.equal("/mnt/onboard/@sd/real.epub", FileOps:_resolvePath("/@internal/@sd/real.epub"))
+            card_present = false
+            assert.are.equal("/mnt/onboard/@sd/real.epub", FileOps:_resolvePath("/@internal/@sd/real.epub"))
+        end)
+
+        it("does not treat other @ names as storage locations", function()
+            assert.are.equal("/mnt/onboard/@other/x", FileOps:_resolvePath("/@other/x"))
+        end)
+
+        it("still blocks path traversal on the card", function()
+            local path, err = FileOps:_resolvePath("/@sd/../onboard")
+            assert.is_nil(path)
+            assert.are.equal("Path traversal not allowed", err)
+        end)
+
+        it("lists the card with prefixed paths, named after the card", function()
+            local listing = FileOps:listDirectory("/@sd/Library", "name", "asc", "", true)
+            assert.are.equal("/@sd/Library", listing.path)
+            assert.are.equal(1, listing.count)
+            assert.are.equal("/@sd/Library/b.epub", listing.entries[1].path)
+            assert.are.same({
+                {name = "SD card", path = "/@sd", root = "sd"},
+                {name = "Library", path = "/@sd/Library"},
+            }, listing.breadcrumbs)
+            assert.are.equal("sd", listing.root)
+            assert.are.same({{id = "internal", path = "/"}, {id = "sd", path = "/@sd"}}, listing.roots)
+
+            listing = FileOps:listDirectory("/@sd", "name", "asc", "", true)
+            assert.are.equal("/@sd/Library", listing.entries[1].path)
+            assert.are.same({{name = "SD card", path = "/@sd", root = "sd"}}, listing.breadcrumbs)
+        end)
+
+        it("detects the storage locations once per listing, not once per entry", function()
+            FileOps:listDirectory("/", "name", "asc", "", false)
+            assert.are.equal(1, provider_calls)
+        end)
+
+        it("keeps internal listings unprefixed, and flags the root only when a card exists", function()
+            local listing = FileOps:listDirectory("/Books", "name", "asc", "", true)
+            assert.are.equal("/Books/a.epub", listing.entries[1].path)
+            assert.are.same({
+                {name = "Home", path = "/", root = "internal"},
+                {name = "Books", path = "/Books"},
+            }, listing.breadcrumbs)
+            assert.are.equal("internal", listing.root)
+
+            card_present = false
+            listing = FileOps:listDirectory("/Books", "name", "asc", "", true)
+            assert.are.same({
+                {name = "Home", path = "/"},
+                {name = "Books", path = "/Books"},
+            }, listing.breadcrumbs)
+            assert.is_nil(listing.roots)
+            assert.is_nil(listing.root)
+        end)
+
+        it("answers /@internal listings with the plain internal path", function()
+            assert.are.equal("/Books", FileOps:listDirectory("/@internal/Books", "name", "asc", "", true).path)
+            assert.are.equal("/", FileOps:listDirectory("/@internal", "name", "asc", "", true).path)
+            assert.are.equal("/Books", FileOps:listDirectory("/Books", "name", "asc", "", true).path)
+        end)
+
+        it("describes the roots only when one besides the internal storage is present", function()
+            assert.are.same({{id = "internal", path = "/"}, {id = "sd", path = "/@sd"}}, FileOps:describeRoots())
+            card_present = false
+            assert.is_nil(FileOps:describeRoots())
+        end)
+
+        it("ignores a provider that fails or returns junk", function()
+            FileOps:setExtraRootsProvider(function() error("boom") end)
+            assert.is_nil(FileOps:describeRoots())
+            assert.are.equal("/mnt/onboard/@sd/real.epub", FileOps:_resolvePath("/@sd/real.epub"))
+            FileOps:setExtraRootsProvider(function()
+                return {{id = "internal", path = "/x"}, {id = "", path = "/y"}, {id = "a/b"}, "junk"}
+            end)
+            assert.is_nil(FileOps:describeRoots())
+            assert.are.equal("/mnt/onboard/Books", FileOps:_resolvePath("/@internal/Books"))
+        end)
+
+        it("ignores trailing slashes on the roots", function()
+            FileOps:setRootDir("/mnt/onboard/")
+            FileOps:setExtraRootsProvider(function() return {{id = "sd", path = "/mnt/sd/"}} end)
+            assert.are.equal("/mnt/onboard", FileOps:_resolvePath("/"))
+            assert.are.equal("/mnt/sd/Library", FileOps:_resolvePath("/@sd/Library"))
+            assert.are.equal("/@sd/Library", FileOps:clientPath("/mnt/sd/Library"))
+        end)
+
+        it("maps absolute paths back to client paths", function()
+            assert.are.equal("/Books/a.epub", FileOps:clientPath("/mnt/onboard/Books/a.epub"))
+            assert.are.equal("/", FileOps:clientPath("/mnt/onboard"))
+            assert.are.equal("/@sd/Library", FileOps:clientPath("/mnt/sd/Library"))
+            assert.are.equal("/@sd", FileOps:clientPath("/mnt/sd"))
+            assert.is_nil(FileOps:clientPath("/home/user/Books"))
+            assert.is_nil(FileOps:clientPath("/mnt/onboard2/Books"))
+            card_present = false
+            assert.is_nil(FileOps:clientPath("/mnt/sd/Library"))
+        end)
+
+        it("maps client paths under a filesystem root of /", function()
+            FileOps:setRootDir("/")
+            FileOps:setExtraRootsProvider(nil)
+            assert.are.equal("/home/user", FileOps:clientPath("/home/user"))
+            assert.are.equal("/", FileOps:clientPath("/"))
+        end)
+
+        it("creates directories on the card", function()
+            local tree = {}
+            for k, v in pairs(TREE) do tree[k] = v end
+            mountTree(tree)
+            local created = recordMkdir(tree)
+            assert.is_true(FileOps:createDirectory("/@sd/Library/new/deep", {recursive = true}))
+            assert.are.same({"/mnt/sd/Library/new", "/mnt/sd/Library/new/deep"}, created)
+        end)
+
+        it("refuses to create or delete the card root itself", function()
+            local ok, err = FileOps:createDirectory("/@sd")
+            assert.is_false(ok)
+            assert.are.equal("Path already exists", err)
+            ok, err = FileOps:delete("/@sd")
+            assert.is_false(ok)
+            assert.are.equal("Cannot delete root directory", err)
+        end)
+
+        it("renames within the card", function()
+            local renamed
+            local real_rename = os.rename
+            os.rename = function(a, b) renamed = {a, b}; return true end
+            local ok = FileOps:rename("/@sd/Library/b.epub", "/@sd/Library/c.epub")
+            os.rename = real_rename
+            assert.is_true(ok)
+            assert.are.same({"/mnt/sd/Library/b.epub", "/mnt/sd/Library/c.epub"}, renamed)
+        end)
+
+        it("refuses to rename from one storage location to another", function()
+            local called = false
+            local real_rename = os.rename
+            os.rename = function() called = true; return true end
+            local ok, err = FileOps:rename("/Books/a.epub", "/@sd/Library/a.epub")
+            local ok2, err2 = FileOps:rename("/@sd/Library/b.epub", "/Books/b.epub")
+            os.rename = real_rename
+            assert.is_false(ok)
+            assert.are.equal("Cannot rename across storage locations", err)
+            assert.is_false(ok2)
+            assert.are.equal("Cannot rename across storage locations", err2)
+            assert.is_false(called)
+        end)
+
+        it("treats /@internal and the unprefixed form as the same location when renaming", function()
+            local real_rename = os.rename
+            os.rename = function() return true end
+            local ok = FileOps:rename("/@internal/Books/a.epub", "/Books/z.epub")
+            os.rename = real_rename
+            assert.is_true(ok)
+        end)
+    end)
 end)
