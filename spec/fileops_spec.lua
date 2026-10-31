@@ -6,6 +6,7 @@ local lfs_stub = {
     attributes = function() return nil end,
     dir = function() return function() return nil end end,
     mkdir = function() return nil, "not mounted" end,
+    open_dirs = 0,
 }
 package.loaded["lfs"] = lfs_stub
 
@@ -26,11 +27,23 @@ local function mountTree(tree)
             end
         end
         table.sort(names)
+        -- Like the real lfs.dir: returns the iterator and a handle. The handle
+        -- is closed when the iterator runs out, or by handle:close(); leaving
+        -- a loop early keeps it open. lfs_stub.open_dirs counts open handles.
         local i = 0
+        local handle = {open = true}
+        function handle:close()
+            if self.open then
+                self.open = false
+                lfs_stub.open_dirs = lfs_stub.open_dirs - 1
+            end
+        end
+        lfs_stub.open_dirs = lfs_stub.open_dirs + 1
         return function()
             i = i + 1
+            if names[i] == nil then handle:close() end
             return names[i]
-        end
+        end, handle
     end
 end
 
@@ -740,6 +753,195 @@ describe("filesync.fileops", function()
             local ok, err = FileOps:createDirectory("/", {recursive = true})
             assert.is_false(ok)
             assert.are.equal("Path already exists", err)
+        end)
+    end)
+
+    describe("listBooks", function()
+
+        local function dir(modification) return {mode = "directory", size = 4096, modification = modification or 100} end
+        local function book(size, modification) return {mode = "file", size = size, modification = modification or 100} end
+
+        local TREE = {
+            ["/mnt/us"]                       = dir(),
+            ["/mnt/us/Books"]                 = dir(),
+            ["/mnt/us/Books/b.epub"]          = book(2000, 300),
+            ["/mnt/us/Books/B.PDF"]           = book(500, 200),
+            ["/mnt/us/Books/notes.txt"]       = book(10),
+            ["/mnt/us/Books/cover.jpg"]       = book(10),
+            ["/mnt/us/Books/Sci-Fi"]          = dir(),
+            ["/mnt/us/Books/Sci-Fi/a.mobi"]   = book(9000, 100),
+            ["/mnt/us/Books/Sci-Fi/a.mobi.sdr"] = dir(),
+            ["/mnt/us/Books/Sci-Fi/a.mobi.sdr/metadata.epub.lua"] = book(1),
+            ["/mnt/us/Books/.hidden"]         = dir(),
+            ["/mnt/us/Books/.hidden/x.epub"]  = book(1),
+            ["/mnt/us/Books/.dot.epub"]       = book(1),
+            ["/mnt/us/Other"]                 = dir(),
+            ["/mnt/us/Other/c.cbz"]           = book(300, 50),
+        }
+
+        local function names(result)
+            local list = {}
+            for _, entry in ipairs(result.entries) do list[#list + 1] = entry.name end
+            return list
+        end
+
+        before_each(function()
+            FileOps:setRootDir("/mnt/us")
+            mountTree(TREE)
+        end)
+
+        after_each(function()
+            unmountTree()
+        end)
+
+        it("lists ebooks from the folder and its subfolders, by extension only", function()
+            local result, err = FileOps:listBooks({"/Books"}, "name", "asc", "", true)
+            assert.is_nil(err)
+            assert.are.same({"a.mobi", "b.epub", "B.PDF"}, names(result))
+            assert.are.equal(3, result.count)
+            assert.is_false(result.truncated)
+        end)
+
+        it("skips hidden files and folders and .sdr folders, even with safe mode off", function()
+            local result = FileOps:listBooks({"/Books"}, "name", "asc", "", false)
+            assert.are.same({"a.mobi", "b.epub", "B.PDF"}, names(result))
+        end)
+
+        it("returns the same fields as listDirectory, with relative paths", function()
+            local result = FileOps:listBooks({"/Books"}, "name", "asc", "", true)
+            local entry = result.entries[1]
+            assert.are.equal("/Books/Sci-Fi/a.mobi", entry.path)
+            assert.are.equal("a.mobi", entry.name)
+            assert.is_false(entry.is_dir)
+            assert.are.equal(9000, entry.size)
+            assert.are.equal("8.8 KB", entry.size_formatted)
+            assert.are.equal(100, entry.modified)
+            assert.are.equal("ebook", entry.type)
+        end)
+
+        it("sorts by date and size like listDirectory", function()
+            local newest = FileOps:listBooks({"/Books"}, "date", "desc", "", true)
+            assert.are.same({"b.epub", "B.PDF", "a.mobi"}, names(newest))
+            local largest = FileOps:listBooks({"/Books"}, "size", "desc", "", true)
+            assert.are.same({"a.mobi", "b.epub", "B.PDF"}, names(largest))
+        end)
+
+        it("filters on the file name only, ignoring case and folder names", function()
+            local by_name = FileOps:listBooks({"/Books"}, "name", "asc", "B.", true)
+            assert.are.same({"b.epub", "B.PDF"}, names(by_name))
+            local by_folder = FileOps:listBooks({"/Books"}, "name", "asc", "sci-fi", true)
+            assert.are.equal(0, by_folder.count)
+        end)
+
+        it("scans several folders and lists a book once when they overlap", function()
+            local result = FileOps:listBooks({"/Books", "/Other", "/Books/Sci-Fi"}, "name", "asc", "", true)
+            assert.are.same({"a.mobi", "b.epub", "B.PDF", "c.cbz"}, names(result))
+        end)
+
+        it("skips a folder that does not exist and lists the others", function()
+            local result, err = FileOps:listBooks({"/Missing", "/Other"}, "name", "asc", "", true)
+            assert.is_nil(err)
+            assert.are.same({"c.cbz"}, names(result))
+        end)
+
+        it("skips a folder outside root_dir and lists the others", function()
+            local result, err = FileOps:listBooks({"/Other", "/../etc"}, "name", "asc", "", true)
+            assert.is_nil(err)
+            assert.are.same({"c.cbz"}, names(result))
+        end)
+
+        it("skips a folder with .. in its name instead of failing the whole list", function()
+            local tree = {}
+            for path, attr in pairs(TREE) do tree[path] = attr end
+            tree["/mnt/us/Vol..2"] = dir()
+            tree["/mnt/us/Vol..2/x.epub"] = book(1)
+            mountTree(tree)
+            local result, err = FileOps:listBooks({"/Vol..2", "/Other"}, "name", "asc", "", true)
+            assert.is_nil(err)
+            assert.are.same({"c.cbz"}, names(result))
+        end)
+
+        it("does not count a folder given twice, or nested in another, against the entry limit", function()
+            local calls = 0
+            local dir_fn = lfs_stub.dir
+            lfs_stub.dir = function(path)
+                calls = calls + 1
+                return dir_fn(path)
+            end
+            FileOps:listBooks({"/Books", "/Books", "/Books/Sci-Fi"}, "name", "asc", "", true)
+            local once = calls
+            calls = 0
+            FileOps:listBooks({"/Books"}, "name", "asc", "", true)
+            assert.are.equal(calls, once)
+        end)
+
+        it("lists nothing when no folder is given", function()
+            local result = FileOps:listBooks({}, "name", "asc", "", true)
+            assert.are.equal(0, result.count)
+        end)
+
+        it("does not enter folders deeper than the depth limit", function()
+            local deep, path = {["/mnt/us"] = dir()}, "/mnt/us"
+            for level = 1, 12 do
+                path = path .. "/d" .. level
+                deep[path] = dir()
+                deep[path .. "/book" .. level .. ".epub"] = book(1)
+            end
+            mountTree(deep)
+            local result = FileOps:listBooks({"/"}, "name", "asc", "", true)
+            assert.are.equal(8, result.count) -- books in d1..d8
+        end)
+
+        it("stops after the entry limit and says so", function()
+            local big = {["/mnt/us"] = dir()}
+            for i = 1, 20001 do
+                big["/mnt/us/n" .. i .. ".txt"] = book(1)
+            end
+            big["/mnt/us/last.epub"] = book(1)
+            mountTree(big)
+            local result = FileOps:listBooks({"/"}, "name", "asc", "", true)
+            assert.is_true(result.truncated)
+        end)
+
+        it("closes every folder it opened, also when the entry limit stops it", function()
+            local big = {["/mnt/us"] = dir(), ["/mnt/us/a"] = dir(), ["/mnt/us/a/b"] = dir()}
+            for i = 1, 20001 do
+                big["/mnt/us/a/b/n" .. i .. ".txt"] = book(1)
+            end
+            mountTree(big)
+            lfs_stub.open_dirs = 0
+            local result = FileOps:listBooks({"/"}, "name", "asc", "", true)
+            assert.is_true(result.truncated)
+            assert.are.equal(0, lfs_stub.open_dirs)
+        end)
+
+        it("closes every folder it opened after a normal scan", function()
+            lfs_stub.open_dirs = 0
+            FileOps:listBooks({"/Books", "/Other"}, "name", "asc", "", true)
+            assert.are.equal(0, lfs_stub.open_dirs)
+        end)
+    end)
+
+    describe("listDirectory open folders", function()
+        after_each(function()
+            unmountTree()
+        end)
+
+        -- The "is it empty?" check reads one entry of each sub-folder and stops;
+        -- the handle must still be closed (issue #57: "Too many open files").
+        it("closes the handle of every sub-folder it peeks into", function()
+            local tree = {["/mnt/us"] = {mode = "directory"}}
+            for i = 1, 5 do
+                tree["/mnt/us/d" .. i] = {mode = "directory"}
+                tree["/mnt/us/d" .. i .. "/f.epub"] = {mode = "file", size = 1}
+            end
+            FileOps:setRootDir("/mnt/us")
+            mountTree(tree)
+            lfs_stub.open_dirs = 0
+            local result = FileOps:listDirectory("/", "name", "asc", "", true)
+            assert.are.equal(5, #result.entries)
+            assert.is_false(result.entries[1].is_empty)
+            assert.are.equal(0, lfs_stub.open_dirs)
         end)
     end)
 end)

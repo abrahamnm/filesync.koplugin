@@ -15,6 +15,36 @@ describe("filesync.utils", function()
         end)
     end)
 
+    describe("relativeToRoot", function()
+
+        it("returns the path as seen from the root", function()
+            assert.are.equal("/Books", Utils.relativeToRoot("/mnt/onboard", "/mnt/onboard/Books"))
+            assert.are.equal("/Books/Sci Fi", Utils.relativeToRoot("/mnt/onboard", "/mnt/onboard/Books/Sci Fi"))
+        end)
+
+        it("returns / for the root itself", function()
+            assert.are.equal("/", Utils.relativeToRoot("/mnt/onboard", "/mnt/onboard"))
+        end)
+
+        it("ignores trailing slashes on either side", function()
+            assert.are.equal("/Books", Utils.relativeToRoot("/mnt/onboard/", "/mnt/onboard/Books/"))
+            assert.are.equal("/", Utils.relativeToRoot("/mnt/onboard", "/mnt/onboard/"))
+        end)
+
+        it("returns nil outside the root, even for a sibling that starts with its name", function()
+            assert.is_nil(Utils.relativeToRoot("/mnt/onboard", "/mnt/onboard2/Books"))
+            assert.is_nil(Utils.relativeToRoot("/mnt/onboard", "/mnt/sd/Books"))
+            assert.is_nil(Utils.relativeToRoot("/mnt/onboard", "/mnt"))
+            assert.is_nil(Utils.relativeToRoot("/mnt/onboard", "Books"))
+        end)
+
+        it("returns nil for missing values", function()
+            assert.is_nil(Utils.relativeToRoot("/mnt/onboard", nil))
+            assert.is_nil(Utils.relativeToRoot("/mnt/onboard", ""))
+            assert.is_nil(Utils.relativeToRoot(nil, "/mnt/onboard"))
+        end)
+    end)
+
     describe("shellEscape", function()
 
         it("wraps a simple string in single quotes", function()

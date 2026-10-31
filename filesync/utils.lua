@@ -4,6 +4,7 @@
 ---   - shellEscape(s): escapes a string for safe use in shell commands
 ---   - restartKOReader(): restarts KOReader only on platforms that support it
 ---   - refreshFileList(): refreshes the file manager after files change on disk
+---   - relativeToRoot(root, path): a path as seen from root, or nil if it lies outside
 
 local Utils = {}
 
@@ -25,6 +26,24 @@ function Utils.getPluginDir()
         _cached_plugin_dir = "."
     end
     return _cached_plugin_dir
+end
+
+--- A path relative to a root directory, as the web UI and FileOps address it.
+--- Pure string handling; the filesystem is not touched. Trailing slashes are
+--- ignored, and a sibling that merely starts with the root's name does not count.
+--- @param root string: absolute root directory (e.g. "/mnt/onboard")
+--- @param path string|nil: absolute path
+--- @return string|nil: "/" for the root itself, "/Books" for "<root>/Books";
+---   nil when path is empty or outside root
+function Utils.relativeToRoot(root, path)
+    if type(root) ~= "string" or type(path) ~= "string" or path == "" then return nil end
+    root = root:gsub("/+$", "")
+    path = path:gsub("/+$", "")
+    if path == root then return "/" end
+    if path:sub(1, #root + 1) == root .. "/" then
+        return path:sub(#root + 1)
+    end
+    return nil
 end
 
 --- Escape a string for safe use in a shell command (wrap in single quotes).
