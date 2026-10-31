@@ -370,19 +370,21 @@ describe("filesync.httpserver", function()
             .. "Version/4.0 Mobile Safari/538.1 (Kobo Touch 0390/4.46.23836)"
         local IPHONE_UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 "
             .. "(KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1"
-        local previous_manager, previous_settings, settings, listed
+        local previous_manager, previous_settings, settings, listed, books_listed, metadata_asked, book_dirs
 
         before_each(function()
             previous_manager = package.loaded["filesync/filesyncmanager"]
+            book_dirs = {}
             package.loaded["filesync/filesyncmanager"] = {
                 getSafeMode = function() return true end,
+                getBookDirs = function() return book_dirs end,
             }
             previous_settings = _G.G_reader_settings
             settings = { language = "en", home_dir = "/mnt/onboard/Books" }
             _G.G_reader_settings = {
                 readSetting = function(_, key) return settings[key] end,
             }
-            listed = nil
+            listed, books_listed, metadata_asked = nil, nil, {}
         end)
 
         after_each(function()
@@ -390,11 +392,26 @@ describe("filesync.httpserver", function()
             _G.G_reader_settings = previous_settings
         end)
 
-        -- A server whose FileOps records the listDirectory call and returns
-        -- one book in /Books.
-        local function new_eink_server()
+        -- A server whose FileOps records the listDirectory and listBooks calls
+        -- and returns one book in /Books.
+        local function new_eink_server(book_count)
             local server = HttpServer:new{ root_dir = "/mnt/onboard" }
             server._fileops = {
+                listBooks = function(_, folders, sort, order, filter, safe_mode)
+                    books_listed = { folders = folders, sort = sort, order = order, filter = filter,
+                                     safe_mode = safe_mode }
+                    local entries = {}
+                    for i = 1, book_count or 1 do
+                        local name = book_count and string.format("Book %02d.epub", i) or "Sample.epub"
+                        entries[i] = { name = name, path = "/Books/" .. name, is_dir = false,
+                                       size = 1417, size_formatted = "1.4 KB", modified = 0 }
+                    end
+                    return { entries = entries, count = #entries, truncated = false }
+                end,
+                getMetadata = function(_, path)
+                    table.insert(metadata_asked, path)
+                    return { title = "Title of " .. path:match("([^/]+)$"), author = "An Author" }
+                end,
                 listDirectory = function(_, path, sort, order, filter, safe_mode)
                     listed = { path = path, sort = sort, order = order, filter = filter, safe_mode = safe_mode }
                     return {
@@ -447,16 +464,63 @@ describe("filesync.httpserver", function()
             assert.is_nil(listed)
         end)
 
-        it("serves the e-ink page to a Kobo, starting at the home folder", function()
+        it("serves the books of the home folder to a Kobo", function()
             local _, status_line, cookies, body = request(new_eink_server(), "/", {}, { ["user-agent"] = KOBO_UA })
             assert.are.equal("HTTP/1.1 200 OK", status_line)
             assert.are.same({}, cookies)
             assert.is_truthy(body:find('href="/api/download?path=/Books/Sample.epub"', 1, true))
+            assert.is_truthy(body:find('<span class="title">Title of Sample.epub</span>', 1, true))
             assert.is_nil(body:find("TRANSLATIONS", 1, true)) -- not the main UI's bundle
-            assert.are.same({ path = "/Books", sort = "name", order = "asc", filter = "", safe_mode = true }, listed)
+            assert.are.same({ folders = { "/Books" }, sort = "name", order = "asc", filter = "",
+                              safe_mode = true }, books_listed)
+            assert.is_nil(listed)
         end)
 
-        it("passes the folder, sort and filter to listDirectory", function()
+        it("passes sort and filter to listBooks, and ignores ?path= in the books view", function()
+            request(new_eink_server(), "/",
+                { view = "books", path = "/../etc", sort = "date", order = "desc", filter = "tolkien" },
+                { ["user-agent"] = KOBO_UA })
+            assert.are.same({ folders = { "/Books" }, sort = "date", order = "desc", filter = "tolkien",
+                              safe_mode = true }, books_listed)
+        end)
+
+        it("reads title and author only for the books on the page shown", function()
+            local _, _, _, body = request(new_eink_server(25), "/", { page = "2" }, { ["user-agent"] = KOBO_UA })
+            assert.are.equal(10, #metadata_asked)
+            assert.are.equal("/Books/Book 11.epub", metadata_asked[1])
+            assert.are.equal("/Books/Book 20.epub", metadata_asked[10])
+            assert.is_truthy(body:find("<b>2 / 3</b>", 1, true))
+        end)
+
+        it("scans the extra book folders too, but only those inside root_dir", function()
+            book_dirs = { "/mnt/onboard/Comics", "/mnt/onboard/Books/Sub/", "/storage/sd/Books", "/mnt/onboard2/x" }
+            request(new_eink_server(), "/", {}, { ["user-agent"] = KOBO_UA })
+            assert.are.same({ "/Books", "/Comics", "/Books/Sub" }, books_listed.folders)
+        end)
+
+        it("scans the root when the home folder is outside root_dir", function()
+            settings.home_dir = "/somewhere/else"
+            request(new_eink_server(), "/", {}, { ["user-agent"] = KOBO_UA })
+            assert.are.same({ "/" }, books_listed.folders)
+        end)
+
+        it("serves the folder view for ?view=folders or a ?path= link, starting at the home folder", function()
+            local _, _, cookies, body = request(new_eink_server(), "/", { view = "folders" },
+                { ["user-agent"] = KOBO_UA })
+            assert.are.same({ "filesync_eink_view=folders; Path=/; Max-Age=31536000" }, cookies)
+            assert.are.same({ path = "/Books", sort = "name", order = "asc", filter = "", safe_mode = true }, listed)
+            assert.is_truthy(body:find('href="/api/download?path=/Books/Sample.epub"', 1, true))
+            assert.is_truthy(body:find('<p class="bar"><a href="/?view=books">Books</a> <b>Folders</b></p>', 1, true))
+            assert.is_nil(books_listed)
+
+            listed = nil
+            _, _, cookies = request(new_eink_server(), "/", { path = "/Books/Sub" }, { ["user-agent"] = KOBO_UA })
+            assert.are.same({}, cookies)
+            assert.are.equal("/Books/Sub", listed.path)
+            assert.is_nil(books_listed)
+        end)
+
+        it("passes the folder, sort and filter to listDirectory in the folder view", function()
             request(new_eink_server(), "/",
                 { path = "/Books/Sub", sort = "date", order = "desc", filter = "tolkien" },
                 { ["user-agent"] = KOBO_UA })
@@ -464,10 +528,16 @@ describe("filesync.httpserver", function()
                               safe_mode = true }, listed)
         end)
 
-        it("starts at the root when the home folder is outside root_dir", function()
+        it("starts the folder view at the root when the home folder is outside root_dir", function()
             settings.home_dir = "/somewhere/else"
-            request(new_eink_server(), "/", {}, { ["user-agent"] = KOBO_UA })
+            request(new_eink_server(), "/", { view = "folders" }, { ["user-agent"] = KOBO_UA })
             assert.are.equal("/", listed.path)
+        end)
+
+        it("remembers the view across requests through its cookie", function()
+            request(new_eink_server(), "/", {}, { ["user-agent"] = KOBO_UA, cookie = "filesync_eink_view=folders" })
+            assert.are.equal("/Books", listed.path)
+            assert.is_nil(books_listed)
         end)
 
         it("turns e-ink on for any browser with ?eink=1, and remembers it", function()
@@ -484,10 +554,12 @@ describe("filesync.httpserver", function()
         end)
 
         it("remembers the page size and covers choice along with the mode", function()
-            local _, _, cookies = request(new_eink_server(), "/", { eink = "1", per_page = "10", covers = "0" }, {})
+            local _, _, cookies = request(new_eink_server(), "/",
+                { eink = "1", per_page = "10", covers = "0", view = "books" }, {})
             assert.are.same({ "filesync_eink=1; Path=/; Max-Age=31536000",
                               "filesync_eink_per_page=10; Path=/; Max-Age=31536000",
-                              "filesync_eink_covers=0; Path=/; Max-Age=31536000" }, cookies)
+                              "filesync_eink_covers=0; Path=/; Max-Age=31536000",
+                              "filesync_eink_view=books; Path=/; Max-Age=31536000" }, cookies)
         end)
 
         it("asks for covers from /api/cover unless they are turned off", function()
@@ -506,6 +578,14 @@ describe("filesync.httpserver", function()
             assert.are.equal("HTTP/1.1 400 Bad Request", status_line)
             assert.is_truthy(body:lower():find("traversal", 1, true))
             assert.is_truthy(body:find('<a href="/?path=/">Home</a>', 1, true))
+        end)
+
+        it("answers 400 with a page when the books cannot be listed", function()
+            local server = new_eink_server()
+            server._fileops.listBooks = function() return nil, "Path traversal not allowed" end
+            local _, status_line, _, body = request(server, "/", {}, { ["user-agent"] = KOBO_UA })
+            assert.are.equal("HTTP/1.1 400 Bad Request", status_line)
+            assert.is_truthy(body:find("Path traversal not allowed", 1, true))
         end)
 
         it("answers 400 with a page when fileops is not loaded", function()

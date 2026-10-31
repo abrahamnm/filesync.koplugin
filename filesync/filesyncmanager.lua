@@ -176,6 +176,49 @@ function FileSyncManager:setSafeMode(enabled)
     G_reader_settings:flush()
 end
 
+--- Extra folders (absolute paths) the e-ink page's Books view lists books from,
+--- besides KOReader's home folder. Only folders inside the root directory can
+--- be served, so addBookDir refuses the others.
+local BOOK_DIRS_KEY = "filesync_book_dirs"
+
+--- @return table: list of absolute folder paths (do not modify)
+function FileSyncManager:getBookDirs()
+    return G_reader_settings:readSetting(BOOK_DIRS_KEY, {})
+end
+
+--- Add a folder to the Books view.
+--- @param path string: absolute folder path (from the folder chooser)
+--- @return boolean: true when the folder is listed afterwards
+--- @return string|nil: a message for the user when the folder is refused
+function FileSyncManager:addBookDir(path)
+    local root = self:getRootDir()
+    local rel = Utils.relativeToRoot(root, path)
+    if not rel then
+        return false, T(_("Only folders inside %1 can be added."), root)
+    end
+    path = path:gsub("/+$", "")
+    local dirs = {}
+    for _i, dir in ipairs(self:getBookDirs()) do
+        if dir == path then return true end -- already listed
+        table.insert(dirs, dir)
+    end
+    table.insert(dirs, path)
+    G_reader_settings:saveSetting(BOOK_DIRS_KEY, dirs)
+    G_reader_settings:flush()
+    return true
+end
+
+--- Remove a folder from the Books view.
+--- @param path string: a folder as listed by getBookDirs
+function FileSyncManager:removeBookDir(path)
+    local dirs = {}
+    for _i, dir in ipairs(self:getBookDirs()) do
+        if dir ~= path then table.insert(dirs, dir) end
+    end
+    G_reader_settings:saveSetting(BOOK_DIRS_KEY, dirs)
+    G_reader_settings:flush()
+end
+
 --- Marks that the one-time 8080 -> 80 port migration has already run.
 local PORT_MIGRATION_KEY = "filesync_port_migrated_to_80"
 
@@ -188,6 +231,7 @@ local SETTINGS_KEYS = {
     "filesync_port",
     "filesync_safe_mode",
     "filesync_hostname",
+    BOOK_DIRS_KEY,
     PORT_MIGRATION_KEY,
     PORT_FALLBACK_NOTICE_KEY,
 }

@@ -974,21 +974,39 @@ function HttpServer:_serveIndex(client, set_cookie)
     self:_sendHtml(client, 200, self._static_cache.index, {set_cookie})
 end
 
---- Serve the e-ink page (see filesync/eink.lua). The listing comes from the
---- same FileOps:listDirectory call and safe-mode rule as /api/files, so path
---- validation and filtering are identical.
+--- Serve the e-ink page (see filesync/eink.lua). The folder view uses the
+--- same FileOps:listDirectory call and safe-mode rule as /api/files, and the
+--- books view FileOps:listBooks, so path validation and filtering are the
+--- same. Title and author are read (getMetadata) only for the books on the
+--- page being shown.
 --- @param mode_cookie string|nil: a Set-Cookie value from Eink.chooseMode
 function HttpServer:_serveEink(client, query, headers, mode_cookie)
     local per_page, per_page_cookie = Eink.choosePerPage(query, headers)
     local covers, covers_cookie = Eink.chooseCovers(query, headers)
+    local view, view_cookie = Eink.chooseView(query, headers)
     local lang = G_reader_settings:readSetting("language") or "en"
-    local state = Eink.listingState(query, self:_homePath() or "/", per_page, lang, covers)
+    local state = Eink.listingState(query, self:_homePath() or "/", per_page, lang, covers, view)
 
-    local listing, err_msg
+    local html, err_msg
     if self._fileops then
         local safe_mode = require("filesync/filesyncmanager"):getSafeMode()
-        listing, err_msg = self._fileops:listDirectory(state.path, state.sort, state.order,
-                                                       state.filter, safe_mode)
+        if view == "books" then
+            local books
+            books, err_msg = self._fileops:listBooks(self:_bookFolders(), state.sort, state.order,
+                                                     state.filter, safe_mode)
+            if books then
+                html = Eink.renderBooks(books, state, gettext, function(entry)
+                    return self._fileops:getMetadata(entry.path)
+                end)
+            end
+        else
+            local listing
+            listing, err_msg = self._fileops:listDirectory(state.path, state.sort, state.order,
+                                                           state.filter, safe_mode)
+            if listing then
+                html = Eink.renderListing(listing, state, gettext)
+            end
+        end
     else
         err_msg = "File operations module not loaded"
     end
@@ -997,30 +1015,32 @@ function HttpServer:_serveEink(client, query, headers, mode_cookie)
     if mode_cookie then table.insert(cookies, mode_cookie) end
     if per_page_cookie then table.insert(cookies, per_page_cookie) end
     if covers_cookie then table.insert(cookies, covers_cookie) end
-    if listing then
-        self:_sendHtml(client, 200, Eink.renderListing(listing, state, gettext), cookies)
+    if view_cookie then table.insert(cookies, view_cookie) end
+    if html then
+        self:_sendHtml(client, 200, html, cookies)
     else
         self:_sendHtml(client, 400, Eink.renderError(err_msg or "Cannot list directory", state, gettext), cookies)
     end
+end
+
+--- Folders the e-ink Books view scans, relative to root_dir: the home folder,
+--- then the extra folders from the plugin menu. Extra folders outside root_dir
+--- are left out (the menu refuses them, but root_dir can differ from when they
+--- were added).
+function HttpServer:_bookFolders()
+    local folders = {self:_homePath() or "/"}
+    for _, dir in ipairs(require("filesync/filesyncmanager"):getBookDirs()) do
+        local rel = Utils.relativeToRoot(self.root_dir, dir)
+        if rel then table.insert(folders, rel) end
+    end
+    return folders
 end
 
 --- KOReader's home folder as a path relative to root_dir, or nil if
 --- home_dir is unset or lies outside root_dir. Used by /api/home and as the
 --- e-ink page's starting folder.
 function HttpServer:_homePath()
-    local home_dir = G_reader_settings:readSetting("home_dir")
-    local home_rel = nil
-    if home_dir and home_dir ~= "" and self.root_dir then
-        local root = self.root_dir
-        if home_dir == root then
-            home_rel = "/"
-        elseif home_dir:sub(1, #root) == root
-            and (home_dir:sub(#root + 1, #root + 1) == "/" or #home_dir == #root) then
-            home_rel = home_dir:sub(#root + 1)
-            if home_rel == "" then home_rel = "/" end
-        end
-    end
-    return home_rel
+    return Utils.relativeToRoot(self.root_dir, G_reader_settings:readSetting("home_dir"))
 end
 
 --- Send an HTML page that browsers must not cache.

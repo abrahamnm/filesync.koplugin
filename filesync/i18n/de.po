@@ -426,3 +426,57 @@ msgstr "Der Server ist in Netzwerken und auf Geräten mit mDNS-Unterstützung au
 
 msgid "Name under which the server is reachable on the local network (e.g. http://filesync.local). Works out of the box on macOS, iOS and Windows; Linux needs avahi; most Android browsers cannot resolve .local names, so use the IP address or QR code there."
 msgstr "Name, unter dem der Server im lokalen Netzwerk erreichbar ist (z. B. http://filesync.local). Funktioniert direkt unter macOS, iOS und Windows; Linux benötigt avahi; die meisten Android-Browser können .local-Namen nicht auflösen, verwenden Sie dort die IP-Adresse oder den QR-Code."
+
+msgid "Add folder"
+msgstr "Ordner hinzufügen"
+
+msgid "Book folders"
+msgstr "Buchordner"
+
+msgid "Books"
+msgstr "Bücher"
+
+msgid "Filter"
+msgstr "Filtern"
+
+msgid "Folders"
+msgstr "Ordner"
+
+msgid "Full version"
+msgstr "Vollversion"
+
+msgid "Hide covers"
+msgstr "Cover ausblenden"
+
+msgid "Next"
+msgstr "Weiter"
+
+msgid "No books found"
+msgstr "Keine Bücher gefunden"
+
+msgid "Only folders inside %1 can be added."
+msgstr "Es können nur Ordner innerhalb von %1 hinzugefügt werden."
+
+msgid "Per page:"
+msgstr "Pro Seite:"
+
+msgid "Previous"
+msgstr "Zurück"
+
+msgid "Remove"
+msgstr "Entfernen"
+
+msgid "Show covers"
+msgstr "Cover anzeigen"
+
+msgid "Stop listing books from %1?"
+msgstr "Bücher aus %1 nicht mehr auflisten?"
+
+msgid "To upload files, open this address on a phone or computer."
+msgstr "Um Dateien hochzuladen, öffnen Sie diese Adresse auf einem Smartphone oder Computer."
+
+msgid "Too many files: the list is incomplete."
+msgstr "Zu viele Dateien: Die Liste ist unvollständig."
+
+msgid "The e-ink page for e-reader browsers lists the books in KOReader's home folder and its subfolders. Add more folders here; each must be inside the device's main storage."
+msgstr "Die E-Ink-Seite für E-Reader-Browser listet die Bücher im KOReader-Heimordner und in dessen Unterordnern auf. Hier können Sie weitere Ordner hinzufügen; jeder muss im Hauptspeicher des Geräts liegen."

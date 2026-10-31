@@ -32,6 +32,60 @@ function FileSync:init()
     self.ui.menu:registerToMainMenu(self)
 end
 
+--- Items of the "Book folders" menu: add a folder, then the folders added so
+--- far (tap one to remove it). The list is rebuilt after each change.
+function FileSync:getBookFoldersMenu()
+    local FileSyncManager = require("filesync/filesyncmanager")
+    local UIManager = require("ui/uimanager")
+    local T = require("ffi/util").template
+
+    local function refresh(touchmenu_instance)
+        touchmenu_instance.item_table = self:getBookFoldersMenu()
+        touchmenu_instance.page = 1
+        touchmenu_instance:updateItems()
+    end
+
+    local items = {
+        {
+            text = _("Add folder"),
+            keep_menu_open = true,
+            callback = function(touchmenu_instance)
+                local PathChooser = require("ui/widget/pathchooser")
+                UIManager:show(PathChooser:new{
+                    select_file = false,
+                    path = G_reader_settings:readSetting("home_dir"),
+                    onConfirm = function(path)
+                        local ok, err = FileSyncManager:addBookDir(path)
+                        if not ok then
+                            local InfoMessage = require("ui/widget/infomessage")
+                            UIManager:show(InfoMessage:new{ text = err })
+                        end
+                        refresh(touchmenu_instance)
+                    end,
+                })
+            end,
+        },
+    }
+    for _i, dir in ipairs(FileSyncManager:getBookDirs()) do
+        table.insert(items, {
+            text = dir,
+            keep_menu_open = true,
+            callback = function(touchmenu_instance)
+                local ConfirmBox = require("ui/widget/confirmbox")
+                UIManager:show(ConfirmBox:new{
+                    text = T(_("Stop listing books from %1?"), dir),
+                    ok_text = _("Remove"),
+                    ok_callback = function()
+                        FileSyncManager:removeBookDir(dir)
+                        refresh(touchmenu_instance)
+                    end,
+                })
+            end,
+        })
+    end
+    return items
+end
+
 function FileSync:addToMainMenu(menu_items)
     menu_items.filesync = {
         text = _("FileSync"),
@@ -86,6 +140,14 @@ Disable it to browse every file on the device, including hidden files and folder
                     FileSyncManager:setSafeMode(not FileSyncManager:getSafeMode())
                 end,
                 keep_menu_open = true,
+            },
+            {
+                text = _("Book folders"),
+                help_text = _([[The e-ink page for e-reader browsers lists the books in KOReader's home folder and its subfolders. Add more folders here; each must be inside the device's main storage.]]),
+                keep_menu_open = true,
+                sub_item_table_func = function()
+                    return self:getBookFoldersMenu()
+                end,
             },
             {
                 text = _("Show QR code"),

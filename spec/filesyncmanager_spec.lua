@@ -169,3 +169,76 @@ describe("FileSyncManager settings migration", function()
         assert.is_nil(settings.store[FALLBACK_NOTICE_KEY])
     end)
 end)
+
+describe("FileSyncManager book folders", function()
+    local previous_settings, previous_root
+
+    before_each(function()
+        previous_settings = _G.G_reader_settings
+        previous_root = FileSyncManager.getRootDir
+        FileSyncManager.getRootDir = function() return "/mnt/onboard" end
+    end)
+
+    after_each(function()
+        _G.G_reader_settings = previous_settings
+        FileSyncManager.getRootDir = previous_root
+    end)
+
+    it("has no extra folders by default", function()
+        _G.G_reader_settings = fake_settings({})
+        assert.are.same({}, FileSyncManager:getBookDirs())
+    end)
+
+    it("adds folders inside the root directory and saves them", function()
+        local settings = fake_settings({})
+        _G.G_reader_settings = settings
+
+        assert.is_true(FileSyncManager:addBookDir("/mnt/onboard/Comics"))
+        assert.is_true(FileSyncManager:addBookDir("/mnt/onboard/Books/Sci Fi/"))
+
+        assert.are.same({ "/mnt/onboard/Comics", "/mnt/onboard/Books/Sci Fi" }, settings.store.filesync_book_dirs)
+        assert.are.same(settings.store.filesync_book_dirs, FileSyncManager:getBookDirs())
+        assert.are.equal(2, settings.flushed)
+    end)
+
+    it("lists a folder once", function()
+        local settings = fake_settings({})
+        _G.G_reader_settings = settings
+
+        FileSyncManager:addBookDir("/mnt/onboard/Comics")
+        assert.is_true(FileSyncManager:addBookDir("/mnt/onboard/Comics/"))
+
+        assert.are.same({ "/mnt/onboard/Comics" }, settings.store.filesync_book_dirs)
+    end)
+
+    it("refuses folders outside the root directory, with a message", function()
+        local settings = fake_settings({})
+        _G.G_reader_settings = settings
+
+        for _, path in ipairs({ "/mnt/sd/Books", "/mnt/onboard2/Books", "/mnt", "relative/dir" }) do
+            local ok, err = FileSyncManager:addBookDir(path)
+            assert.is_false(ok)
+            assert.is_string(err)
+        end
+        assert.is_nil(settings.store.filesync_book_dirs)
+        assert.are.equal(0, settings.flushed)
+    end)
+
+    it("removes a folder and keeps the others", function()
+        local settings = fake_settings({ filesync_book_dirs = { "/mnt/onboard/A", "/mnt/onboard/B" } })
+        _G.G_reader_settings = settings
+
+        FileSyncManager:removeBookDir("/mnt/onboard/A")
+
+        assert.are.same({ "/mnt/onboard/B" }, settings.store.filesync_book_dirs)
+    end)
+
+    it("clears the folders with the rest of the settings", function()
+        local settings = fake_settings({ filesync_book_dirs = { "/mnt/onboard/A" } })
+        _G.G_reader_settings = settings
+
+        FileSyncManager:deleteSettings()
+
+        assert.is_nil(settings.store.filesync_book_dirs)
+    end)
+end)

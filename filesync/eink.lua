@@ -6,11 +6,13 @@
 --- this server-rendered page instead: no JavaScript, no animations, black on
 --- white, one full page load per action, which suits e-ink screens.
 ---
---- It lists folders and files (the same FileOps:listDirectory call and safe
---- mode rules as /api/files) with breadcrumbs, filter, sort and pages, and
---- downloads through the existing /api/download. There is no upload: on a
---- Kobo, <input type="file"> opens a desktop Qt dialog that freezes the
---- device.
+--- It has two views, switched by a Books | Folders bar. Books (the default) is a
+--- flat list of the device's ebooks (FileOps:listBooks), with title and author
+--- for the books on the page shown. Folders lists folders and files (the same
+--- FileOps:listDirectory call and safe mode rules as /api/files) with
+--- breadcrumbs. Both have filter, sort and pages, and download through the
+--- existing /api/download. There is no upload: on a Kobo, <input type="file">
+--- opens a desktop Qt dialog that freezes the device.
 ---
 --- Which page GET / serves (first match wins):
 ---   ?eink=1                      e-ink, remembered in the filesync_eink cookie
@@ -23,11 +25,13 @@
 ---   User-Agent "Kindle/<digit>"  e-ink (Kindle e-readers, not Kindle Fire)
 ---   anything else                the main UI, unchanged
 ---
+--- View: ?view=books|folders, remembered in the filesync_eink_view cookie.
+---
 --- Entries per page: ?per_page=N (one of PER_PAGE_CHOICES), remembered in the
 --- filesync_eink_per_page cookie.
 ---
 --- Kobo's browser forgets cookies when it is closed but keeps localStorage,
---- so a few lines of ES5 in <head> copy those two choices into localStorage
+--- so a few lines of ES5 in <head> copy those choices into localStorage
 --- and, in a new browser session, put them back into the cookies and reload
 --- once, before the page is drawn. Without JavaScript the page works the same,
 --- the choices just last one session.
@@ -48,6 +52,7 @@ local Eink = {}
 local MODE_COOKIE = "filesync_eink"
 local PER_PAGE_COOKIE = "filesync_eink_per_page"
 local COVERS_COOKIE = "filesync_eink_covers"
+local VIEW_COOKIE = "filesync_eink_view"
 local COOKIE_MAX_AGE = 365 * 24 * 60 * 60
 
 Eink.PER_PAGE_CHOICES = { 5, 10, 15, 20, 30 }
@@ -62,6 +67,8 @@ local EINK_USER_AGENTS = {
 }
 
 local SORT_FIELDS = { name = true, date = true, size = true, type = true }
+local VIEWS = { books = true, folders = true }
+local DEFAULT_VIEW = "books"
 
 -- Formats FileOps:getBookCover can extract a cover from.
 local COVER_EXTENSIONS = { epub = true }
@@ -86,7 +93,8 @@ input{font-size:20px;padding:6px;border:2px solid #000;background:#fff;color:#00
 ul{list-style:none;margin:0;padding:0;border-top:2px solid #000}
 li{border-bottom:1px solid #000}
 li a{display:block;padding:8px 4px;text-decoration:none;word-wrap:break-word;overflow:hidden}
-.dir{font-weight:bold}
+.dir,.title{font-weight:bold}
+.title{display:block}
 .meta{display:block;font-size:15px}
 .cover,.color-only{display:none}
 @media (color){
@@ -101,7 +109,7 @@ li a{display:block;padding:8px 4px;text-decoration:none;word-wrap:break-word;ove
 local PREFS_SCRIPT = [[
 (function () {
     try {
-        var names = ["]] .. PER_PAGE_COOKIE .. [[", "]] .. COVERS_COOKIE .. [["];
+        var names = ["]] .. PER_PAGE_COOKIE .. [[", "]] .. COVERS_COOKIE .. [[", "]] .. VIEW_COOKIE .. [["];
         var restored = null;
         for (var i = 0; i < names.length; i++) {
             var found = document.cookie.match(new RegExp("(?:^|; )" + names[i] + "=(\\w+)"));
@@ -205,14 +213,34 @@ function Eink.chooseCovers(query, headers)
     return Eink.getCookie(headers.cookie, COVERS_COOKIE) ~= "0"
 end
 
+--- Which view to show: ?view= beats ?path= (a folder, so the folders view),
+--- which beats the cookie, which beats the default (books). Links in the
+--- folders view carry ?path=, so they need no ?view=, and links that predate
+--- the books view keep working.
+--- @param query table: the parsed query string
+--- @param headers table: request headers, lowercased keys
+--- @return string: "books" or "folders"
+--- @return string|nil: a Set-Cookie header value when ?view= changed it
+function Eink.chooseView(query, headers)
+    if VIEWS[query.view] then
+        return query.view, setCookie(VIEW_COOKIE, query.view, COOKIE_MAX_AGE)
+    end
+    if query.path and query.path ~= "" then
+        return "folders"
+    end
+    local stored = Eink.getCookie(headers.cookie, VIEW_COOKIE)
+    return VIEWS[stored] and stored or DEFAULT_VIEW
+end
+
 --- Validated listing parameters from the query string.
 --- @param query table: the parsed query string
 --- @param home_path string: folder shown when ?path= is absent
 --- @param per_page number: from choosePerPage
 --- @param lang string|nil: KOReader UI language, e.g. "en", "pt_BR"
 --- @param covers boolean|nil: from chooseCovers (default on)
---- @return table: {path, sort, order, filter, page, per_page, lang, covers}
-function Eink.listingState(query, home_path, per_page, lang, covers)
+--- @param view string|nil: from chooseView (default books)
+--- @return table: {path, sort, order, filter, page, per_page, lang, covers, view}
+function Eink.listingState(query, home_path, per_page, lang, covers, view)
     local page = math.floor(tonumber(query.page) or 1)
     if page < 1 then page = 1 end
     return {
@@ -224,6 +252,7 @@ function Eink.listingState(query, home_path, per_page, lang, covers)
         per_page = per_page,
         lang = lang or "en",
         covers = covers ~= false,
+        view = view or DEFAULT_VIEW,
     }
 end
 
@@ -242,17 +271,19 @@ local function encodeQueryValue(s)
 end
 
 local URL_DEFAULTS = { sort = "name", order = "asc", filter = "", page = 1 }
-local URL_KEYS = { "path", "sort", "order", "filter", "page", "per_page", "covers" }
+local URL_KEYS = { "view", "path", "sort", "order", "filter", "page", "per_page", "covers" }
 
 -- Link to the e-ink page for `state` with some parameters changed. Default
--- values are left out to keep URLs short; path is always kept, because a
--- missing path means the home folder, not the root.
+-- values are left out to keep URLs short. The folders view always keeps path,
+-- because a missing path means the home folder, not the root, and that is
+-- also what selects the view; the books view has no path and says view=books.
 local function pageUrl(state, changes)
     local params = {
-        path = state.path, sort = state.sort, order = state.order,
+        view = state.view, path = state.path, sort = state.sort, order = state.order,
         filter = state.filter, page = state.page,
     }
     for key, value in pairs(changes or {}) do params[key] = value end
+    if params.view == "folders" then params.view = nil else params.path = nil end
     local parts = {}
     for _, key in ipairs(URL_KEYS) do
         local value = params[key]
@@ -300,11 +331,12 @@ local function breadcrumbs(listing, state, _)
 end
 
 local function filterForm(state, _)
-    local hidden = { path = state.path }
+    local hidden = {}
+    if state.view == "folders" then hidden.path = state.path else hidden.view = state.view end
     if state.sort ~= URL_DEFAULTS.sort then hidden.sort = state.sort end
     if state.order ~= URL_DEFAULTS.order then hidden.order = state.order end
     local html = { '<form method="get" action="/">' }
-    for _i, key in ipairs({ "path", "sort", "order" }) do
+    for _i, key in ipairs({ "view", "path", "sort", "order" }) do
         if hidden[key] then
             html[#html + 1] = '<input type="hidden" name="' .. key .. '" value="' .. escapeHtml(hidden[key]) .. '">'
         end
@@ -314,6 +346,20 @@ local function filterForm(state, _)
     html[#html + 1] = '<input type="submit" value="' .. escapeHtml(_("Filter")) .. '">'
     html[#html + 1] = "</form>\n"
     return table.concat(html)
+end
+
+-- Books | Folders: the current view is a black label, the other a link.
+local function viewBar(state, _)
+    local parts = {}
+    for _i, view in ipairs({ { "books", "Books" }, { "folders", "Folders" } }) do
+        local label = escapeHtml(_(view[2]))
+        if state.view == view[1] then
+            parts[#parts + 1] = "<b>" .. label .. "</b>"
+        else
+            parts[#parts + 1] = link(pageUrl(state, { view = view[1], page = 1, filter = "" }), label)
+        end
+    end
+    return '<p class="bar">' .. table.concat(parts, " ") .. "</p>\n"
 end
 
 local function sortBar(state, _)
@@ -334,6 +380,14 @@ local function hasCover(entry)
     return extension and COVER_EXTENSIONS[extension:lower()] or false
 end
 
+local function downloadLink(entry, inner)
+    return link("/api/download?path=" .. encodeQueryValue(entry.path), inner)
+end
+
+local function coverSpan(cover_id)
+    return cover_id and ('<span class="cover" id="' .. cover_id .. '"></span>') or ""
+end
+
 -- cover_id: id of the element that shows the book's cover, or nil.
 local function entryItem(entry, state, cover_id)
     if entry.is_dir then
@@ -344,10 +398,19 @@ local function entryItem(entry, state, cover_id)
     if entry.modified and entry.modified > 0 then
         meta[#meta + 1] = os.date("%Y-%m-%d", entry.modified)
     end
-    local cover = cover_id and ('<span class="cover" id="' .. cover_id .. '"></span>') or ""
-    return "<li>" .. link("/api/download?path=" .. encodeQueryValue(entry.path),
-        cover .. escapeHtml(entry.name) .. '<span class="meta">' .. escapeHtml(table.concat(meta, " · ")) .. "</span>")
-        .. "</li>\n"
+    return "<li>" .. downloadLink(entry, coverSpan(cover_id) .. escapeHtml(entry.name)
+        .. '<span class="meta">' .. escapeHtml(table.concat(meta, " · ")) .. "</span>") .. "</li>\n"
+end
+
+-- meta: {title, author} from FileOps:getMetadata, or nil (then the file name
+-- is the title).
+local function bookItem(entry, meta, cover_id)
+    local info = { (entry.name:match("%.([^%.]+)$") or ""):upper(), entry.size_formatted or "" }
+    local author = meta and meta.author and meta.author ~= ""
+        and ('<span class="meta">' .. escapeHtml(meta.author) .. "</span>") or ""
+    return "<li>" .. downloadLink(entry, coverSpan(cover_id)
+        .. '<span class="title">' .. escapeHtml(meta and meta.title or entry.name) .. "</span>" .. author
+        .. '<span class="meta">' .. escapeHtml(table.concat(info, " · ")) .. "</span>") .. "</li>\n"
 end
 
 local function pager(state, page, pages, _)
@@ -382,25 +445,16 @@ local function coversBar(state, _)
         .. "</p>\n"
 end
 
---- Render a folder listing as the e-ink page.
---- @param listing table: FileOps:listDirectory result {path, entries, breadcrumbs}
---- @param state table: from Eink.listingState
---- @param _ function: gettext
---- @return string: the HTML page
-function Eink.renderListing(listing, state, _)
-    local entries = listing.entries or {}
+-- The part both views share: one page of `entries` as a list, then the
+-- pager, per-page and covers bars. `item(entry, cover_id)` renders one <li>.
+-- Returns the html and the CSS (one rule per cover, inside @media (color);
+-- the URL is percent-encoded, so it holds no quote, bracket or backslash).
+local function entryPage(entries, state, empty_text, item, _)
     local pages = math.max(1, math.ceil(#entries / state.per_page))
     local page = math.min(state.page, pages)
-    local html = {
-        breadcrumbs(listing, state, _),
-        filterForm(state, _),
-        sortBar(state, _),
-    }
-    -- One CSS rule per cover, inside @media (color). The URL is
-    -- percent-encoded, so it holds no quote, bracket or backslash.
-    local cover_rules = {}
+    local html, cover_rules = {}, {}
     if #entries == 0 then
-        html[#html + 1] = "<p>" .. escapeHtml(_("This folder is empty")) .. "</p>\n"
+        html[#html + 1] = "<p>" .. escapeHtml(empty_text) .. "</p>\n"
     else
         html[#html + 1] = "<ul>\n"
         local first = (page - 1) * state.per_page + 1
@@ -411,7 +465,7 @@ function Eink.renderListing(listing, state, _)
                 cover_rules[#cover_rules + 1] = "#" .. cover_id .. '{background-image:url("/api/cover?path='
                     .. encodeQueryValue(entry.path) .. '")}\n'
             end
-            html[#html + 1] = entryItem(entry, state, cover_id)
+            html[#html + 1] = item(entry, cover_id)
         end
         html[#html + 1] = "</ul>\n"
     end
@@ -420,7 +474,37 @@ function Eink.renderListing(listing, state, _)
     html[#html + 1] = coversBar(state, _)
     html[#html + 1] = "<p>" .. escapeHtml(_("To upload files, open this address on a phone or computer.")) .. "</p>\n"
     local cover_style = #cover_rules > 0 and ("@media (color){\n" .. table.concat(cover_rules) .. "}\n") or nil
-    return document(state, table.concat(html), _, cover_style)
+    return table.concat(html), cover_style
+end
+
+--- Render a folder listing as the e-ink page (the Folders view).
+--- @param listing table: FileOps:listDirectory result {path, entries, breadcrumbs}
+--- @param state table: from Eink.listingState
+--- @param _ function: gettext
+--- @return string: the HTML page
+function Eink.renderListing(listing, state, _)
+    local list, cover_style = entryPage(listing.entries or {}, state, _("This folder is empty"), function(entry, cover_id)
+        return entryItem(entry, state, cover_id)
+    end, _)
+    return document(state, viewBar(state, _) .. breadcrumbs(listing, state, _) .. filterForm(state, _)
+        .. sortBar(state, _) .. list, _, cover_style)
+end
+
+--- Render the flat list of books as the e-ink page (the Books view).
+--- @param books table: FileOps:listBooks result {entries, truncated}
+--- @param state table: from Eink.listingState
+--- @param _ function: gettext
+--- @param metadata_for function: entry -> {title, author} or nil; called
+---   only for the books on the page shown
+--- @return string: the HTML page
+function Eink.renderBooks(books, state, _, metadata_for)
+    local list, cover_style = entryPage(books.entries or {}, state, _("No books found"), function(entry, cover_id)
+        return bookItem(entry, metadata_for(entry), cover_id)
+    end, _)
+    local note = books.truncated
+        and ("<p>" .. escapeHtml(_("Too many files: the list is incomplete.")) .. "</p>\n") or ""
+    return document(state, viewBar(state, _) .. filterForm(state, _) .. sortBar(state, _) .. note .. list,
+        _, cover_style)
 end
 
 --- Render an error (e.g. a folder that cannot be listed) as the e-ink page.

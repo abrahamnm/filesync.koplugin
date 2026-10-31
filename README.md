@@ -37,7 +37,7 @@ Works on devices running KOReader (designed for **Kindle** and **Kobo**), includ
 - **Sleep Prevention** — Keeps device awake and WiFi alive while the server runs
 - **Safe Mode** — Show only books and images, hiding system files
 - **Responsive UI** — Designed for smartphones, works on any screen
-- **E-ink Mode** — A simple page for e-reader browsers, so another Kobo or Kindle can download books
+- **E-ink Mode** — A simple page for e-reader browsers that lists the device's books, so another Kobo or Kindle can download them
 - **Touch and Key Navigation** — On-device screens work with taps or with the D-pad/physical keys on non-touch readers
 
 ## How It Works
@@ -210,7 +210,7 @@ To toggle safe mode, open the plugin menu and tap **Safe mode**. Disabling it wi
 
 Another e-reader can open FileSync in its built-in web browser, for example to download books from a friend's device on the same WiFi. E-reader browsers are too old for the main web interface, so FileSync recognizes them by their user agent and serves them a simple page instead:
 
-- Browse folders, filter, sort, and download a book with one tap; long folders are split into pages of 10 entries by default
+- A **Books** view (the default) lists the books on the device, whatever folder they are in, with title, author, format, and size; one tap downloads a book. A **Folders** view browses folders and files instead. Both can be filtered and sorted, and long lists are split into pages of 10 entries by default
 - Plain HTML with no animations, black on white, so e-ink screens redraw as little as possible; everything works without JavaScript
 - Book covers (EPUB, MOBI, AZW3) on e-readers whose browser reports a colour screen, such as the Kobo Libra Colour; a **Hide covers** link turns them off, which makes pages lighter
 - The browser remembers the page size and the covers choice, also after it is closed (Kobo's browser forgets cookies, so a tiny script keeps them in its local storage)
@@ -219,7 +219,9 @@ Another e-reader can open FileSync in its built-in web browser, for example to d
 
 Detected browsers: Kobo's built-in browser (tested on a Kobo Libra Colour, firmware 4.46) and Kindle's (`Kindle/` in the user agent; not tested yet).
 
-To pick the page yourself, add `?eink=1` to the address (for example `http://192.168.1.5/?eink=1`); the browser remembers the choice. The **Full version** link at the bottom of the e-ink page (`?eink=0`) opens the main interface for that visit only.
+The Books view lists the e-books in KOReader's home folder and its subfolders (hidden folders and KOReader's `.sdr` folders are skipped). To list more folders, open the plugin menu, tap **Book folders**, then **Add folder**; tap a folder in that list to remove it. Added folders must be inside the device's main storage (`/mnt/onboard` on Kobo, `/mnt/us` on Kindle, `/mnt/ext1` on PocketBook). A book is recognized by its extension and nothing is opened to find it; title and author are read only for the books on the page being shown. Filtering matches file names. Very large libraries (over 20000 files, or folders nested more than 8 levels deep) are listed partially, and the page says so.
+
+To pick the page yourself, add `?eink=1` to the address (for example `http://192.168.1.5/?eink=1`); the browser remembers the choice. `?view=books` or `?view=folders` picks the view and the browser remembers it; the **Books** link at the top of the page does the same as `?view=books`, while the **Folders** link and the folder links open a folder for that visit only, so the page always opens on the Books view unless you chose `?view=folders`. The **Full version** link at the bottom of the e-ink page (`?eink=0`) opens the main interface for that visit only.
 
 A Kobo's browser cannot reach the FileSync server on the same Kobo: KOReader closes the Kobo's own reading app, and its browser, while it runs.
 

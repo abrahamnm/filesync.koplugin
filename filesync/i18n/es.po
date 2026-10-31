@@ -426,3 +426,57 @@ msgstr "El servidor también está disponible en http://<nombre>.local en redes 
 
 msgid "Name under which the server is reachable on the local network (e.g. http://filesync.local). Works out of the box on macOS, iOS and Windows; Linux needs avahi; most Android browsers cannot resolve .local names, so use the IP address or QR code there."
 msgstr "Nombre con el que se puede acceder al servidor en la red local (p. ej. http://filesync.local). Funciona directamente en macOS, iOS y Windows; Linux necesita avahi; la mayoría de navegadores Android no resuelven nombres .local, así que allí usa la dirección IP o el código QR."
+
+msgid "Add folder"
+msgstr "Añadir carpeta"
+
+msgid "Book folders"
+msgstr "Carpetas de libros"
+
+msgid "Books"
+msgstr "Libros"
+
+msgid "Filter"
+msgstr "Filtrar"
+
+msgid "Folders"
+msgstr "Carpetas"
+
+msgid "Full version"
+msgstr "Versión completa"
+
+msgid "Hide covers"
+msgstr "Ocultar portadas"
+
+msgid "Next"
+msgstr "Siguiente"
+
+msgid "No books found"
+msgstr "No se encontraron libros"
+
+msgid "Only folders inside %1 can be added."
+msgstr "Solo se pueden añadir carpetas dentro de %1."
+
+msgid "Per page:"
+msgstr "Por página:"
+
+msgid "Previous"
+msgstr "Anterior"
+
+msgid "Remove"
+msgstr "Quitar"
+
+msgid "Show covers"
+msgstr "Mostrar portadas"
+
+msgid "Stop listing books from %1?"
+msgstr "¿Dejar de listar los libros de %1?"
+
+msgid "To upload files, open this address on a phone or computer."
+msgstr "Para subir archivos, abre esta dirección en un teléfono o un ordenador."
+
+msgid "Too many files: the list is incomplete."
+msgstr "Demasiados archivos: la lista está incompleta."
+
+msgid "The e-ink page for e-reader browsers lists the books in KOReader's home folder and its subfolders. Add more folders here; each must be inside the device's main storage."
+msgstr "La página para navegadores de lectores electrónicos lista los libros de la carpeta de inicio de KOReader y de sus subcarpetas. Añade aquí más carpetas; cada una debe estar dentro del almacenamiento principal del dispositivo."

@@ -20,8 +20,10 @@ local function count(haystack, needle)
     end
 end
 
+-- State of the folders view (what renderListing is given); the books view
+-- tests ask for view = "books".
 local function state(changes)
-    local s = Eink.listingState({}, "/", 15, "en")
+    local s = Eink.listingState({}, "/", 15, "en", true, "folders")
     for key, value in pairs(changes or {}) do s[key] = value end
     return s
 end
@@ -183,18 +185,54 @@ describe("filesync.eink", function()
         end)
     end)
 
+    describe("chooseView", function()
+        it("defaults to the books view", function()
+            local view, set_cookie = Eink.chooseView({}, {})
+            assert.are.equal("books", view)
+            assert.is_nil(set_cookie)
+        end)
+
+        it("takes ?view= and remembers it in a cookie", function()
+            local view, set_cookie = Eink.chooseView({ view = "folders" }, {})
+            assert.are.equal("folders", view)
+            assert.are.equal("filesync_eink_view=folders; Path=/; Max-Age=31536000", set_cookie)
+            view, set_cookie = Eink.chooseView({ view = "books" }, { cookie = "filesync_eink_view=folders" })
+            assert.are.equal("books", view)
+            assert.are.equal("filesync_eink_view=books; Path=/; Max-Age=31536000", set_cookie)
+        end)
+
+        it("uses the cookie when there is no ?view= or ?path=", function()
+            assert.are.equal("folders", (Eink.chooseView({}, { cookie = "a=1; filesync_eink_view=folders" })))
+            assert.are.equal("books", (Eink.chooseView({}, { cookie = "filesync_eink_view=books" })))
+        end)
+
+        it("shows the folders view for a link with ?path=, whatever the cookie says", function()
+            local view, set_cookie = Eink.chooseView({ path = "/Books" }, { cookie = "filesync_eink_view=books" })
+            assert.are.equal("folders", view)
+            assert.is_nil(set_cookie)
+            assert.are.equal("books", (Eink.chooseView({ path = "" }, {})))
+        end)
+
+        it("ignores values that are not a view", function()
+            assert.are.equal("books", (Eink.chooseView({ view = "evil" }, { cookie = "filesync_eink_view=<x>" })))
+            local _, set_cookie = Eink.chooseView({ view = "evil" }, {})
+            assert.is_nil(set_cookie)
+        end)
+    end)
+
     describe("listingState", function()
         it("starts at the home folder, sorted by name, with covers", function()
             local s = Eink.listingState({}, "/Books", 15, "it")
             assert.are.same({ path = "/Books", sort = "name", order = "asc", filter = "",
-                              page = 1, per_page = 15, lang = "it", covers = true }, s)
+                              page = 1, per_page = 15, lang = "it", covers = true, view = "books" }, s)
+            assert.are.equal("folders", Eink.listingState({}, "/Books", 15, "it", true, "folders").view)
             assert.is_false(Eink.listingState({}, "/Books", 15, "it", false).covers)
         end)
 
         it("keeps valid parameters and replaces invalid ones", function()
             local s = Eink.listingState({ path = "/x", sort = "date", order = "desc", filter = "abc", page = "3" }, "/", 10)
             assert.are.same({ path = "/x", sort = "date", order = "desc", filter = "abc",
-                              page = 3, per_page = 10, lang = "en", covers = true }, s)
+                              page = 3, per_page = 10, lang = "en", covers = true, view = "books" }, s)
             s = Eink.listingState({ path = "", sort = "evil", order = "sideways", page = "-2" }, "/home", 10)
             assert.are.equal("/home", s.path)
             assert.are.equal("name", s.sort)
@@ -302,7 +340,7 @@ describe("filesync.eink", function()
             assert.are.equal(1, count(html, "<script"))
             local script = html:match("<script>\n(.-)</script>")
             -- Works on the two choice cookies, through localStorage
-            assert.is_truthy(script:find('"filesync_eink_per_page", "filesync_eink_covers"', 1, true))
+            assert.is_truthy(script:find('"filesync_eink_per_page", "filesync_eink_covers", "filesync_eink_view"', 1, true))
             assert.is_truthy(script:find("localStorage.setItem", 1, true))
             -- Reloads at most once per session, and only if the cookie stuck
             assert.are.equal(1, count(script, "location.reload()"))
@@ -377,6 +415,125 @@ describe("filesync.eink", function()
             local html = Eink.renderListing(books_listing({ file("a.epub", { modified = modified }) }),
                 state({ path = "/Books" }), identity)
             assert.is_truthy(html:find('<span class="meta">1.4 KB · 2026-10-19</span>', 1, true))
+        end)
+    end)
+
+    describe("view bar", function()
+        it("marks the current view and links the other one, in both views", function()
+            local folders = Eink.renderListing(books_listing({}), state({ path = "/Books" }), identity)
+            assert.is_truthy(folders:find('<p class="bar"><a href="/?view=books">Books</a> <b>Folders</b></p>', 1, true))
+            local books = Eink.renderBooks({ entries = {} }, state({ view = "books", path = "/Books" }), identity, function() end)
+            assert.is_truthy(books:find('<p class="bar"><b>Books</b> <a href="/?path=/Books">Folders</a></p>', 1, true))
+        end)
+
+        it("keeps the sort when switching view, but not the filter or page", function()
+            local html = Eink.renderListing(books_listing({}),
+                state({ path = "/Books", sort = "size", order = "desc", filter = "x", page = 3 }), identity)
+            assert.is_truthy(html:find('<a href="/?view=books&amp;sort=size&amp;order=desc">Books</a>', 1, true))
+        end)
+    end)
+
+    describe("renderBooks", function()
+        local function book(name, extra)
+            local entry = { name = name, path = "/Books/Sub/" .. name, is_dir = false,
+                            size = 2048, size_formatted = "2.0 KB", modified = 0, type = "ebook" }
+            for key, value in pairs(extra or {}) do entry[key] = value end
+            return entry
+        end
+        local function books_state(changes)
+            local merged = { view = "books", path = "/Books" }
+            for key, value in pairs(changes or {}) do merged[key] = value end
+            return state(merged)
+        end
+        local function render(entries, changes, metadata_for)
+            return Eink.renderBooks({ entries = entries }, books_state(changes), identity,
+                metadata_for or function() return nil end)
+        end
+
+        it("lists each book with title, author, format and size, linked to /api/download", function()
+            local html = render({ book("dune.epub") }, nil, function()
+                return { title = "Dune", author = "Frank Herbert" }
+            end)
+            assert.is_truthy(html:find('<a href="/api/download?path=/Books/Sub/dune.epub">', 1, true))
+            assert.is_truthy(html:find('<span class="title">Dune</span>', 1, true))
+            assert.is_truthy(html:find('<span class="meta">Frank Herbert</span>', 1, true))
+            assert.is_truthy(html:find('<span class="meta">EPUB · 2.0 KB</span>', 1, true))
+        end)
+
+        it("falls back to the file name, and shows no author line without one", function()
+            local html = render({ book("dune.epub") })
+            assert.is_truthy(html:find('<span class="title">dune.epub</span>', 1, true))
+            assert.are.equal(1, count(html, '<span class="meta">'))
+            html = render({ book("a.epub") }, nil, function() return { title = "A", author = "" } end)
+            assert.are.equal(1, count(html, '<span class="meta">'))
+        end)
+
+        it("escapes title, author and file name", function()
+            local html = render({ book([[<i>.epub]]) }, nil, function()
+                return { title = [[<b>"T"</b>]], author = "A & B" }
+            end)
+            assert.is_truthy(html:find("&lt;b&gt;&quot;T&quot;&lt;/b&gt;", 1, true))
+            assert.is_truthy(html:find("A &amp; B", 1, true))
+            assert.is_nil(html:find("<b>\"T\"", 1, true))
+        end)
+
+        it("asks for metadata only for the books on the page shown", function()
+            local entries = {}
+            for i = 1, 32 do entries[i] = book(string.format("book %02d.epub", i)) end
+            local asked = {}
+            local html = render(entries, { page = 2, per_page = 10 }, function(entry)
+                asked[#asked + 1] = entry.name
+                return nil
+            end)
+            assert.are.equal(10, #asked)
+            assert.are.equal("book 11.epub", asked[1])
+            assert.are.equal("book 20.epub", asked[10])
+            assert.are.equal(10, count(html, "<li>"))
+            assert.is_truthy(html:find("<b>2 / 4</b>", 1, true))
+        end)
+
+        it("pages and sorts with view=books links and no path", function()
+            local entries = {}
+            for i = 1, 12 do entries[i] = book(string.format("book %02d.epub", i)) end
+            local html = render(entries, { per_page = 10, sort = "date", order = "desc" })
+            assert.is_truthy(html:find('<a href="/?view=books&amp;sort=date&amp;order=desc&amp;page=2">Next</a>', 1, true))
+            assert.is_truthy(html:find('<a href="/?view=books&amp;sort=size&amp;order=desc">Largest first</a>', 1, true))
+            assert.is_nil(html:find("view=books&amp;path", 1, true))
+        end)
+
+        it("keeps the view in the filter form instead of a folder", function()
+            local html = render({}, { sort = "size", order = "desc", filter = "du" })
+            assert.is_truthy(html:find('<input type="hidden" name="view" value="books">', 1, true))
+            assert.is_truthy(html:find('<input type="hidden" name="sort" value="size">', 1, true))
+            assert.is_nil(html:find('name="path"', 1, true))
+            assert.is_truthy(html:find('name="filter" value="du"', 1, true))
+        end)
+
+        it("says when there are no books, and when the scan was cut short", function()
+            local html = render({})
+            assert.is_truthy(html:find("No books found", 1, true))
+            assert.is_nil(html:find("<ul>", 1, true))
+            assert.is_nil(html:find("incomplete", 1, true))
+            html = Eink.renderBooks({ entries = {}, truncated = true }, books_state(), identity, function() end)
+            assert.is_truthy(html:find("Too many files: the list is incomplete.", 1, true))
+        end)
+
+        it("shows covers of EPUB and MOBI-family books only, like the folders view", function()
+            local html = render({ book("a.epub"), book("b.pdf"), book("c.azw3") })
+            assert.are.equal(2, count(html, "/api/cover?"))
+            assert.is_truthy(html:find('#c1{background-image:url("/api/cover?path=/Books/Sub/a.epub")}', 1, true))
+            assert.is_truthy(html:find('<span class="cover" id="c1"></span><span class="title">a.epub</span>', 1, true))
+            assert.is_nil(render({ book("a.epub") }, { covers = false }):find("/api/cover", 1, true))
+        end)
+
+        it("is plain HTML and keeps the way back to the full version and the upload hint", function()
+            local html = render({ book("a.epub") })
+            for _, banned in ipairs({ "animation", "transition", "var(--", "type=\"file\"" }) do
+                assert.is_nil(html:lower():find(banned, 1, true), banned)
+            end
+            assert.are.equal(1, count(html, "<script"))
+            assert.is_truthy(html:find("To upload files, open this address on a phone or computer.", 1, true))
+            assert.is_truthy(html:find("Full version", 1, true))
         end)
     end)
 

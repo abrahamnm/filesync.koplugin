@@ -352,6 +352,42 @@ function FileOps:writeTextFile(rel_path, content)
     return true
 end
 
+--- Sort listing entries in place (directories first, then by the given field).
+--- @param sort_by string: "name", "size", "date" or "type" (anything else sorts by name)
+--- @param sort_order string: "asc" or "desc"
+local function sortEntries(entries, sort_by, sort_order)
+    sort_by = sort_by or "name"
+    sort_order = sort_order or "asc"
+
+    table.sort(entries, function(a, b)
+        -- Directories always come first
+        if a.is_dir and not b.is_dir then return true end
+        if not a.is_dir and b.is_dir then return false end
+
+        -- For descending, swap a and b so the same < operator works correctly
+        -- (using "not result" breaks strict weak ordering for equal values)
+        if sort_order == "desc" then
+            a, b = b, a
+        end
+
+        if sort_by == "name" then
+            return a.name:lower() < b.name:lower()
+        elseif sort_by == "size" then
+            return a.size < b.size
+        elseif sort_by == "date" then
+            return a.modified < b.modified
+        elseif sort_by == "type" then
+            if a.type == b.type then
+                return a.name:lower() < b.name:lower()
+            else
+                return a.type < b.type
+            end
+        else
+            return a.name:lower() < b.name:lower()
+        end
+    end)
+end
+
 --- List directory contents with sorting, filtering, and safe mode enforcement.
 --- @param rel_path string: relative path from root_dir
 --- @param sort_by string: sort field ("name", "size", "date", "type")
@@ -435,37 +471,7 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
         return nil, "Cannot read directory: " .. tostring(iter_err)
     end
 
-    -- Sort entries (directories first, then by specified criteria)
-    sort_by = sort_by or "name"
-    sort_order = sort_order or "asc"
-
-    table.sort(entries, function(a, b)
-        -- Directories always come first
-        if a.is_dir and not b.is_dir then return true end
-        if not a.is_dir and b.is_dir then return false end
-
-        -- For descending, swap a and b so the same < operator works correctly
-        -- (using "not result" breaks strict weak ordering for equal values)
-        if sort_order == "desc" then
-            a, b = b, a
-        end
-
-        if sort_by == "name" then
-            return a.name:lower() < b.name:lower()
-        elseif sort_by == "size" then
-            return a.size < b.size
-        elseif sort_by == "date" then
-            return a.modified < b.modified
-        elseif sort_by == "type" then
-            if a.type == b.type then
-                return a.name:lower() < b.name:lower()
-            else
-                return a.type < b.type
-            end
-        else
-            return a.name:lower() < b.name:lower()
-        end
-    end)
+    sortEntries(entries, sort_by, sort_order)
 
     -- Build breadcrumbs
     local breadcrumbs = {{name = "Home", path = "/"}}
@@ -487,6 +493,87 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
         breadcrumbs = breadcrumbs,
         count = #entries,
     }
+end
+
+-- Limits for listBooks, so a looping symlink or a huge tree cannot stall the
+-- single-threaded server: folders more than MAX_BOOK_SCAN_DEPTH levels below a
+-- scanned folder are not entered, and after MAX_BOOK_SCAN_ENTRIES directory
+-- entries the scan stops (the result is flagged truncated).
+local MAX_BOOK_SCAN_DEPTH = 8
+local MAX_BOOK_SCAN_ENTRIES = 20000
+
+--- Flat list of the ebooks in one or more folders and their subfolders: the
+--- e-ink page's "Books" view. A file is a book by its extension alone
+--- (_getFileType), nothing is opened. Hidden files and folders and .sdr
+--- folders are skipped. A folder that cannot be read is skipped; the others
+--- are still listed.
+--- @param rel_paths table: folders to scan, relative to root_dir; each goes
+---   through _resolvePath, so none can lie outside it
+--- @param sort_by string: as for listDirectory
+--- @param sort_order string: "asc" or "desc"
+--- @param filter string: case-insensitive substring filter for book file names
+--- @param safe_mode boolean: when true, only whitelisted extensions are listed
+--- @return table|nil: {entries, count, truncated} on success; each entry as in
+---   listDirectory ({name, path, is_dir, size, size_formatted, modified, type})
+--- @return string|nil: error message when a folder is refused
+function FileOps:listBooks(rel_paths, sort_by, sort_order, filter, safe_mode)
+    local entries, seen, visited, truncated = {}, {}, 0, false
+    local needle = (filter and filter ~= "") and filter:lower() or nil
+
+    local function scan(full_path, depth)
+        local ok, iter, dir_obj = pcall(lfs.dir, full_path)
+        if not ok then
+            logger.warn("FileSync: Cannot read directory", full_path)
+            return
+        end
+        for name in iter, dir_obj do
+            if truncated then return end
+            if name:sub(1, 1) ~= "." then -- hidden, "." and ".."
+                visited = visited + 1
+                if visited > MAX_BOOK_SCAN_ENTRIES then
+                    truncated = true
+                    return
+                end
+                local entry_path = full_path .. "/" .. name
+                local attr = lfs.attributes(entry_path)
+                if attr and attr.mode == "directory" then
+                    if depth < MAX_BOOK_SCAN_DEPTH and not name:match("%.sdr$") then
+                        scan(entry_path, depth + 1)
+                    end
+                elseif attr and attr.mode == "file" and self:_getFileType(name) == "ebook"
+                    and not seen[entry_path]
+                    and not (safe_mode and not self:isExtensionSafe(name))
+                    and (not needle or name:lower():find(needle, 1, true)) then
+                    seen[entry_path] = true -- folders may overlap
+                    entries[#entries + 1] = {
+                        name = name,
+                        path = self:_getRelativePath(entry_path),
+                        is_dir = false,
+                        size = attr.size or 0,
+                        size_formatted = self:_formatSize(attr.size or 0),
+                        modified = attr.modification or 0,
+                        type = "ebook",
+                    }
+                end
+            end
+        end
+    end
+
+    for _, rel_path in ipairs(rel_paths) do
+        local full_path, err = self:_resolvePath(rel_path)
+        if not full_path then
+            return nil, err
+        end
+        local is_dir, dir_err = self:_checkDirectory(full_path, rel_path)
+        if is_dir then
+            scan(full_path, 0)
+        else
+            logger.warn("FileSync: Book folder skipped:", dir_err)
+        end
+    end
+
+    sortEntries(entries, sort_by, sort_order)
+    return {entries = entries, count = #entries, truncated = truncated}
 end
 
 --- Get recursive file count for a directory
