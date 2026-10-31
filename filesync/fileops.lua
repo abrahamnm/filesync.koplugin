@@ -443,12 +443,17 @@ function FileOps:listDirectory(rel_path, sort_by, sort_order, filter, safe_mode)
                                 -- For directories, check if they are empty
                                 if is_dir then
                                     local child_count = 0
-                                    for child_name in lfs.dir(entry_path) do
+                                    local child_iter, child_dir = lfs.dir(entry_path)
+                                    for child_name in child_iter, child_dir do
                                         if child_name ~= "." and child_name ~= ".." then
                                             child_count = child_count + 1
                                             break -- only need to know if > 0
                                         end
                                     end
+                                    -- Leaving the loop early does not close the
+                                    -- handle: one descriptor leaked per folder
+                                    -- until the garbage collector ran.
+                                    child_dir:close()
                                     entry.is_empty = (child_count == 0)
                                 end
                                 -- For non-directory files, check if a corresponding .sdr directory exists
@@ -527,12 +532,12 @@ function FileOps:listBooks(rel_paths, sort_by, sort_order, filter, safe_mode)
             return
         end
         for name in iter, dir_obj do
-            if truncated then return end
+            if truncated then break end
             if name:sub(1, 1) ~= "." then -- hidden, "." and ".."
                 visited = visited + 1
                 if visited > MAX_BOOK_SCAN_ENTRIES then
                     truncated = true
-                    return
+                    break
                 end
                 local entry_path = full_path .. "/" .. name
                 local attr = lfs.attributes(entry_path)
@@ -557,6 +562,7 @@ function FileOps:listBooks(rel_paths, sort_by, sort_order, filter, safe_mode)
                 end
             end
         end
+        dir_obj:close() -- a no-op after a full pass; needed when the caps stop the loop early
     end
 
     for _, rel_path in ipairs(rel_paths) do

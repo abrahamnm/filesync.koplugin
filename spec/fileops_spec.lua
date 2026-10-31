@@ -6,6 +6,7 @@ local lfs_stub = {
     attributes = function() return nil end,
     dir = function() return function() return nil end end,
     mkdir = function() return nil, "not mounted" end,
+    open_dirs = 0,
 }
 package.loaded["lfs"] = lfs_stub
 
@@ -26,11 +27,23 @@ local function mountTree(tree)
             end
         end
         table.sort(names)
+        -- Like the real lfs.dir: returns the iterator and a handle. The handle
+        -- is closed when the iterator runs out, or by handle:close(); leaving
+        -- a loop early keeps it open. lfs_stub.open_dirs counts open handles.
         local i = 0
+        local handle = {open = true}
+        function handle:close()
+            if self.open then
+                self.open = false
+                lfs_stub.open_dirs = lfs_stub.open_dirs - 1
+            end
+        end
+        lfs_stub.open_dirs = lfs_stub.open_dirs + 1
         return function()
             i = i + 1
+            if names[i] == nil then handle:close() end
             return names[i]
-        end
+        end, handle
     end
 end
 
@@ -863,6 +876,47 @@ describe("filesync.fileops", function()
             mountTree(big)
             local result = FileOps:listBooks({"/"}, "name", "asc", "", true)
             assert.is_true(result.truncated)
+        end)
+
+        it("closes every folder it opened, also when the entry limit stops it", function()
+            local big = {["/mnt/us"] = dir(), ["/mnt/us/a"] = dir(), ["/mnt/us/a/b"] = dir()}
+            for i = 1, 20001 do
+                big["/mnt/us/a/b/n" .. i .. ".txt"] = book(1)
+            end
+            mountTree(big)
+            lfs_stub.open_dirs = 0
+            local result = FileOps:listBooks({"/"}, "name", "asc", "", true)
+            assert.is_true(result.truncated)
+            assert.are.equal(0, lfs_stub.open_dirs)
+        end)
+
+        it("closes every folder it opened after a normal scan", function()
+            lfs_stub.open_dirs = 0
+            FileOps:listBooks({"/Books", "/Other"}, "name", "asc", "", true)
+            assert.are.equal(0, lfs_stub.open_dirs)
+        end)
+    end)
+
+    describe("listDirectory open folders", function()
+        after_each(function()
+            unmountTree()
+        end)
+
+        -- The "is it empty?" check reads one entry of each sub-folder and stops;
+        -- the handle must still be closed (issue #57: "Too many open files").
+        it("closes the handle of every sub-folder it peeks into", function()
+            local tree = {["/mnt/us"] = {mode = "directory"}}
+            for i = 1, 5 do
+                tree["/mnt/us/d" .. i] = {mode = "directory"}
+                tree["/mnt/us/d" .. i .. "/f.epub"] = {mode = "file", size = 1}
+            end
+            FileOps:setRootDir("/mnt/us")
+            mountTree(tree)
+            lfs_stub.open_dirs = 0
+            local result = FileOps:listDirectory("/", "name", "asc", "", true)
+            assert.are.equal(5, #result.entries)
+            assert.is_false(result.entries[1].is_empty)
+            assert.are.equal(0, lfs_stub.open_dirs)
         end)
     end)
 end)
