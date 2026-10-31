@@ -37,6 +37,7 @@ Works on devices running KOReader (designed for **Kindle** and **Kobo**), includ
 - **Sleep Prevention** — Keeps device awake and WiFi alive while the server runs
 - **Safe Mode** — Show only books and images, hiding system files
 - **Responsive UI** — Designed for smartphones, works on any screen
+- **E-ink Mode** — A simple page for e-reader browsers, so another Kobo or Kindle can download books
 - **Touch and Key Navigation** — On-device screens work with taps or with the D-pad/physical keys on non-touch readers
 
 ## How It Works
@@ -204,6 +205,23 @@ Safe mode is **enabled by default** and limits the web interface to only show fi
 - Folders you upload are stored in full, but any file inside them that isn't a book, document, or image (a plugin's `.lua` files, for example) stays hidden until you turn safe mode off
 
 To toggle safe mode, open the plugin menu and tap **Safe mode**. Disabling it will show every file on the device, including hidden files and folders, which are dimmed in the listing to set them apart.
+
+### E-ink Mode
+
+Another e-reader can open FileSync in its built-in web browser, for example to download books from a friend's device on the same WiFi. E-reader browsers are too old for the main web interface, so FileSync recognizes them by their user agent and serves them a simple page instead:
+
+- Browse folders, filter, sort, and download a book with one tap; long folders are split into pages of 10 entries by default
+- Plain HTML with no animations, black on white, so e-ink screens redraw as little as possible; everything works without JavaScript
+- Book covers (EPUB, MOBI, AZW3) on e-readers whose browser reports a colour screen, such as the Kobo Libra Colour; a **Hide covers** link turns them off, which makes pages lighter
+- The browser remembers the page size and the covers choice, also after it is closed (Kobo's browser forgets cookies, so a tiny script keeps them in its local storage)
+- No upload: on a Kobo, the browser's file picker freezes the device. Upload from a phone or computer instead
+- Safe mode applies exactly as in the main interface
+
+Detected browsers: Kobo's built-in browser (tested on a Kobo Libra Colour, firmware 4.46) and Kindle's (`Kindle/` in the user agent; not tested yet).
+
+To pick the page yourself, add `?eink=1` to the address (for example `http://192.168.1.5/?eink=1`); the browser remembers the choice. The **Full version** link at the bottom of the e-ink page (`?eink=0`) opens the main interface for that visit only.
+
+A Kobo's browser cannot reach the FileSync server on the same Kobo: KOReader closes the Kobo's own reading app, and its browser, while it runs.
 
 ## Troubleshooting
 

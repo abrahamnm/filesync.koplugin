@@ -4,13 +4,17 @@
 --- Delegates file operations to the fileops module and uses the shared json module
 --- for request/response serialization.
 ---
---- Key dependencies: socket (LuaSocket), UIManager (KOReader), filesync/json, filesync/fileops
+--- Key dependencies: socket (LuaSocket), UIManager (KOReader), filesync/json, filesync/fileops,
+--- filesync/eink
 
+local Eink = require("filesync/eink")
 local JSON = require("filesync/json")
 local Utils = require("filesync/utils")
 local logger = require("logger")
 local socket = require("socket")
 local UIManager = require("ui/uimanager")
+local ok_i18n, plugin_gettext = pcall(require, "filesync/filesync_i18n")
+local gettext = ok_i18n and plugin_gettext or require("gettext")
 
 -- Maximum allowed upload size (200 MB) — checked via Content-Length before
 -- reading any body data.  The streaming multipart parser writes file data
@@ -245,6 +249,11 @@ function HttpServer:_readBody(client, length)
 end
 
 --- Route an HTTP request to the appropriate handler.
+--- Web UI:
+---   GET  /               - the web UI (static/index.html). E-reader browsers get
+---                          the e-ink page instead (filesync/eink.lua; query: path,
+---                          sort, order, filter, page, per_page, covers; eink=1|0
+---                          overrides the User-Agent detection)
 --- API endpoints:
 ---   GET  /api/lang       - returns {lang: string} (KOReader UI language)
 ---   GET  /api/health     - returns {status, root_dir, fileops_loaded, device}
@@ -283,9 +292,14 @@ function HttpServer:_route(client, method, path, query, headers, body)
         return
     end
 
-    -- Serve static files
+    -- Serve the web UI, or the e-ink page to e-reader browsers
     if method == "GET" and (path == "/" or path == "/index.html") then
-        self:_serveIndex(client)
+        local eink, mode_cookie = Eink.chooseMode(query, headers)
+        if eink then
+            self:_serveEink(client, query, headers, mode_cookie)
+        else
+            self:_serveIndex(client, mode_cookie)
+        end
         return
     end
 
@@ -323,19 +337,7 @@ function HttpServer:_route(client, method, path, query, headers, body)
         -- Returns null if home_dir is unset or lies outside root_dir, so the
         -- frontend can decide its own fallback (currently: open at root).
         if method == "GET" and path == "/api/home" then
-            local home_dir = G_reader_settings:readSetting("home_dir")
-            local home_rel = nil
-            if home_dir and home_dir ~= "" and self.root_dir then
-                local root = self.root_dir
-                if home_dir == root then
-                    home_rel = "/"
-                elseif home_dir:sub(1, #root) == root
-                    and (home_dir:sub(#root + 1, #root + 1) == "/" or #home_dir == #root) then
-                    home_rel = home_dir:sub(#root + 1)
-                    if home_rel == "" then home_rel = "/" end
-                end
-            end
-            self:_sendJSON(client, 200, {home = home_rel})
+            self:_sendJSON(client, 200, {home = self:_homePath()})
             return
         end
 
@@ -955,7 +957,8 @@ function HttpServer:_handleStreamingUpload(client, content_length, content_type,
     end
 end
 
-function HttpServer:_serveIndex(client)
+--- @param set_cookie string|nil: a Set-Cookie value (e-ink mode override)
+function HttpServer:_serveIndex(client, set_cookie)
     if not self._static_cache.index then
         -- Load the HTML file from the static directory
         local plugin_dir = self:_getPluginDir()
@@ -968,17 +971,78 @@ function HttpServer:_serveIndex(client)
         f:close()
     end
 
-    local html = self._static_cache.index
-    local response = table.concat({
-        "HTTP/1.1 200 OK\r\n",
+    self:_sendHtml(client, 200, self._static_cache.index, {set_cookie})
+end
+
+--- Serve the e-ink page (see filesync/eink.lua). The listing comes from the
+--- same FileOps:listDirectory call and safe-mode rule as /api/files, so path
+--- validation and filtering are identical.
+--- @param mode_cookie string|nil: a Set-Cookie value from Eink.chooseMode
+function HttpServer:_serveEink(client, query, headers, mode_cookie)
+    local per_page, per_page_cookie = Eink.choosePerPage(query, headers)
+    local covers, covers_cookie = Eink.chooseCovers(query, headers)
+    local lang = G_reader_settings:readSetting("language") or "en"
+    local state = Eink.listingState(query, self:_homePath() or "/", per_page, lang, covers)
+
+    local listing, err_msg
+    if self._fileops then
+        local safe_mode = require("filesync/filesyncmanager"):getSafeMode()
+        listing, err_msg = self._fileops:listDirectory(state.path, state.sort, state.order,
+                                                       state.filter, safe_mode)
+    else
+        err_msg = "File operations module not loaded"
+    end
+
+    local cookies = {}
+    if mode_cookie then table.insert(cookies, mode_cookie) end
+    if per_page_cookie then table.insert(cookies, per_page_cookie) end
+    if covers_cookie then table.insert(cookies, covers_cookie) end
+    if listing then
+        self:_sendHtml(client, 200, Eink.renderListing(listing, state, gettext), cookies)
+    else
+        self:_sendHtml(client, 400, Eink.renderError(err_msg or "Cannot list directory", state, gettext), cookies)
+    end
+end
+
+--- KOReader's home folder as a path relative to root_dir, or nil if
+--- home_dir is unset or lies outside root_dir. Used by /api/home and as the
+--- e-ink page's starting folder.
+function HttpServer:_homePath()
+    local home_dir = G_reader_settings:readSetting("home_dir")
+    local home_rel = nil
+    if home_dir and home_dir ~= "" and self.root_dir then
+        local root = self.root_dir
+        if home_dir == root then
+            home_rel = "/"
+        elseif home_dir:sub(1, #root) == root
+            and (home_dir:sub(#root + 1, #root + 1) == "/" or #home_dir == #root) then
+            home_rel = home_dir:sub(#root + 1)
+            if home_rel == "" then home_rel = "/" end
+        end
+    end
+    return home_rel
+end
+
+--- Send an HTML page that browsers must not cache.
+--- @param set_cookies table: Set-Cookie values to send (may be empty)
+function HttpServer:_sendHtml(client, status, html, set_cookies)
+    local status_text = ({
+        [200] = "OK",
+        [400] = "Bad Request",
+    })[status] or "OK"
+    local parts = {
+        "HTTP/1.1 " .. status .. " " .. status_text .. "\r\n",
         "Content-Type: text/html; charset=utf-8\r\n",
         "Content-Length: " .. #html .. "\r\n",
         "Connection: close\r\n",
         "Cache-Control: no-cache\r\n",
-        "\r\n",
-        html,
-    })
-    self:_sendAll(client, response)
+    }
+    for _, cookie in ipairs(set_cookies) do
+        table.insert(parts, "Set-Cookie: " .. cookie .. "\r\n")
+    end
+    table.insert(parts, "\r\n")
+    table.insert(parts, html)
+    self:_sendAll(client, table.concat(parts))
 end
 
 --- Get the directory containing this module's source files (filesync/).
