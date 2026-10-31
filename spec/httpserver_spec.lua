@@ -410,7 +410,7 @@ describe("filesync.httpserver", function()
                 end,
                 getMetadata = function(_, path)
                     table.insert(metadata_asked, path)
-                    return { title = "Title of " .. path:match("([^/]+)$"), author = "An Author" }
+                    return { title = "Title of " .. path:match("([^/]+)$"), author = "An Author", has_cover = true }
                 end,
                 listDirectory = function(_, path, sort, order, filter, safe_mode)
                     listed = { path = path, sort = sort, order = order, filter = filter, safe_mode = safe_mode }

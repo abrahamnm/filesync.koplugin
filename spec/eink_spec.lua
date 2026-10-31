@@ -519,11 +519,34 @@ describe("filesync.eink", function()
         end)
 
         it("shows covers of EPUB and MOBI-family books only, like the folders view", function()
-            local html = render({ book("a.epub"), book("b.pdf"), book("c.azw3") })
+            local with_cover = function() return { has_cover = true } end
+            local html = render({ book("a.epub"), book("b.pdf"), book("c.azw3") }, nil, with_cover)
             assert.are.equal(2, count(html, "/api/cover?"))
             assert.is_truthy(html:find('#c1{background-image:url("/api/cover?path=/Books/Sub/a.epub")}', 1, true))
             assert.is_truthy(html:find('<span class="cover" id="c1"></span><span class="title">a.epub</span>', 1, true))
-            assert.is_nil(render({ book("a.epub") }, { covers = false }):find("/api/cover", 1, true))
+            assert.is_nil(render({ book("a.epub") }, { covers = false }, with_cover):find("/api/cover", 1, true))
+        end)
+
+        it("requests a cover only for books whose metadata says they have one", function()
+            local calls = 0
+            local html = render({ book("a.epub"), book("b.epub"), book("c.epub") }, nil, function(entry)
+                calls = calls + 1
+                return { has_cover = entry.name == "b.epub" }
+            end)
+            assert.are.equal(1, count(html, "/api/cover?"))
+            assert.is_truthy(html:find('#c2{background-image:url("/api/cover?path=/Books/Sub/b.epub")}', 1, true))
+            assert.are.equal(3, calls) -- metadata is read once per book, not once per use
+            assert.is_nil(render({ book("a.epub") }):find("/api/cover", 1, true)) -- no metadata, no cover
+        end)
+
+        it("clamps a page number that is NaN, infinite or negative", function()
+            for _, page in ipairs({ "nan", "inf", "1e999", "-5" }) do
+                local s = Eink.listingState({ page = page }, "/", 10, "en", true, "books")
+                local html = Eink.renderBooks({ entries = { book("a.epub"), book("b.epub") } }, s, identity, function() end)
+                assert.is_nil(html:find("page=nan", 1, true), page)
+                assert.is_nil(html:find("page=inf", 1, true), page)
+                assert.is_truthy(html:find('<span class="title">a.epub</span>', 1, true), page)
+            end
         end)
 
         it("is plain HTML and keeps the way back to the full version and the upload hint", function()

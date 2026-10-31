@@ -844,10 +844,35 @@ describe("filesync.fileops", function()
             assert.are.same({"c.cbz"}, names(result))
         end)
 
-        it("refuses a folder outside root_dir", function()
+        it("skips a folder outside root_dir and lists the others", function()
             local result, err = FileOps:listBooks({"/Other", "/../etc"}, "name", "asc", "", true)
-            assert.is_nil(result)
-            assert.is_truthy(err:find("traversal"))
+            assert.is_nil(err)
+            assert.are.same({"c.cbz"}, names(result))
+        end)
+
+        it("skips a folder with .. in its name instead of failing the whole list", function()
+            local tree = {}
+            for path, attr in pairs(TREE) do tree[path] = attr end
+            tree["/mnt/us/Vol..2"] = dir()
+            tree["/mnt/us/Vol..2/x.epub"] = book(1)
+            mountTree(tree)
+            local result, err = FileOps:listBooks({"/Vol..2", "/Other"}, "name", "asc", "", true)
+            assert.is_nil(err)
+            assert.are.same({"c.cbz"}, names(result))
+        end)
+
+        it("does not count a folder given twice, or nested in another, against the entry limit", function()
+            local calls = 0
+            local dir_fn = lfs_stub.dir
+            lfs_stub.dir = function(path)
+                calls = calls + 1
+                return dir_fn(path)
+            end
+            FileOps:listBooks({"/Books", "/Books", "/Books/Sci-Fi"}, "name", "asc", "", true)
+            local once = calls
+            calls = 0
+            FileOps:listBooks({"/Books"}, "name", "asc", "", true)
+            assert.are.equal(calls, once)
         end)
 
         it("lists nothing when no folder is given", function()

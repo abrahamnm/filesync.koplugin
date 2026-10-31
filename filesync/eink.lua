@@ -242,7 +242,8 @@ end
 --- @return table: {path, sort, order, filter, page, per_page, lang, covers, view}
 function Eink.listingState(query, home_path, per_page, lang, covers, view)
     local page = math.floor(tonumber(query.page) or 1)
-    if page < 1 then page = 1 end
+    if not (page >= 1) then page = 1 end -- also catches NaN
+    if page > 1e9 then page = 1e9 end -- "inf" would end up in the links
     return {
         path = (query.path and query.path ~= "") and query.path or home_path,
         sort = SORT_FIELDS[query.sort] and query.sort or "name",
@@ -447,9 +448,10 @@ end
 
 -- The part both views share: one page of `entries` as a list, then the
 -- pager, per-page and covers bars. `item(entry, cover_id)` renders one <li>.
+-- `wants_cover(entry)`, if given, can veto the cover of a book that has none.
 -- Returns the html and the CSS (one rule per cover, inside @media (color);
 -- the URL is percent-encoded, so it holds no quote, bracket or backslash).
-local function entryPage(entries, state, empty_text, item, _)
+local function entryPage(entries, state, empty_text, item, _, wants_cover)
     local pages = math.max(1, math.ceil(#entries / state.per_page))
     local page = math.min(state.page, pages)
     local html, cover_rules = {}, {}
@@ -460,7 +462,7 @@ local function entryPage(entries, state, empty_text, item, _)
         local first = (page - 1) * state.per_page + 1
         for i = first, math.min(first + state.per_page - 1, #entries) do
             local entry, cover_id = entries[i], nil
-            if state.covers and hasCover(entry) then
+            if state.covers and hasCover(entry) and (not wants_cover or wants_cover(entry)) then
                 cover_id = "c" .. i
                 cover_rules[#cover_rules + 1] = "#" .. cover_id .. '{background-image:url("/api/cover?path='
                     .. encodeQueryValue(entry.path) .. '")}\n'
@@ -494,13 +496,21 @@ end
 --- @param books table: FileOps:listBooks result {entries, truncated}
 --- @param state table: from Eink.listingState
 --- @param _ function: gettext
---- @param metadata_for function: entry -> {title, author} or nil; called
----   only for the books on the page shown
+--- @param metadata_for function: entry -> {title, author, has_cover} or nil;
+---   called once, and only for the books on the page shown. A cover is
+---   requested only for a book whose metadata says it has one.
 --- @return string: the HTML page
 function Eink.renderBooks(books, state, _, metadata_for)
+    local metadata = {}
+    local function metadataOf(entry)
+        if metadata[entry] == nil then metadata[entry] = metadata_for(entry) or false end
+        return metadata[entry]
+    end
     local list, cover_style = entryPage(books.entries or {}, state, _("No books found"), function(entry, cover_id)
-        return bookItem(entry, metadata_for(entry), cover_id)
-    end, _)
+        return bookItem(entry, metadataOf(entry), cover_id)
+    end, _, function(entry)
+        return metadataOf(entry) and metadataOf(entry).has_cover
+    end)
     local note = books.truncated
         and ("<p>" .. escapeHtml(_("Too many files: the list is incomplete.")) .. "</p>\n") or ""
     return document(state, viewBar(state, _) .. filterForm(state, _) .. sortBar(state, _) .. note .. list,

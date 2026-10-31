@@ -510,22 +510,25 @@ local MAX_BOOK_SCAN_ENTRIES = 20000
 --- Flat list of the ebooks in one or more folders and their subfolders: the
 --- e-ink page's "Books" view. A file is a book by its extension alone
 --- (_getFileType), nothing is opened. Hidden files and folders and .sdr
---- folders are skipped. A folder that cannot be read is skipped; the others
---- are still listed.
+--- folders are skipped. A folder that cannot be used (missing, not a folder,
+--- refused by _resolvePath: outside root_dir, or ".." in its name) is skipped
+--- with a warning; the others are still listed, and one folder given twice, or
+--- nested in another, is scanned once.
 --- @param rel_paths table: folders to scan, relative to root_dir; each goes
 ---   through _resolvePath, so none can lie outside it
 --- @param sort_by string: as for listDirectory
 --- @param sort_order string: "asc" or "desc"
 --- @param filter string: case-insensitive substring filter for book file names
 --- @param safe_mode boolean: when true, only whitelisted extensions are listed
---- @return table|nil: {entries, count, truncated} on success; each entry as in
----   listDirectory ({name, path, is_dir, size, size_formatted, modified, type})
---- @return string|nil: error message when a folder is refused
+--- @return table: {entries, count, truncated}; each entry as in listDirectory
+---   ({name, path, is_dir, size, size_formatted, modified, type})
 function FileOps:listBooks(rel_paths, sort_by, sort_order, filter, safe_mode)
-    local entries, seen, visited, truncated = {}, {}, 0, false
+    local entries, scanned, visited, truncated = {}, {}, 0, false
     local needle = (filter and filter ~= "") and filter:lower() or nil
 
     local function scan(full_path, depth)
+        if scanned[full_path] then return end -- folders may overlap
+        scanned[full_path] = true
         local ok, iter, dir_obj = pcall(lfs.dir, full_path)
         if not ok then
             logger.warn("FileSync: Cannot read directory", full_path)
@@ -546,10 +549,8 @@ function FileOps:listBooks(rel_paths, sort_by, sort_order, filter, safe_mode)
                         scan(entry_path, depth + 1)
                     end
                 elseif attr and attr.mode == "file" and self:_getFileType(name) == "ebook"
-                    and not seen[entry_path]
                     and not (safe_mode and not self:isExtensionSafe(name))
                     and (not needle or name:lower():find(needle, 1, true)) then
-                    seen[entry_path] = true -- folders may overlap
                     entries[#entries + 1] = {
                         name = name,
                         path = self:_getRelativePath(entry_path),
@@ -567,14 +568,16 @@ function FileOps:listBooks(rel_paths, sort_by, sort_order, filter, safe_mode)
 
     for _, rel_path in ipairs(rel_paths) do
         local full_path, err = self:_resolvePath(rel_path)
-        if not full_path then
-            return nil, err
+        if full_path then
+            local is_dir, dir_err = self:_checkDirectory(full_path, rel_path)
+            if is_dir then
+                scan(full_path, 0)
+            else
+                err = dir_err
+            end
         end
-        local is_dir, dir_err = self:_checkDirectory(full_path, rel_path)
-        if is_dir then
-            scan(full_path, 0)
-        else
-            logger.warn("FileSync: Book folder skipped:", dir_err)
+        if err then
+            logger.warn("FileSync: Book folder skipped:", err)
         end
     end
 
